@@ -281,6 +281,14 @@ async def salud():
     return {"status": "ok"}
 
 
+@app.get("/api/debug-modelos")
+async def debug_modelos():
+    """Endpoint temporal de diagnóstico: muestra qué lista de modelos está
+    usando realmente el servidor corriendo en este momento, para descartar
+    problemas de despliegue/caché sin tener que adivinar."""
+    return {"modelos_fallback": MODELOS_FALLBACK}
+
+
 @app.get("/api/validar-key")
 async def validar_key(x_gemini_api_key: str = Header(None, alias="x-gemini-api-key")):
     """Chequea que la API Key sea válida listando modelos (no gasta cuota
