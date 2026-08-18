@@ -133,7 +133,7 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
                 detail=(
                     "Se hicieron demasiados pedidos seguidos en poco tiempo (límite por minuto, "
                     "no por día). No es que se haya agotado la cuota del día — esperá unos 60 "
-                    f"segundos y volvé a intentar. (Detalle: {str(ultimo_error)[:200]})"
+                    f"segundos y volvé a intentar. (Detalle: {str(ultimo_error)[:600]})"
                 ),
             )
         raise HTTPException(
@@ -141,7 +141,7 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
             detail=(
                 "Se agotó la cuota gratuita de Gemini para esta API Key por hoy "
                 f"(probamos {modelos}). El plan gratuito permite 20 pedidos por día por modelo. "
-                f"Esperá a que se resetee mañana o usá otra API Key. (Detalle: {str(ultimo_error)[:200]})"
+                f"Esperá a que se resetee mañana o usá otra API Key. (Detalle: {str(ultimo_error)[:600]})"
             ),
         )
     if ultimo_error is not None and _es_error_temporal(ultimo_error):
