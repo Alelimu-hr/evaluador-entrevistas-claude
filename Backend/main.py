@@ -126,6 +126,12 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
         except Exception as e:
             ultimo_error = e
             errores_por_modelo[modelo] = str(e)[:200]
+            # OJO: esto es lo único que nos deja ver qué pasó REALMENTE en
+            # cada intento. Antes no había ningún print/log acá, así que los
+            # logs de Render no mostraban nada útil sobre estos fallos —
+            # estábamos debugueando solo con el mensaje traducido que ve el
+            # usuario, que no siempre refleja el error real de Google.
+            print(f"[gemini] fallo con modelo={modelo}: {type(e).__name__}: {e}", flush=True)
             if _es_error_temporal(e):
                 time.sleep(1.5)  # pequeña pausa antes de probar el próximo modelo
     if ultimo_error is not None and _es_error_de_cuota(ultimo_error):
@@ -152,7 +158,8 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
             detail=(
                 "Los servidores de Google están momentáneamente saturados por alta demanda "
                 "(no es un problema de tu cuenta ni de tu cuota). Esperá unos segundos y volvé a "
-                "intentar — normalmente se resuelve solo."
+                "intentar — normalmente se resuelve solo. "
+                f"(Detalle técnico: {str(ultimo_error)})"
             ),
         )
     detalle_por_modelo = " | ".join(f"{m}: {e}" for m, e in errores_por_modelo.items())
