@@ -108,28 +108,26 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
     ultimo_error = None
     errores_por_modelo = {}  # para poder mostrar qué pasó con CADA modelo, no solo el último
     for modelo in modelos:
-        # Si un modelo se queda sin cuota (plan gratuito: 20 pedidos/día por
-        # modelo) o está momentáneamente saturado, el "break" de más abajo corta
-        # el reintento y pasamos directo al siguiente modelo de la lista: insistir
-        # varias veces seguidas con la MISMA key contra el mismo modelo saturado
-        # no ayuda y puede leerse como una ráfaga de pedidos ante Google.
-        for intento in range(2):
-            try:
-                kwargs = {"model": modelo, "contents": contents}
-                if config is not None:
-                    kwargs["config"] = config
-                res = client.models.generate_content(**kwargs)
-                if res and res.text:
-                    return res.text, modelo
-            except Exception as e:
-                ultimo_error = e
-                errores_por_modelo[modelo] = str(e)[:200]
-                if _es_error_de_cuota(e):
-                    break  # no reintentar este modelo, probar el siguiente ya mismo
-                if _es_error_temporal(e):
-                    time.sleep(1.5)
-                    break  # no insistir con el mismo modelo saturado, probar otro
-                time.sleep(1)
+        # OJO: un solo intento por modelo, sin reintento interno. Antes
+        # hacíamos hasta 2 intentos por modelo (hasta 6 pedidos reales en
+        # total para /api/informe-final, cada uno reenviando TODOS los audios
+        # de nuevo), lo cual multiplicaba el tiempo de espera y el consumo de
+        # cuota sin mejorar la tasa de éxito. El prototipo de Streamlit —que
+        # sí funciona de forma consistente para este mismo paso pesado—
+        # prueba cada modelo candidato UNA sola vez y pasa rápido al
+        # siguiente si falla. Alineamos el comportamiento a ese patrón.
+        try:
+            kwargs = {"model": modelo, "contents": contents}
+            if config is not None:
+                kwargs["config"] = config
+            res = client.models.generate_content(**kwargs)
+            if res and res.text:
+                return res.text, modelo
+        except Exception as e:
+            ultimo_error = e
+            errores_por_modelo[modelo] = str(e)[:200]
+            if _es_error_temporal(e):
+                time.sleep(1.5)  # pequeña pausa antes de probar el próximo modelo
     if ultimo_error is not None and _es_error_de_cuota(ultimo_error):
         if _es_error_de_cuota_por_minuto(ultimo_error):
             raise HTTPException(
