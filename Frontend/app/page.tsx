@@ -377,7 +377,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(124,58,237,0.20),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(37,99,235,0.12),transparent),#050811] text-white p-6 font-sans">
+    <div className="min-h-screen bg-app text-white p-6 font-sans">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
@@ -400,13 +400,13 @@ export default function Home() {
 
         {paso === 'form' && (
           <div className="text-center pt-2 pb-2 animate-fade-in-up">
-            <p className="text-xs uppercase tracking-[0.2em] text-purple-400 font-semibold mb-3">
+            <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
               Práctica de entrevistas con IA
             </p>
-            <h2 className="font-display text-3xl md:text-4xl font-semibold text-white leading-tight max-w-2xl mx-auto">
+            <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
               Preparate para tu próxima entrevista
             </h2>
-            <p className="text-slate-400 text-sm mt-3 max-w-xl mx-auto">
+            <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
               Preguntas personalizadas a tu rol y tu CV, feedback de oratoria en cada respuesta, y un informe final
               con tu diagnóstico completo.
             </p>
@@ -416,12 +416,12 @@ export default function Home() {
         {/* PASO 1: Formulario */}
         {paso === 'form' && (
           <form onSubmit={handleGenerarPreguntas} className="space-y-4 animate-fade-in-up">
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#0d1730] via-[#0b1329] to-[#101b3a] border border-slate-800 p-5 rounded-2xl shadow-lg shadow-black/20 transition-colors hover:border-slate-700">
-              <div className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 bg-blue-500/10 rounded-full blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 -left-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl" />
+            <div className="relative overflow-hidden bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl shadow-xl shadow-purple-950/30 transition-colors">
+              <div className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 bg-purple-200/40 rounded-full blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-10 w-48 h-48 bg-blue-200/40 rounded-full blur-3xl" />
 
               <div className="relative">
-                <label className="block text-sm font-semibold text-slate-200 mb-2">🔑 API Key de Gemini:</label>
+                <label className="block text-sm font-semibold text-slate-800 mb-2">🔑 API Key de Gemini:</label>
                 <div className="relative">
                   <input
                     type="password"
@@ -429,33 +429,33 @@ export default function Home() {
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder="AIzaSy..."
                     required
-                    className="w-full bg-[#050811]/80 border border-slate-700 text-slate-100 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                    className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
                     {estadoKey === 'verificando' && <Spinner className="text-slate-400" />}
                     {estadoKey === 'valida' && (
-                      <span className="text-emerald-400 animate-scale-in" title="API Key válida">
+                      <span className="text-emerald-500 animate-scale-in" title="API Key válida">
                         🟢
                       </span>
                     )}
                     {estadoKey === 'invalida' && (
-                      <span className="text-red-400 animate-scale-in" title="API Key inválida">
+                      <span className="text-red-500 animate-scale-in" title="API Key inválida">
                         🔴
                       </span>
                     )}
                   </span>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-slate-800/70 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                <div className="mt-3 pt-3 border-t border-slate-200 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
                   <a
                     href="https://aistudio.google.com/apikey"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-blue-400 underline hover:text-blue-300 transition-colors"
+                    className="text-indigo-600 underline hover:text-indigo-700 transition-colors"
                   >
                     👉 Conseguí tu API Key gratuita acá
                   </a>
-                  <span className="text-slate-500">
+                  <span className="text-slate-600">
                     · Es 100% gratis y te lleva menos de 1 minuto generarla con tu cuenta de Google.
                   </span>
                 </div>
@@ -472,24 +472,24 @@ export default function Home() {
               </p>
             )}
 
-            <div className="bg-[#0b1329] border border-slate-800 p-5 rounded-xl space-y-4 shadow-lg shadow-black/20 transition-colors hover:border-slate-700">
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Puesto / Rol</label>
+                  <label className="block text-xs text-slate-600 mb-1">Puesto / Rol</label>
                   <input
                     type="text"
                     value={rol}
                     onChange={(e) => setRol(e.target.value)}
-                    className="w-full bg-[#050811] border border-slate-700 text-slate-100 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Seniority</label>
+                  <label className="block text-xs text-slate-600 mb-1">Seniority</label>
                   <select
                     value={seniority}
                     onChange={(e) => setSeniority(e.target.value)}
-                    className="w-full bg-[#050811] border border-slate-700 text-slate-100 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
                   >
                     <option value="Junior">Junior</option>
                     <option value="Semi-Senior">Semi-Senior</option>
@@ -501,8 +501,8 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-2">Enfoque de la Entrevista</label>
-                  <div className="flex flex-wrap gap-1.5 bg-[#050811] border border-slate-700 rounded-2xl p-1.5">
+                  <label className="block text-xs text-slate-600 mb-2">Enfoque de la Entrevista</label>
+                  <div className="flex flex-wrap gap-1.5 bg-slate-100 border border-slate-200 rounded-2xl p-1.5">
                     {[
                       { value: 'Mixta (Técnica + Conductual)', label: 'Mixta' },
                       { value: 'Metodología STAR / Conductual', label: 'STAR / Conductual' },
@@ -515,8 +515,8 @@ export default function Home() {
                         onClick={() => setEnfoque(opt.value)}
                         className={`px-3 py-1.5 text-xs sm:text-sm rounded-full whitespace-nowrap transition-all ${
                           enfoque === opt.value
-                            ? 'bg-white text-slate-900 font-semibold shadow'
-                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow'
+                            : 'text-slate-600 hover:text-slate-800 hover:bg-white/80'
                         }`}
                       >
                         {opt.label}
@@ -525,8 +525,8 @@ export default function Home() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-2">Idioma</label>
-                  <div className="flex bg-[#050811] border border-slate-700 rounded-full p-1.5 gap-1">
+                  <label className="block text-xs text-slate-600 mb-2">Idioma</label>
+                  <div className="flex bg-slate-100 border border-slate-200 rounded-full p-1.5 gap-1">
                     {['Español', 'Inglés'].map((opt) => (
                       <button
                         type="button"
@@ -534,8 +534,8 @@ export default function Home() {
                         onClick={() => setIdioma(opt)}
                         className={`px-4 py-1.5 text-sm rounded-full transition-all ${
                           idioma === opt
-                            ? 'bg-white text-slate-900 font-semibold shadow'
-                            : 'text-slate-400 hover:text-slate-200'
+                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow'
+                            : 'text-slate-600 hover:text-slate-800'
                         }`}
                       >
                         {opt}
@@ -546,35 +546,35 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Cantidad de Preguntas</label>
+                <label className="block text-xs text-slate-600 mb-1">Cantidad de Preguntas</label>
                 <input
                   type="number"
                   min="1"
                   max="10"
                   value={cantidad}
                   onChange={(e) => setCantidad(Number(e.target.value))}
-                  className="w-full bg-[#050811] border border-slate-700 text-slate-100 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Job Description (JD)</label>
+                <label className="block text-xs text-slate-600 mb-1">Job Description (JD)</label>
                 <textarea
                   rows={3}
                   placeholder="Pegá aquí las responsabilidades y requisitos de la vacante..."
                   value={jd}
                   onChange={(e) => setJd(e.target.value)}
-                  className="w-full bg-[#050811] border border-slate-700 text-slate-100 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 resize-none"
+                  className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40 resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs text-slate-400 mb-1">Adjuntar Curriculum Vitae (CV)</label>
+                <label className="block text-xs text-slate-600 mb-1">Adjuntar Curriculum Vitae (CV)</label>
                 <input
                   type="file"
                   accept=".pdf,.txt,.docx"
                   onChange={(e) => setCvFile(e.target.files?.[0] || null)}
-                  className="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer"
+                  className="w-full text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer"
                 />
               </div>
 

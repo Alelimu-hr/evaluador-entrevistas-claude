@@ -3,8 +3,7 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { HistorialChart } from '@/components/HistorialChart';
 
-const FONDO =
-  'bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(124,58,237,0.20),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(37,99,235,0.12),transparent),#050811]';
+const FONDO = 'bg-app';
 
 function StatTile({ label, value }: { label: string; value: string | number }) {
   return (
