@@ -48,10 +48,11 @@ app.add_middleware(
 # Lista de modelos a probar en orden. Si el primero falla o está saturado,
 # se intenta con el siguiente. Se actualiza a medida que Google va
 # discontinuando modelos (por ejemplo gemini-1.5-flash y gemini-2.0-flash
-# ya no están disponibles). gemini-2.5-pro se agrega al final como una
-# variante de mayor capacidad/otra cola de servidores, para tener más
-# opciones distintas si los modelos "flash" están saturados.
-MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash", "gemini-2.5-pro"]
+# ya no están disponibles). OJO: gemini-2.5-pro quedó descartado a propósito
+# porque Google ya no lo habilita para cuentas/API Keys nuevas (justo el
+# perfil de la mayoría de las personas del taller) — usamos en su lugar
+# gemini-3.1-pro-preview, que es el reemplazo que la propia API sugiere.
+MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash", "gemini-3.1-pro-preview"]
 
 # OJO: a propósito NO usamos response_mime_type="application/json" (modo JSON
 # estricto). Los pedidos que fuerzan a Gemini a devolver JSON validado usan un
@@ -90,6 +91,7 @@ def _es_error_temporal(e: Exception) -> bool:
 def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, modelos=None):
     modelos = modelos or MODELOS_FALLBACK
     ultimo_error = None
+    errores_por_modelo = {}  # para poder mostrar qué pasó con CADA modelo, no solo el último
     for modelo in modelos:
         # Si un modelo se queda sin cuota (plan gratuito: 20 pedidos/día por
         # modelo) o está momentáneamente saturado, el "break" de más abajo corta
@@ -106,6 +108,7 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
                     return res.text, modelo
             except Exception as e:
                 ultimo_error = e
+                errores_por_modelo[modelo] = str(e)[:200]
                 if _es_error_de_cuota(e):
                     break  # no reintentar este modelo, probar el siguiente ya mismo
                 if _es_error_temporal(e):
@@ -130,9 +133,10 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
                 "intentar — normalmente se resuelve solo."
             ),
         )
+    detalle_por_modelo = " | ".join(f"{m}: {e}" for m, e in errores_por_modelo.items())
     raise HTTPException(
         status_code=502,
-        detail=f"No se pudo obtener respuesta de Gemini (probamos {modelos}). Último error: {ultimo_error}",
+        detail=f"No se pudo obtener respuesta de Gemini. Detalle por modelo -> {detalle_por_modelo}",
     )
 
 
