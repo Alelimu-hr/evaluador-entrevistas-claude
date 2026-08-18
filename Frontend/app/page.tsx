@@ -405,6 +405,17 @@ export default function Home() {
               <div>
                 <label className="block text-sm font-semibold text-slate-200">🔑 API Key de Gemini:</label>
                 <p className="text-xs text-slate-400">Pega tu clave de Google AI Studio para probar.</p>
+                <a
+                  href="https://aistudio.google.com/apikey"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-1 text-xs text-blue-400 underline hover:text-blue-300 transition-colors"
+                >
+                  👉 Conseguí tu API Key gratuita acá
+                </a>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Es 100% gratis y te lleva menos de 1 minuto generarla con tu cuenta de Google.
+                </p>
               </div>
               <div className="relative w-72">
                 <input
