@@ -16,11 +16,11 @@ export function HistorialChart({ sesiones }: { sesiones: Sesion[] }) {
 
   return (
     <div>
-      <div className="flex items-end gap-1.5 h-48 border-b border-slate-800 relative">
+      <div className="flex items-end gap-1.5 h-48 border-b border-slate-200 relative">
         {[0, 2.5, 5, 7.5, 10].map((v) => (
           <div
             key={v}
-            className="absolute left-0 right-0 border-t border-slate-800/60 pointer-events-none"
+            className="absolute left-0 right-0 border-t border-slate-100 pointer-events-none"
             style={{ bottom: `${(v / ESCALA_MAX) * 100}%` }}
           />
         ))}
@@ -35,7 +35,7 @@ export function HistorialChart({ sesiones }: { sesiones: Sesion[] }) {
               onMouseLeave={() => setHoverIdx(null)}
             >
               <div
-                className="w-full max-w-[28px] rounded-t-md bg-gradient-to-t from-blue-600 to-blue-400 transition-all hover:from-blue-500 hover:to-blue-300"
+                className="w-full max-w-[28px] rounded-t-md bg-gradient-to-t from-indigo-600 to-purple-400 transition-all hover:from-indigo-500 hover:to-purple-300"
                 style={{ height: `${alturaPct}%` }}
               />
               {hoverIdx === i && (

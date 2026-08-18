@@ -40,9 +40,9 @@ type Paso = 'form' | 'pregunta' | 'resumen' | 'informe';
 type EstadoKey = 'vacio' | 'verificando' | 'valida' | 'invalida';
 
 function colorDeNota(nota: number) {
-  if (nota >= 7) return { texto: 'text-emerald-400', anillo: 'ring-emerald-500/30', bg: 'from-emerald-500/15' };
-  if (nota >= 4) return { texto: 'text-amber-400', anillo: 'ring-amber-500/30', bg: 'from-amber-500/15' };
-  return { texto: 'text-red-400', anillo: 'ring-red-500/30', bg: 'from-red-500/15' };
+  if (nota >= 7) return { texto: 'text-emerald-600', anillo: 'ring-emerald-300', borde: 'border-emerald-200' };
+  if (nota >= 4) return { texto: 'text-amber-600', anillo: 'ring-amber-300', borde: 'border-amber-200' };
+  return { texto: 'text-red-600', anillo: 'ring-red-300', borde: 'border-red-200' };
 }
 
 export default function Home() {
@@ -592,34 +592,34 @@ export default function Home() {
 
         {/* PASO 2: Pregunta activa, una por vez */}
         {paso === 'pregunta' && preguntas.length > 0 && (
-          <div className="bg-[#0b1329] border border-slate-800 p-5 rounded-xl space-y-4 shadow-lg shadow-black/20 animate-fade-in-up">
-            <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 animate-fade-in-up">
+            <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-blue-500 to-blue-400 h-1.5 rounded-full transition-all duration-500 ease-out"
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-1.5 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${((preguntaIndex + 1) / preguntas.length) * 100}%` }}
               />
             </div>
 
             {/* key={preguntaIndex} para que la pregunta haga un fade sutil cada vez que avanza */}
             <div key={preguntaIndex} className="space-y-3 animate-fade-in-up">
-              <span className="inline-block text-xs font-semibold text-blue-300 bg-blue-950/50 border border-blue-900 px-3 py-1 rounded-full">
+              <span className="inline-block text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
                 🤖 PREGUNTA {preguntaIndex + 1} DE {preguntas.length}
               </span>
 
-              <p className="text-lg text-slate-100 font-medium">{preguntas[preguntaIndex]}</p>
+              <p className="text-lg text-slate-800 font-medium">{preguntas[preguntaIndex]}</p>
 
               <div className="flex items-center gap-3 pt-2">
                 {!grabando ? (
                   <button
                     onClick={iniciarGrabacion}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:shadow-lg hover:shadow-emerald-500/20 active:scale-[0.98]"
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-all shadow hover:shadow-lg hover:shadow-emerald-500/30 active:scale-[0.98]"
                   >
                     🟢 Grabar Respuesta
                   </button>
                 ) : (
                   <button
                     onClick={detenerGrabacion}
-                    className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all animate-pulse-glow active:scale-[0.98]"
+                    className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium transition-all animate-pulse-glow active:scale-[0.98]"
                   >
                     ⏹ Detener ({segundos}s)
                   </button>
@@ -629,29 +629,29 @@ export default function Home() {
               </div>
 
               {cargandoFeedback && (
-                <p className="text-sm text-slate-400 flex items-center gap-2 animate-fade-in">
+                <p className="text-sm text-slate-500 flex items-center gap-2 animate-fade-in">
                   <Spinner /> Analizando ritmo, fluidez y tono emocional del audio...
                 </p>
               )}
 
               {feedbackActual && !cargandoFeedback && (
-                <div className="bg-emerald-950/30 border border-emerald-900 p-4 rounded-lg space-y-1 text-sm animate-scale-in">
-                  <p className="font-semibold text-emerald-300">📊 Feedback de Oratoria y Tono Vocal:</p>
-                  <p className="text-slate-300">
+                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-lg space-y-1 text-sm animate-scale-in">
+                  <p className="font-semibold text-emerald-700">📊 Feedback de Oratoria y Tono Vocal:</p>
+                  <p className="text-slate-700">
                     ⏱️ <b>Duración:</b> {feedbackActual.duracion_segundos} segs | 🗣️ <b>Velocidad:</b> ~
                     {feedbackActual.ppm} PPM | ⚡ <b>Ritmo:</b> {feedbackActual.evaluacion_ritmo}
                   </p>
-                  <p className="text-slate-300">
+                  <p className="text-slate-700">
                     🎭 <b>Tono Emocional Detectado:</b> {feedbackActual.tono_emocional}
                   </p>
-                  <p className="text-slate-400 italic">💡 {feedbackActual.consejo_oratoria}</p>
+                  <p className="text-slate-500 italic">💡 {feedbackActual.consejo_oratoria}</p>
                 </div>
               )}
 
               {feedbackActual && !cargandoFeedback && (
                 <button
                   onClick={handleGuardarYSiguiente}
-                  className="w-full mt-2 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-lg font-medium text-sm transition-all hover:shadow-lg hover:shadow-red-500/20 active:scale-[0.99] animate-fade-in-up"
+                  className="w-full mt-2 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-500 hover:via-purple-500 hover:to-blue-500 text-white py-2.5 rounded-full font-medium text-sm transition-all shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.99] animate-fade-in-up"
                 >
                   ➡️ Guardar Respuesta y Siguiente
                 </button>
@@ -663,11 +663,11 @@ export default function Home() {
         {/* PASO 3: Pantalla previa al informe */}
         {paso === 'resumen' && (
           <div className="space-y-4 animate-fade-in-up">
-            <div className="bg-gradient-to-br from-[#0f172a] to-[#1e293b] p-6 rounded-2xl shadow-xl shadow-black/30 border border-slate-800">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] p-6 rounded-2xl shadow-xl shadow-purple-950/30 border border-white/60">
+              <h2 className="font-display text-2xl font-semibold text-slate-800 flex items-center gap-2">
                 🎙️ Simulador Pro de Entrevistas con IA
               </h2>
-              <p className="text-slate-400 text-sm mt-1">
+              <p className="text-slate-600 text-sm mt-1">
                 Ya respondiste las {preguntas.length} preguntas. Generá tu evaluación completa con
                 análisis STAR, gaps técnicos y respuestas modelo.
               </p>
@@ -675,7 +675,7 @@ export default function Home() {
             <button
               onClick={handleGenerarInforme}
               disabled={cargandoInforme}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-red-500/20 active:scale-[0.99] flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-500 hover:via-purple-500 hover:to-blue-500 text-white font-semibold py-3 rounded-full transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.99] flex items-center justify-center gap-2"
             >
               {cargandoInforme && <Spinner />}
               {cargandoInforme
@@ -690,24 +690,26 @@ export default function Home() {
           <div className="space-y-4 animate-fade-in-up">
             {notas && (
               <div
-                className={`bg-gradient-to-br ${colorDeNota(notas.global).bg} to-transparent border border-slate-800 p-6 rounded-2xl flex items-center justify-between shadow-xl shadow-black/30 animate-scale-in`}
+                className={`bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border ${
+                  colorDeNota(notas.global).borde
+                } p-6 rounded-2xl flex items-center justify-between shadow-xl shadow-purple-950/30 animate-scale-in`}
               >
                 <div>
-                  <span className="text-slate-300 font-semibold block">Nota Global</span>
+                  <span className="text-slate-800 font-semibold block">Nota Global</span>
                   <span className="text-slate-500 text-xs">Resultado de tu simulación</span>
                 </div>
                 <span
                   className={`text-4xl font-extrabold ${colorDeNota(notas.global).texto} ring-4 ${
                     colorDeNota(notas.global).anillo
-                  } rounded-full w-24 h-24 flex items-center justify-center`}
+                  } bg-white rounded-full w-24 h-24 flex items-center justify-center`}
                 >
                   {notas.global}
                 </span>
               </div>
             )}
 
-            <div className="bg-[#0b1329] border border-slate-800 p-5 rounded-xl shadow-lg shadow-black/20">
-              <div className="text-slate-300 text-sm leading-relaxed prose prose-invert max-w-none">
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl shadow-xl shadow-purple-950/30">
+              <div className="text-slate-700 text-sm leading-relaxed prose prose-slate max-w-none">
                 <ReactMarkdown>{informeMarkdown}</ReactMarkdown>
               </div>
             </div>
@@ -716,14 +718,14 @@ export default function Home() {
               <button
                 onClick={handleDescargarPdf}
                 disabled={descargandoPdf}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-2.5 rounded-lg font-medium text-sm transition-all disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/20 active:scale-[0.99] flex items-center justify-center gap-2"
+                className="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-500 hover:via-purple-500 hover:to-blue-500 text-white py-2.5 rounded-full font-medium text-sm transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.99] flex items-center justify-center gap-2"
               >
                 {descargandoPdf && <Spinner />}
                 {descargandoPdf ? 'Generando PDF...' : '📥 Descargar Informe en PDF'}
               </button>
               <button
                 onClick={reiniciarTodo}
-                className="flex-1 bg-slate-800 hover:bg-slate-700 text-white py-2.5 rounded-lg font-medium text-sm transition-all active:scale-[0.99]"
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-2.5 rounded-full font-medium text-sm transition-all active:scale-[0.99]"
               >
                 🔄 Hacer otra simulación
               </button>

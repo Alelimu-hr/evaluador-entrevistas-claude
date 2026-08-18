@@ -7,9 +7,9 @@ const FONDO = 'bg-app';
 
 function StatTile({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="bg-[#0b1329] border border-slate-800 p-4 rounded-xl text-center shadow-lg shadow-black/20">
-      <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-xs text-slate-400 mt-1">{label}</p>
+    <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-4 rounded-2xl text-center shadow-xl shadow-purple-950/30">
+      <p className="font-display text-2xl font-semibold text-slate-800">{value}</p>
+      <p className="text-xs text-slate-600 mt-1">{label}</p>
     </div>
   );
 }
@@ -50,10 +50,10 @@ export default async function ProgresoPage() {
         </header>
 
         {total === 0 ? (
-          <div className="bg-[#0b1329] border border-slate-800 p-8 rounded-xl text-center text-slate-400 animate-fade-in-up">
+          <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-8 rounded-2xl text-center text-slate-600 shadow-xl shadow-purple-950/30 animate-fade-in-up">
             Todavía no completaste ninguna simulación.
             <br />
-            <Link href="/" className="text-blue-400 underline hover:text-blue-300">
+            <Link href="/" className="text-indigo-600 underline hover:text-indigo-700">
               Empezá tu primera práctica →
             </Link>
           </div>
@@ -65,15 +65,15 @@ export default async function ProgresoPage() {
               <StatTile label="Última calificación" value={`${ultima} / 10`} />
             </div>
 
-            <div className="bg-[#0b1329] border border-slate-800 p-5 rounded-xl shadow-lg shadow-black/20">
-              <h2 className="text-sm font-semibold text-slate-300 mb-4">
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl shadow-xl shadow-purple-950/30">
+              <h2 className="text-sm font-semibold text-slate-700 mb-4">
                 Evolución de tu Nota Global por sesión
               </h2>
               <HistorialChart sesiones={lista} />
             </div>
 
-            <div className="bg-[#0b1329] border border-slate-800 p-5 rounded-xl overflow-x-auto shadow-lg shadow-black/20">
-              <h2 className="text-sm font-semibold text-slate-300 mb-3">Detalle de sesiones</h2>
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl overflow-x-auto shadow-xl shadow-purple-950/30">
+              <h2 className="text-sm font-semibold text-slate-700 mb-3">Detalle de sesiones</h2>
               <table className="w-full text-sm text-left">
                 <thead>
                   <tr className="text-slate-500 text-xs uppercase">
@@ -85,17 +85,17 @@ export default async function ProgresoPage() {
                 </thead>
                 <tbody>
                   {[...lista].reverse().map((s) => (
-                    <tr key={s.id} className="border-t border-slate-800 hover:bg-slate-900/40 transition-colors">
-                      <td className="py-2 text-slate-400">
+                    <tr key={s.id} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                      <td className="py-2 text-slate-500">
                         {new Date(s.creado_en).toLocaleDateString('es-AR', {
                           day: '2-digit',
                           month: 'short',
                           year: 'numeric',
                         })}
                       </td>
-                      <td className="py-2 text-slate-100">{s.rol}</td>
-                      <td className="py-2 text-slate-400">{s.seniority}</td>
-                      <td className="py-2 text-right font-semibold text-slate-100">
+                      <td className="py-2 text-slate-800">{s.rol}</td>
+                      <td className="py-2 text-slate-500">{s.seniority}</td>
+                      <td className="py-2 text-right font-semibold text-slate-800">
                         {s.nota_global} / 10
                       </td>
                     </tr>
