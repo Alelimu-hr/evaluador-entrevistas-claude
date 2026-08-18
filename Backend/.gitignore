@@ -1,5 +1,16 @@
-.env
-.streamlit/secrets.toml
+# Entorno virtual de Python
 venv/
+env/
+.venv/
+
+# Cache de Python
 __pycache__/
-*.json
+*.pyc
+
+# Variables de entorno / claves (nunca deben subirse a GitHub)
+.env
+.env.local
+
+# Archivos temporales generados en pruebas locales
+respuesta_temp.wav
+reportes/

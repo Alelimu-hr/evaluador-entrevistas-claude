@@ -1,0 +1,20 @@
+[
+    {
+        "fecha": "2026-08-14 14:57",
+        "puesto": "People Manager",
+        "seniority": "Senior / Lead",
+        "modo": "Deep Dive en Brechas (CV vs Job Description)",
+        "nota": 7,
+        "preguntas": 3,
+        "duracion_total_seg": 34.6
+    },
+    {
+        "fecha": "2026-08-14 15:07",
+        "puesto": "People Manager",
+        "seniority": "Senior / Lead",
+        "modo": "Simulación Completa STAR (Soft & Hard Skills)",
+        "nota": 7,
+        "preguntas": 2,
+        "duracion_total_seg": 9.9
+    }
+]

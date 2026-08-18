@@ -48,11 +48,20 @@ app.add_middleware(
 # Lista de modelos a probar en orden. Si el primero falla o está saturado,
 # se intenta con el siguiente. Se actualiza a medida que Google va
 # discontinuando modelos (por ejemplo gemini-1.5-flash y gemini-2.0-flash
-# ya no están disponibles).
-MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash"]
+# ya no están disponibles). gemini-2.5-pro se agrega al final como una
+# variante de mayor capacidad/otra cola de servidores, para tener más
+# opciones distintas si los modelos "flash" están saturados.
+MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash", "gemini-2.5-pro"]
 
+# OJO: a propósito NO usamos response_mime_type="application/json" (modo JSON
+# estricto). Los pedidos que fuerzan a Gemini a devolver JSON validado usan un
+# camino de procesamiento más pesado en los servidores de Google, y durante
+# picos de demanda son de los primeros en recibir un 503. En cambio, le
+# pedimos el JSON por texto en el prompt (ver más abajo) y lo parseamos de
+# forma tolerante con extraer_json_seguro() — mismo patrón que ya veníamos
+# usando en el prototipo de Streamlit, que resultó más resistente a estos
+# picos.
 JSON_CONFIG = types.GenerateContentConfig(
-    response_mime_type="application/json",
     temperature=0.2,
 )
 
@@ -83,9 +92,11 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
     ultimo_error = None
     for modelo in modelos:
         # Si un modelo se queda sin cuota (plan gratuito: 20 pedidos/día por
-        # modelo) el "break" de más abajo corta el reintento y pasamos
-        # directo al siguiente modelo de la lista, sin esperar.
-        for intento in range(3):
+        # modelo) o está momentáneamente saturado, el "break" de más abajo corta
+        # el reintento y pasamos directo al siguiente modelo de la lista: insistir
+        # varias veces seguidas con la MISMA key contra el mismo modelo saturado
+        # no ayuda y puede leerse como una ráfaga de pedidos ante Google.
+        for intento in range(2):
             try:
                 kwargs = {"model": modelo, "contents": contents}
                 if config is not None:
@@ -98,11 +109,9 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
                 if _es_error_de_cuota(e):
                     break  # no reintentar este modelo, probar el siguiente ya mismo
                 if _es_error_temporal(e):
-                    # Google está saturado momentáneamente: esperamos un poco más
-                    # entre reintentos (backoff creciente) antes de insistir.
-                    time.sleep(2 * (intento + 1))
-                else:
-                    time.sleep(1)
+                    time.sleep(1.5)
+                    break  # no insistir con el mismo modelo saturado, probar otro
+                time.sleep(1)
     if ultimo_error is not None and _es_error_de_cuota(ultimo_error):
         raise HTTPException(
             status_code=429,
