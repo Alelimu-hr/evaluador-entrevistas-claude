@@ -1,0 +1,76 @@
+REPORTE DE ENTREVISTA - People manager
+Fecha: 2026-08-12 12:23:45
+==================================================
+
+Here is the evaluation report based on the candidate's recorded responses and the requirements for the **Head of People (C-Level Partner)** role at **Zenziya**.
+
+---
+
+# 📋 INFORME FINAL DE SELECCIÓN
+
+**Puesto:** Head of People / People Manager  
+**Cliente:** Zenziya (Fintech / Lending)  
+**Evaluador:** Reclutador Principal y Evaluador Técnico (Freelo HR)
+
+---
+
+## 1. 🎯 PUNTUACIÓN Y RECOMENDACIÓN FINAL
+
+*   **Calificación Global:** **4.0 / 10**
+*   **Dictamen:** **NO APTO**
+
+> **Justificación del Dictamen:** El perfil muestra un entendimiento conceptual básico de la gestión de personas, pero **carece de la profundidad estratégica, la capacidad analítica y la visión de negocio que exige un rol C-Level en una Fintech**. Las respuestas fueron extremadamente breves, poco estructuradas y no lograron fundamentar ni métricas de *Unit Economics*, ni planes de incentivos complejos en USD, ni un liderazgo de adopción de IA más allá de imponer cuotas de uso de herramientas.
+
+---
+
+## 2. 💡 EVALUACIÓN TÉCNICA Y DE EXPERIENCIA
+
+*   **Visión de Negocio y Unit Economics (Fintech/Lending):** **Deficiente.** En la pregunta 1 se le solicitó explícitamente explicar el impacto directo en los *unit economics*. El candidato omitió por completo este punto, demostrando falta de enfoque en la rentabilidad financiera desde el área de People.
+*   **Adopción de Inteligencia Artificial (IA-Driven Ops):** **Superficial.** Mencionó el uso de Claude y Gemini Premium bajo la regla de exigir "mínimo 30 horas de uso mensual por área". Esto refleja una gestión basada en la imposición de métricas de vanidad (horas de uso) y no en la rediseño real de procesos burocráticos ni en automatización basada en datos.
+*   **Performance Engineering e Incentivos en USD:** **Básico.** Ante el escenario crítico de 30 días en Zenziya, propuso una estructura genérica estándar (70% objetivos de negocio / 30% desempeño individual). No detalló la mecánica de compensación en USD, el manejo de la volatilidad/retención ni el análisis técnico para evitar la fuga de talento clave.
+*   **Desarrollo de Mandos Medios:** **Moderado.** Comprende la importancia de armar planes de carrera y *coaching*, pero sus métodos carecen de frameworks sólidos de gestión del cambio.
+
+---
+
+## 3. 🌟 ANÁLISIS DE COMPETENCIAS S.T.A.R. (SOFT SKILLS)
+
+### 🔹 Competencia 1: Comunicación y Síntesis
+*   **Situación:** Adecuada al contextualizar cambios organizacionales.
+*   **Tarea:** Expresó la intención de comunicar los cambios.
+*   **Acción:** Sus explicaciones fueron demasiado breves e incompletas. Confundió la *síntesis* con la *omisión de información crítica*.
+*   **Resultado:** No logró articular cómo su comunicación generó un impacto positivo duradero.
+
+### 🔹 Competencia 2: Resolución de Conflictos
+*   **Situación:** Describió la transición de mandos medios reportando a *Founders* hacia una estructura con C-Level de 5 verticales.
+*   **Tarea:** Mitigar el malestar y resistencia del mando medio.
+*   **Acción:** Realizó reuniones de alineación y trazó planes a 3 y 6 meses vinculados a mejoras salariales.
+*   **Resultado:** **Faltante de métricas.** Afirmó que era "para mejor", pero no aportó datos cuantitativos sobre retención de talento, eNPS o incremento en productividad tras la reestructuración.
+
+### 🔹 Competencia 3: Orientación a Resultados
+*   **Situación:** Análisis de metas bajas de Lending y desalineación en 30 días.
+*   **Tarea:** Rediseñar esquema de bonos y ejecutar estrategia bajo presión.
+*   **Acción:** Proponer un *All-Hands* respaldado por los *Founders* para comunicar el esquema 70/30.
+*   **Resultado:** No presentó resultados proyectados ni explicó cómo garantizaría que la meta de Lending se recuperara rápidamente con esta acción.
+
+---
+
+## 4. 🗣️ EVALUACIÓN DE ORATORIA Y COMUNICACIÓN EN VIVO
+
+*   **Claridad y Brevedad:** Sus respuestas fueron excesivamente cortas (entre 15 y 30 segundos por respuesta), lo que denota falta de elaboración para un rol directivo.
+*   **Uso de Muletillas y Pausas:** Presenta algunas dudas al hablar y pausas que restan fluidez.
+*   **Nivel de Seguridad y Tono de Voz:** Tono plano, poco persuasivo. Para un Head of People que debe enamorar al equipo y convencer al C-Level/Founders, su oratoria carece del impacto y la energía requeridos.
+*   **Ruido de Fondo:** Se perciben ruidos ambientales durante las grabaciones, lo cual resta profesionalismo a la entrega.
+
+---
+
+## 5. 🚀 PLAN DE ACCIÓN Y MEJORA PARA EL CANDIDATO
+
+### 🟢 3 Fortalezas Observadas:
+1.  **Identificación de estructuras organizacionales:** Reconoce la necesidad de profesionalizar las empresas pasando de modelos centrados en los *founders* a capas directivas (C-Level).
+2.  **Familiaridad con herramientas de IA:** Muestra apertura e interés por la inclusión de herramientas generativas (Claude, Gemini) en el día a día operativo.
+3.  **Alineación con el liderazgo:** Comprende el valor del *sponsorship* de los *Founders* (All-Hands) para validar cambios culturales o de compensación.
+
+### 🔴 3 Áreas de Mejora Concretas:
+1.  **Enfoque Orientado a Datos y Unit Economics:** Debe aprender a conectar las iniciativas de People (capacitación, clima, bonos) con métricas financieras reales del negocio (CAC, LTV, margen operativo, costo por contratación/retención).
+2.  **Estructura y Profundidad Metodológica (STAR):** Necesita fundamentar sus respuestas con datos cuantitativos. En nivel ejecutivo, no basta con decir que el resultado fue "para mejor"; se deben presentar porcentajes de mejora, volumen de retención o aumento de performance.
+3.  **Estrategia de Adopción de IA:** Evolucionar de un modelo de "cuotas de tiempo de uso de IA" hacia la automatización real de flujos de trabajo (p. ej., People Analytics predictivo, *onboarding* automatizado, evaluación de desempeño asistida por IA).

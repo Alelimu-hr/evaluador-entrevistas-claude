@@ -1,0 +1,61 @@
+REPORTE DE ENTREVISTA - Tech Lead
+Fecha: 2026-08-12 12:04:59
+==================================================
+
+# INFORME FINAL DE SELECCIÓN — TECHNICAL LEADER (ZENZIYA)
+
+**Candidato:** [No especificado en grabación]  
+**Puesto:** Technical Leader  
+**Evaluador:** Reclutador Principal & Evaluador Técnico  
+
+---
+
+### 1. 🎯 PUNTUACIÓN Y RECOMENDACIÓN FINAL
+
+* **Calificación Global:** **1 / 10**
+* **Dictamen:** **NO APTO**
+
+> **Síntesis del dictamen:** Las grabaciones adjuntas no contienen respuestas a ninguna de las preguntas planteadas en la entrevista técnica. En su lugar, únicamente se registran audios de prueba de micrófono (*"prueba 1, prueba 2, prueba 3"*). Ante la ausencia total de evidencia técnica y actitudinal, el candidato no puede ser evaluado ni avanzar en el proceso de selección.
+
+---
+
+### 2. 💡 EVALUACIÓN TÉCNICA Y DE EXPERIENCIA
+
+* **Dominio de Java, Apache Camel y N8N:** **No Evaluable.** No se presentó información sobre su experiencia hands-on ni sobre su capacidad de balancear desarrollo con arquitectura/liderazgo (Pregunta 1).
+* **Patrones de Arquitectura e Integración (Resiliencia, Idempotencia, Strangler Fig, ACL):** **No Evaluable.** No se obtuvo respuesta técnica frente al escenario de contingencia durante la migración legacy (Pregunta 3).
+* **Coordinación Técnica y Liderazgo de Equipo:** **No Evaluable.** No se argumentó cómo lideraría a sus 5 reportes directos (2 Devs, DevOps, QA, Analista Funcional).
+
+---
+
+### 3. 🌟 ANÁLISIS DE COMPETENCIAS S.T.A.R. (SOFT SKILLS)
+
+Dado que el candidato no abordó los enunciados, se detalla la falta de evidencia en los requerimientos evaluados:
+
+| Competencia | Situación / Tarea | Acción | Resultado | Evaluación |
+| :--- | :--- | :--- | :--- | :--- |
+| **Comunicación y Síntesis** | N/A | No emite respuesta. Solo prueba de audio. | N/A | **Sin Evidencia** |
+| **Resolución de Conflictos** | N/A | No responde a la Pregunta 2 (STAR sobre desacuerdo técnico). | N/A | **Sin Evidencia** |
+| **Orientación a Resultados y Autonomía** | N/A | No responde a la Pregunta 3 (Tolerancia a la ambigüedad y manejo de incidentes). | N/A | **Sin Evidencia** |
+
+---
+
+### 4. 🗣️ EVALUACIÓN DE ORATORIA Y COMUNICACIÓN EN VIVO
+
+* **Uso de muletillas y pausas:** No evaluable en contexto conversacional.
+* **Claridad y Síntesis:** Sin contenido expositivo.
+* **Tono de voz y Seguridad:** Se limita a conteos de prueba (*"uno, prueba 2, prueba 3"*).
+* **Observación sobre la entrevista:** El candidato no utilizó el tiempo asignado para responder los planteamientos requeridos por el rol.
+
+---
+
+### 5. 🚀 PLAN DE ACCIÓN Y MEJORA PARA EL CANDIDATO
+
+#### 3 Fortalezas observadas:
+1. **Verificación de hardware:** Realizó una prueba básica de canal/micrófono antes o durante el registro.
+2. N/A (Insuficiente muestra de desempeño).
+3. N/A (Insuficiente muestra de desempeño).
+
+#### 3 Áreas de mejora concretas:
+1. **Completitud y compromiso en procesos asincrónicos/grabados:** Asegurarse de responder formalmente cada consigna técnica en lugar de enviar grabaciones de prueba sin contenido.
+2. **Estructuración de respuestas STAR:** Preparar casos reales de su trayectoria profesional donde haya liderado migraciones o resuelto conflictos entre áreas (PM/CTO/QA) para futuras instancias.
+3. **Demostración de criterio técnico en contingencias:** Desarrollar la capacidad de explicar de manera concisa arquitectura de integración, patrones de resiliencia (Circuit Breaker, Idempotencia, ACL) y gestión de incidentes bajo presión.

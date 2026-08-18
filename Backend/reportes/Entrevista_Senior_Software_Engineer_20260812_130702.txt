@@ -1,0 +1,35 @@
+REPORTE DE ENTREVISTA - Senior Software Engineer
+Fecha: 2026-08-12 13:07:02
+==================================================
+
+**INFORME FINAL DE SELECCIÓN: Senior Software Engineer (Technical Leader)**
+
+**1. 🎯 PUNTUACIÓN Y RECOMENDACIÓN FINAL**
+*   **Calificación Global:** 5/10.
+*   **Dictamen:** Requiere Profundización. El candidato demuestra conocimientos técnicos teóricos sólidos en arquitecturas modernas y herramientas como Apache Camel y N8N; sin embargo, la falta de respuesta en una pregunta crítica sobre diseño de resiliencia ante proveedores inestables es un riesgo alto para un rol de liderazgo en un contexto de migración.
+
+**2. 💡 EVALUACIÓN TÉCNICA Y DE EXPERIENCIA**
+*   **Fortalezas:** El candidato comprende el stack requerido (Java, Camel, N8N, microservicios) y tiene experiencia previa en migraciones de sistemas monolíticos a microservicios. Su enfoque en el uso de "Feature Flags", "Strangler Fig" y automatización en el pipeline (CI/CD) es correcto y alineado con los requisitos del rol.
+*   **Debilidades:** Hubo un fallo crítico en la tercera pregunta técnica. Siendo el aislamiento de sistemas inestables un requisito fundamental del rol (según el *Job Description*), el candidato no pudo articular una estrategia (Circuit Breaker, Bulkhead, Retries/Exponential Backoff, o el uso de un Anti-Corruption Layer para aislar el proveedor), lo cual es inaceptable para una posición de *Technical Leader*.
+
+**3. 🌟 ANÁLISIS DE COMPETENCIAS S.T.A.R. (SOFT SKILLS)**
+*   **Comunicación y Síntesis:** Muy buena capacidad de estructura al responder (técnica STAR utilizada). Las explicaciones son precisas y profesionales.
+*   **Resolución de Conflictos:** Demuestra pragmatismo al tratar conflictos con PM y QA. Entiende la necesidad de equilibrar la "deuda técnica" (limpieza de código) con la "entrega de negocio" (hitos de producto).
+*   **Orientación a Resultados:** Enfocado en la autonomía del equipo. Sus propuestas de delegación (mentoría 1:1, estandarización de contratos de API) demuestran que entiende su responsabilidad de "facilitar" el éxito del equipo.
+
+**4. 🗣️ EVALUACIÓN DE ORATORIA Y COMUNICACIÓN EN VIVO**
+*   **Claridad y Seguridad:** Habla con un tono pausado y seguro.
+*   **Síntesis:** Logra condensar conceptos complejos de arquitectura en respuestas breves, lo cual es muy positivo para un líder técnico que debe comunicarse con perfiles diversos (CTO, QA, funcional).
+*   **Muletillas/Pausas:** No presenta muletillas excesivas; su discurso es fluido y profesional.
+
+**5. 🚀 PLAN DE ACCIÓN Y MEJORA PARA EL CANDIDATO**
+*   **Fortalezas observadas:** 
+    1. Conocimiento técnico específico en el stack core (Java/Camel). 
+    2. Experiencia probada en migraciones de sistemas. 
+    3. Excelente capacidad de estructurar equipos y fomentar la autonomía técnica.
+*   **Áreas de mejora:**
+    1. **Resiliencia Arquitectónica:** Debe profundizar en patrones de resiliencia (específicamente *Circuit Breakers* y *Queue-based Load Leveling*) para manejar proveedores externos inestables.
+    2. **Dominio de Casos Críticos:** En una entrevista, ante el desconocimiento de un tema, debería intentar proponer un enfoque lógico o una solución parcial en lugar de manifestar una incapacidad total de respuesta.
+    3. **Visión 360° en Integraciones:** Necesita robustecer su criterio sobre cómo los patrones de diseño (como el *Anti-Corruption Layer*) no son solo para la migración de legacy, sino para proteger la salud de todo el ecosistema de microservicios.
+
+**Nota final:** Dada la importancia del rol (Reporta directo al CTO en medio de una migración), recomiendo realizar una **segunda entrevista técnica enfocada exclusivamente en el diseño de sistemas resilientes** antes de tomar una decisión de contratación.

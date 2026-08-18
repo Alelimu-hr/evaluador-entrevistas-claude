@@ -1,0 +1,56 @@
+REPORTE DE ENTREVISTA - Senior Software Engineer
+Fecha: 2026-08-12 12:45:14
+==================================================
+
+¡Hola! Como Reclutador Principal y Evaluador Técnico, aquí tienes el **INFORME FINAL DE SELECCIÓN** basado en la entrevista realizada para la posición de Senior Software Engineer (Technical Leader — Zenziya).
+
+---
+
+# 📋 INFORME FINAL DE SELECCIÓN
+
+**Puesto Evaluado:** Technical Leader — Zenziya  
+**Candidato:** [Nombre del Candidato]  
+**Fecha:** [Fecha actual]  
+**Evaluador:** Reclutador Principal y Evaluador Técnico  
+
+---
+
+### 1. 🎯 PUNTUACIÓN Y RECOMENDACIÓN FINAL
+* **Calificación Global:** **5.5 / 10**
+* **Dictamen:** **[Requiere Profundización / No Apto]**  
+* *Justificación:* Si bien el candidato menciona la experiencia requerida en el papel (Apache Camel, N8N, migración legacy), las respuestas grabadas muestran un desempeño deficiente en términos de profundidad técnica, estructura de comunicación y capacidad de argumentación bajo presión. El perfil exhibe una alarmante falta de claridad conceptual en momentos críticos y baja seguridad al explicar procesos complejos de arquitectura, lo cual choca frontalmente con la exigencia de autonomía y liderazgo técnico que Zenziya necesita para su transformación.
+
+---
+
+### 2. 💡 EVALUACIÓN TÉCNICA Y DE EXPERIENCIA
+* **Dominio del Stack (Java, Apache Camel, N8N):** Aunque afirma tener 5 años de experiencia, la verbalización de sus conocimientos técnicos fue extremadamente superficial. No profundizó en patrones de integración, manejo de estados distribuidos, contratos de API, ni en cómo estructurar una arquitectura basada en capas y orientada a eventos.
+* **Experiencia en Migración (Legacy → Nueva plataforma):** Mencionó vagamente la migración, pero careció de rigor técnico al explicar el uso de patrones clave requeridos para el puesto (como *Strangler Fig* o *Anti-Corruption Layer*).
+* **Autonomía y Toma de Decisiones:** En la pregunta de resolución de conflictos y gestión bajo presión, demostró una dependencia excesiva de la jerarquía ("el seteo quería...") en lugar de asumir el rol de liderazgo técnico resolutivo y pragmático que se espera de un TL en Zenziya.
+
+---
+
+### 3. 🌟 ANÁLISIS DE COMPETENCIAS S.T.A.R. (SOFT SKILLS)
+* **Comunicación y Síntesis:** **Insuficiente.** Las respuestas fueron excesivamente cortas, inconexas, con baches prolongados de silencio y carentes de una estructura lógica (Situación, Tarea, Acción, Resultado). No logró sintetizar conceptos técnicos complejos de manera efectiva.
+* **Resolución de Conflictos:** **Débil.** Al abordar el desacuerdo con el PM/Gerencia sobre priorización del backlog vs. entregas técnicas, su argumentación se redujo a "yo tenía razón porque el seteo estaba más centrado en lo estratégico", sin evidenciar habilidades de negociación técnica, empatía con el negocio o persuasión basada en datos.
+* **Orientación a Resultados / Autonomía:** **Moderada/Baja.** No transmitió la capacidad de operar con iniciativa propia ante escenarios de alta ambigüedad o "fuego" (incidentes en producción durante la migración). Sus respuestas sobre el aislamiento de un fallo intermitente en el core legacy brillaron por su completa ausencia en el audio 3.
+
+---
+
+### 4. 🗣️ EVALUACIÓN DE ORATORIA Y COMUNICACIÓN EN VIVO
+* **Fluidez y Seguridad:** La voz denota inseguridad, nerviosismo y falta de dominio sobre el relato. 
+* **Muletillas y Pausas:** Presencia de prolongadas pausas iniciales ("Eh...", silencios de varios segundos antes de articular palabra), lo que denota improvisación o dificultad para procesar y estructurar ideas bajo presión.
+* **Claridad:** El tono de voz es bajo y dubitativo. Faltó energía y convicción ejecutiva, elementos indispensables para liderar y mentorear a un equipo de ingeniería y coordinar con perfiles multidisciplinarios.
+
+---
+
+### 5. 🚀 PLAN DE ACCIÓN Y MEJORA PARA EL CANDIDATO
+
+**3 Fortalezas Observadas:**
+1. Experiencia formal declarada en el stack principal (Java, Apache Camel, N8N).
+2. Antecedentes en contextos de migración de sistemas legacy.
+3. Disposición a colaborar con perfiles de gestión (PM).
+
+**3 Áreas de Mejora Concretas:**
+1. **Estructura y Oratoria:** Desarrollar técnicas de comunicación asertiva y estructurada (como el método STAR) para responder con claridad, seguridad y síntesis en entornos ejecutivos o técnicos.
+2. **Profundidad Técnica y Arquitectónica:** Profundizar en patrones de diseño avanzados, resiliencia (idempotencia, circuit breakers, aislamiento de sistemas inestables) y estrategias de migración (*Strangler Fig Pattern* / *ACL*).
+3. **Liderazgo y Autonomía:** Fortalecer la mentalidad de ownership y toma de decisiones descentralizadas, demostrando cómo destrabar conflictos técnicos con el negocio mediante criterios basados en impacto y viabilidad técnica, sin requerir la intervención constante de la dirección.
