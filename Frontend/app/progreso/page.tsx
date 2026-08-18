@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { HistorialChart } from '@/components/HistorialChart';
 
 const FONDO =
-  'bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(37,99,235,0.16),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(239,68,68,0.08),transparent),#050811]';
+  'bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(124,58,237,0.20),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(37,99,235,0.12),transparent),#050811]';
 
 function StatTile({ label, value }: { label: string; value: string | number }) {
   return (
@@ -39,7 +39,7 @@ export default async function ProgresoPage() {
     <div className={`min-h-screen ${FONDO} text-white p-6 font-sans`}>
       <div className="max-w-4xl mx-auto space-y-6">
         <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <h1 className="text-2xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="font-display text-2xl font-semibold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             📈 Mi Progreso
           </h1>
           <nav className="flex items-center gap-4 text-sm">

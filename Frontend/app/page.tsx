@@ -377,11 +377,11 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(37,99,235,0.16),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(239,68,68,0.08),transparent),#050811] text-white p-6 font-sans">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(124,58,237,0.20),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(37,99,235,0.12),transparent),#050811] text-white p-6 font-sans">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <h1 className="text-2xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             🎙 Simulador de Entrevistas
           </h1>
           <nav className="flex items-center gap-4 text-sm">
@@ -398,47 +398,67 @@ export default function Home() {
           </nav>
         </header>
 
+        {paso === 'form' && (
+          <div className="text-center pt-2 pb-2 animate-fade-in-up">
+            <p className="text-xs uppercase tracking-[0.2em] text-purple-400 font-semibold mb-3">
+              Práctica de entrevistas con IA
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl font-semibold text-white leading-tight max-w-2xl mx-auto">
+              Preparate para tu próxima entrevista
+            </h2>
+            <p className="text-slate-400 text-sm mt-3 max-w-xl mx-auto">
+              Preguntas personalizadas a tu rol y tu CV, feedback de oratoria en cada respuesta, y un informe final
+              con tu diagnóstico completo.
+            </p>
+          </div>
+        )}
+
         {/* PASO 1: Formulario */}
         {paso === 'form' && (
           <form onSubmit={handleGenerarPreguntas} className="space-y-4 animate-fade-in-up">
-            <div className="bg-[#0b1329] border border-slate-800 p-4 rounded-xl flex items-center justify-between gap-4 shadow-lg shadow-black/20 transition-colors hover:border-slate-700">
-              <div>
-                <label className="block text-sm font-semibold text-slate-200">🔑 API Key de Gemini:</label>
-                <p className="text-xs text-slate-400">Pega tu clave de Google AI Studio para probar.</p>
-                <a
-                  href="https://aistudio.google.com/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block mt-1 text-xs text-blue-400 underline hover:text-blue-300 transition-colors"
-                >
-                  👉 Conseguí tu API Key gratuita acá
-                </a>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Es 100% gratis y te lleva menos de 1 minuto generarla con tu cuenta de Google.
-                </p>
-              </div>
-              <div className="relative w-72">
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="AIzaSy..."
-                  required
-                  className="w-full bg-[#050811] border border-slate-700 text-slate-100 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
-                />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-                  {estadoKey === 'verificando' && <Spinner className="text-slate-400" />}
-                  {estadoKey === 'valida' && (
-                    <span className="text-emerald-400 animate-scale-in" title="API Key válida">
-                      🟢
-                    </span>
-                  )}
-                  {estadoKey === 'invalida' && (
-                    <span className="text-red-400 animate-scale-in" title="API Key inválida">
-                      🔴
-                    </span>
-                  )}
-                </span>
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#0d1730] via-[#0b1329] to-[#101b3a] border border-slate-800 p-5 rounded-2xl shadow-lg shadow-black/20 transition-colors hover:border-slate-700">
+              <div className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 bg-blue-500/10 rounded-full blur-3xl" />
+              <div className="pointer-events-none absolute -bottom-24 -left-10 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl" />
+
+              <div className="relative">
+                <label className="block text-sm font-semibold text-slate-200 mb-2">🔑 API Key de Gemini:</label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                    placeholder="AIzaSy..."
+                    required
+                    className="w-full bg-[#050811]/80 border border-slate-700 text-slate-100 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+                    {estadoKey === 'verificando' && <Spinner className="text-slate-400" />}
+                    {estadoKey === 'valida' && (
+                      <span className="text-emerald-400 animate-scale-in" title="API Key válida">
+                        🟢
+                      </span>
+                    )}
+                    {estadoKey === 'invalida' && (
+                      <span className="text-red-400 animate-scale-in" title="API Key inválida">
+                        🔴
+                      </span>
+                    )}
+                  </span>
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-slate-800/70 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+                  <a
+                    href="https://aistudio.google.com/apikey"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 underline hover:text-blue-300 transition-colors"
+                  >
+                    👉 Conseguí tu API Key gratuita acá
+                  </a>
+                  <span className="text-slate-500">
+                    · Es 100% gratis y te lleva menos de 1 minuto generarla con tu cuenta de Google.
+                  </span>
+                </div>
               </div>
             </div>
             {estadoKey === 'invalida' && (
@@ -479,32 +499,49 @@ export default function Home() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Enfoque de la Entrevista</label>
-                  <select
-                    value={enfoque}
-                    onChange={(e) => setEnfoque(e.target.value)}
-                    className="w-full bg-[#050811] border border-slate-700 text-slate-100 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    <option value="Mixta (Técnica + Conductual)">Mixta (Técnica + Conductual)</option>
-                    <option value="Metodología STAR / Conductual">Metodología STAR / Conductual</option>
-                    <option value="Técnica Estricta">Técnica Estricta</option>
-                    <option value="Deep Dive: brechas entre el CV y la Job Description">
-                      Deep Dive: CV vs. JD (buscar brechas)
-                    </option>
-                  </select>
+                  <label className="block text-xs text-slate-400 mb-2">Enfoque de la Entrevista</label>
+                  <div className="flex flex-wrap gap-1.5 bg-[#050811] border border-slate-700 rounded-2xl p-1.5">
+                    {[
+                      { value: 'Mixta (Técnica + Conductual)', label: 'Mixta' },
+                      { value: 'Metodología STAR / Conductual', label: 'STAR / Conductual' },
+                      { value: 'Técnica Estricta', label: 'Técnica Estricta' },
+                      { value: 'Deep Dive: brechas entre el CV y la Job Description', label: 'Deep Dive: CV vs. JD' },
+                    ].map((opt) => (
+                      <button
+                        type="button"
+                        key={opt.value}
+                        onClick={() => setEnfoque(opt.value)}
+                        className={`px-3 py-1.5 text-xs sm:text-sm rounded-full whitespace-nowrap transition-all ${
+                          enfoque === opt.value
+                            ? 'bg-white text-slate-900 font-semibold shadow'
+                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 mb-1">Idioma de la Entrevista</label>
-                  <select
-                    value={idioma}
-                    onChange={(e) => setIdioma(e.target.value)}
-                    className="w-full bg-[#050811] border border-slate-700 text-slate-100 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-                  >
-                    <option value="Español">Español</option>
-                    <option value="Inglés">Inglés</option>
-                  </select>
+                  <label className="block text-xs text-slate-400 mb-2">Idioma</label>
+                  <div className="flex bg-[#050811] border border-slate-700 rounded-full p-1.5 gap-1">
+                    {['Español', 'Inglés'].map((opt) => (
+                      <button
+                        type="button"
+                        key={opt}
+                        onClick={() => setIdioma(opt)}
+                        className={`px-4 py-1.5 text-sm rounded-full transition-all ${
+                          idioma === opt
+                            ? 'bg-white text-slate-900 font-semibold shadow'
+                            : 'text-slate-400 hover:text-slate-200'
+                        }`}
+                      >
+                        {opt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -544,7 +581,7 @@ export default function Home() {
               <button
                 type="submit"
                 disabled={cargandoPreguntas}
-                className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-lg transition-all duration-200 disabled:opacity-50 hover:shadow-lg hover:shadow-blue-500/20 active:scale-[0.99] flex items-center justify-center gap-2"
+                className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-500 hover:via-purple-500 hover:to-blue-500 text-white font-semibold py-3 rounded-full transition-all duration-200 disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.99] flex items-center justify-center gap-2"
               >
                 {cargandoPreguntas && <Spinner />}
                 {cargandoPreguntas ? 'Generando Cuestionario...' : 'Obtener Preguntas 🎯'}

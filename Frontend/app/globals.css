@@ -89,3 +89,7 @@ body {
 .delay-2 {
   animation-delay: 0.16s;
 }
+
+.font-display {
+  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+}

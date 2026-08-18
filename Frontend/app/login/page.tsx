@@ -41,9 +41,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(37,99,235,0.16),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(239,68,68,0.08),transparent),#050811] text-white">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(124,58,237,0.20),transparent),radial-gradient(ellipse_60%_40%_at_100%_0%,rgba(37,99,235,0.12),transparent),#050811] text-white">
       <div className="w-full max-w-sm bg-[#0b1329] border border-slate-800 p-6 rounded-2xl shadow-xl shadow-black/30 animate-fade-in-up">
-        <h1 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
+        <h1 className="font-display text-2xl font-semibold text-white mb-1 flex items-center gap-2">
           🎙 Simulador de Entrevistas
         </h1>
         <p className="text-slate-400 text-sm mb-6">
