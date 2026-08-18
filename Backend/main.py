@@ -46,13 +46,17 @@ app.add_middleware(
 )
 
 # Lista de modelos a probar en orden. Si el primero falla o está saturado,
-# se intenta con el siguiente. Se actualiza a medida que Google va
-# discontinuando modelos (por ejemplo gemini-1.5-flash y gemini-2.0-flash
-# ya no están disponibles). OJO: gemini-2.5-pro quedó descartado a propósito
-# porque Google ya no lo habilita para cuentas/API Keys nuevas (justo el
-# perfil de la mayoría de las personas del taller) — usamos en su lugar
-# gemini-3.1-pro-preview, que es el reemplazo que la propia API sugiere.
-MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash", "gemini-3.1-pro-preview"]
+# se intenta con el siguiente.
+#
+# IMPORTANTE (lección aprendida a las malas): NO agregar modelos "pro" acá
+# sin confirmar antes que tienen cupo en el plan GRATUITO. Tanto
+# gemini-2.5-pro como gemini-3.1-pro-preview requieren facturación paga
+# habilitada — en el plan gratis su límite es directamente 0, así que
+# cualquier pedido que llegue a probarlos falla siempre y ensucia el mensaje
+# de error. Nos quedamos solo con modelos "flash", que sí están disponibles
+# gratis (gemini-1.5-flash y gemini-2.0-flash ya fueron discontinuados por
+# Google, por eso no están en esta lista).
+MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash"]
 
 # OJO: a propósito NO usamos response_mime_type="application/json" (modo JSON
 # estricto). Los pedidos que fuerzan a Gemini a devolver JSON validado usan un
