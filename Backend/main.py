@@ -68,6 +68,16 @@ def _es_error_de_cuota(e: Exception) -> bool:
     return "429" in texto or "RESOURCE_EXHAUSTED" in texto or "quota" in texto.lower()
 
 
+def _es_error_temporal(e: Exception) -> bool:
+    texto = str(e)
+    return (
+        "503" in texto
+        or "UNAVAILABLE" in texto
+        or "overloaded" in texto.lower()
+        or "high demand" in texto.lower()
+    )
+
+
 def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, modelos=None):
     modelos = modelos or MODELOS_FALLBACK
     ultimo_error = None
@@ -75,7 +85,7 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
         # Si un modelo se queda sin cuota (plan gratuito: 20 pedidos/día por
         # modelo) el "break" de más abajo corta el reintento y pasamos
         # directo al siguiente modelo de la lista, sin esperar.
-        for intento in range(2):
+        for intento in range(3):
             try:
                 kwargs = {"model": modelo, "contents": contents}
                 if config is not None:
@@ -87,7 +97,12 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
                 ultimo_error = e
                 if _es_error_de_cuota(e):
                     break  # no reintentar este modelo, probar el siguiente ya mismo
-                time.sleep(1)
+                if _es_error_temporal(e):
+                    # Google está saturado momentáneamente: esperamos un poco más
+                    # entre reintentos (backoff creciente) antes de insistir.
+                    time.sleep(2 * (intento + 1))
+                else:
+                    time.sleep(1)
     if ultimo_error is not None and _es_error_de_cuota(ultimo_error):
         raise HTTPException(
             status_code=429,
@@ -95,6 +110,15 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
                 "Se agotó la cuota gratuita de Gemini para esta API Key por hoy "
                 f"(probamos {modelos}). El plan gratuito permite 20 pedidos por día por modelo. "
                 "Esperá a que se resetee mañana o usá otra API Key."
+            ),
+        )
+    if ultimo_error is not None and _es_error_temporal(ultimo_error):
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Los servidores de Google están momentáneamente saturados por alta demanda "
+                "(no es un problema de tu cuenta ni de tu cuota). Esperá unos segundos y volvé a "
+                "intentar — normalmente se resuelve solo."
             ),
         )
     raise HTTPException(
