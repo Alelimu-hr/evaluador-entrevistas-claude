@@ -78,6 +78,17 @@ def _es_error_de_cuota(e: Exception) -> bool:
     return "429" in texto or "RESOURCE_EXHAUSTED" in texto or "quota" in texto.lower()
 
 
+def _es_error_de_cuota_por_minuto(e: Exception) -> bool:
+    # Google devuelve 429/RESOURCE_EXHAUSTED tanto cuando se agota la cuota
+    # DIARIA como cuando se supera el límite de pedidos POR MINUTO (un límite
+    # mucho más corto, pensado para frenar ráfagas). Son cosas muy distintas:
+    # una se resuelve esperando un minuto, la otra recién al día siguiente. El
+    # texto del error de Google suele indicar cuál de las dos es mirando el
+    # nombre de la métrica de cuota (contiene "PerMinute" vs "PerDay").
+    texto = str(e).lower()
+    return "perminute" in texto.replace(" ", "") or "requests per minute" in texto
+
+
 def _es_error_temporal(e: Exception) -> bool:
     texto = str(e)
     return (
@@ -116,12 +127,21 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
                     break  # no insistir con el mismo modelo saturado, probar otro
                 time.sleep(1)
     if ultimo_error is not None and _es_error_de_cuota(ultimo_error):
+        if _es_error_de_cuota_por_minuto(ultimo_error):
+            raise HTTPException(
+                status_code=429,
+                detail=(
+                    "Se hicieron demasiados pedidos seguidos en poco tiempo (límite por minuto, "
+                    "no por día). No es que se haya agotado la cuota del día — esperá unos 60 "
+                    f"segundos y volvé a intentar. (Detalle: {str(ultimo_error)[:200]})"
+                ),
+            )
         raise HTTPException(
             status_code=429,
             detail=(
                 "Se agotó la cuota gratuita de Gemini para esta API Key por hoy "
                 f"(probamos {modelos}). El plan gratuito permite 20 pedidos por día por modelo. "
-                "Esperá a que se resetee mañana o usá otra API Key."
+                f"Esperá a que se resetee mañana o usá otra API Key. (Detalle: {str(ultimo_error)[:200]})"
             ),
         )
     if ultimo_error is not None and _es_error_temporal(ultimo_error):
@@ -373,7 +393,7 @@ async def evaluar_respuesta(
         # respuesta puntual; seguimos igual, pero avisamos claro si fue por
         # cuota agotada (para que no parezca que la app está rota).
         if he.status_code == 429:
-            aviso = "Se agotó la cuota gratuita de Gemini por hoy. Tu respuesta quedó guardada igual."
+            aviso = f"{he.detail} Tu respuesta quedó guardada igual."
         else:
             aviso = "No se pudo analizar el audio en detalle, pero tu respuesta quedó guardada."
         data = {
