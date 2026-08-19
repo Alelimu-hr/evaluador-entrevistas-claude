@@ -120,7 +120,6 @@ export default function Home() {
   const [informeMarkdown, setInformeMarkdown] = useState('');
   const [notas, setNotas] = useState<Notas | null>(null);
   const [descargandoPdf, setDescargandoPdf] = useState(false);
-  const [seccionInformeActiva, setSeccionInformeActiva] = useState(0);
 
   // --- Sesión de usuario (Supabase) ---
   const router = useRouter();
@@ -346,7 +345,6 @@ export default function Home() {
       if (res.ok) {
         setInformeMarkdown(data.informe_markdown || '');
         setNotas(data.notas || null);
-        setSeccionInformeActiva(0);
         setPaso('informe');
         guardarEnProgreso(data.notas || null, data.informe_markdown || '');
       } else {
@@ -750,8 +748,10 @@ export default function Home() {
                 ...otrasSecciones,
               ]
             : [{ key: 'todo', label: '📄 Informe', contenido: informeMarkdown }];
-          const indiceActivo = Math.min(seccionInformeActiva, tabs.length - 1);
-          const tabActiva = tabs[indiceActivo];
+
+          const irASeccion = (key: string) => {
+            document.getElementById(`informe-seccion-${key}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          };
 
           return (
             <div className="space-y-4 animate-fade-in-up">
@@ -796,30 +796,29 @@ export default function Home() {
                 </div>
               )}
 
-              <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 overflow-hidden">
-                {tabs.length > 1 && (
-                  <div className="flex flex-wrap gap-1.5 bg-slate-100 border-b border-slate-200 p-2.5">
-                    {tabs.map((tab, i) => (
-                      <button
-                        type="button"
-                        key={tab.key}
-                        onClick={() => setSeccionInformeActiva(i)}
-                        className={`px-3 py-1.5 text-xs sm:text-sm rounded-full whitespace-nowrap transition-all ${
-                          i === indiceActivo
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow'
-                            : 'text-slate-600 hover:text-slate-800 hover:bg-white/80'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <div className="p-5">
-                  <div className="text-slate-700 text-sm leading-relaxed informe-contenido max-w-none">
-                    <ReactMarkdown>{tabActiva?.contenido || informeMarkdown}</ReactMarkdown>
-                  </div>
+              {tabs.length > 1 && (
+                <div className="sticky top-2 z-10 flex flex-wrap gap-1.5 bg-white/90 backdrop-blur border border-white/60 rounded-2xl shadow-lg shadow-purple-950/20 p-2.5">
+                  {tabs.map((tab) => (
+                    <button
+                      type="button"
+                      key={tab.key}
+                      onClick={() => irASeccion(tab.key)}
+                      className="px-3 py-1.5 text-xs sm:text-sm rounded-full whitespace-nowrap transition-all text-slate-600 hover:text-white hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 hover:shadow"
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
                 </div>
+              )}
+
+              <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5 space-y-6">
+                {tabs.map((tab) => (
+                  <div key={tab.key} id={`informe-seccion-${tab.key}`} className="scroll-mt-20">
+                    <div className="text-slate-700 text-sm leading-relaxed informe-contenido max-w-none">
+                      <ReactMarkdown>{tab.contenido}</ReactMarkdown>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <div className="flex gap-3">
