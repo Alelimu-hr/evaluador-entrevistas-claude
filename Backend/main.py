@@ -58,6 +58,60 @@ app.add_middleware(
 # Google, por eso no están en esta lista).
 MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash"]
 
+
+def obtener_modelos_disponibles(client: genai.Client) -> list[str]:
+    """Descubre EN VIVO qué modelos 'flash' están realmente disponibles para
+    esta cuenta/key en este momento, en vez de depender ciegamente de la
+    lista fija de arriba (que se desactualiza cada vez que Google cambia su
+    catálogo — ya nos pasó dos veces: gemini-2.5-pro dejó de estar
+    disponible para cuentas nuevas, y gemini-3.1-pro-preview resultó tener
+    cupo 0 en el plan gratis). Es el mismo enfoque que usa el prototipo de
+    Streamlit (obtener_modelos_multimodales_activos), que viene resultando
+    más resistente que nuestra lista hardcodeada.
+
+    client.models.list() es solo metadata: NO consume cuota de
+    generate_content (la que tiene el límite de 20/día), así que es seguro
+    llamarlo en cada pedido. Si la llamada falla por lo que sea, no
+    rompemos nada: caemos de vuelta a MODELOS_FALLBACK como red de
+    seguridad.
+    """
+    try:
+        modelos_google = list(client.models.list())
+    except Exception:
+        return MODELOS_FALLBACK
+
+    candidatos = []
+    for m in modelos_google:
+        nombre = (getattr(m, "name", "") or "").replace("models/", "")
+        if not nombre:
+            continue
+        metodos = getattr(m, "supported_actions", None) or getattr(m, "supported_generation_methods", None) or []
+        acepta_generacion = any("generateContent" in str(x) for x in metodos) if metodos else True
+        # A propósito solo consideramos modelos "flash": los "pro" en el plan
+        # gratuito casi siempre tienen cupo 0 (lección aprendida a las malas
+        # más arriba). Tampoco tiene sentido armar una lista enorme: topeamos
+        # la cantidad de candidatos más abajo para no multiplicar de más los
+        # pedidos reales si varios modelos fallan en cadena.
+        if "flash" in nombre.lower() and "pro" not in nombre.lower() and acepta_generacion:
+            candidatos.append(nombre)
+
+    if not candidatos:
+        return MODELOS_FALLBACK
+
+    def prioridad(nombre: str) -> int:
+        # Preferimos, en este orden: los que ya veníamos usando manualmente
+        # (probados y confiables) > modelos estables > modelos preview/exp
+        # (más nuevos, pero menos probados y más propensos a saturarse).
+        if nombre in MODELOS_FALLBACK:
+            return MODELOS_FALLBACK.index(nombre)
+        if "preview" in nombre.lower() or "exp" in nombre.lower():
+            return 100
+        return 50
+
+    candidatos = sorted(set(candidatos), key=prioridad)
+    return candidatos[:4]  # tope de seguridad: no probar decenas de modelos en cadena
+
+
 # OJO: a propósito NO usamos response_mime_type="application/json" (modo JSON
 # estricto). Los pedidos que fuerzan a Gemini a devolver JSON validado usan un
 # camino de procesamiento más pesado en los servidores de Google, y durante
@@ -111,7 +165,10 @@ def _es_error_temporal(e: Exception) -> bool:
 
 
 def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, modelos=None):
-    modelos = modelos or MODELOS_FALLBACK
+    # Si no nos pasaron una lista explícita de modelos, la descubrimos en
+    # vivo (ver obtener_modelos_disponibles) en vez de usar directo la lista
+    # fija — así nos adaptamos solos a cambios en el catálogo de Google.
+    modelos = modelos or obtener_modelos_disponibles(client)
     ultimo_error = None
     errores_por_modelo = {}  # para poder mostrar qué pasó con CADA modelo, no solo el último
     for modelo in modelos:

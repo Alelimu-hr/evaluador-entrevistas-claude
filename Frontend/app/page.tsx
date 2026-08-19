@@ -45,6 +45,49 @@ function colorDeNota(nota: number) {
   return { texto: 'text-red-600', anillo: 'ring-red-300', borde: 'border-red-200' };
 }
 
+// El informe final que devuelve Gemini viene con una estructura fija de
+// títulos numerados (ver el prompt de /api/informe-final en el backend). En
+// vez de mostrar todo ese texto larguísimo de un tirón, lo partimos acá en
+// "módulos" navegables por pestaña, buscando esos títulos por palabra clave
+// (así no dependemos de que Gemini use exactamente el mismo formato de
+// markdown/numeración cada vez).
+const SECCIONES_INFORME_DEF: { key: string; label: string; match: RegExp }[] = [
+  { key: 'notas', label: '🎯 Notas', match: /DESGLOSE DE NOTAS/i },
+  { key: 'tiempo', label: '⏱️ Tiempo y Ritmo', match: /TIEMPO.{0,15}RITMO|RITMO POR RESPUESTA/i },
+  { key: 'gap', label: '💡 Gap Técnico', match: /EVALUACI[ÓO]N T[ÉE]CNICA/i },
+  { key: 'star', label: '🌟 Metodología STAR', match: /METODOLOG[ÍI]A\s+S\.?\s*T\.?\s*A\.?\s*R\.?/i },
+  { key: 'tono', label: '🎭 Tono y Emoción', match: /EMOCIONALIDAD Y TONO/i },
+  { key: 'consejos', label: '🚀 Consejos Clave', match: /CONSEJOS CLAVE/i },
+  { key: 'respuestas', label: '📌 Respuestas Modelo', match: /RESPUESTAS MODELO/i },
+];
+
+function parsearInformeEnSecciones(md: string) {
+  const lineas = md.split('\n');
+  const indices = SECCIONES_INFORME_DEF.map((def) => lineas.findIndex((l) => def.match.test(l)));
+
+  const secciones: { key: string; label: string; contenido: string }[] = [];
+  indices.forEach((inicio, i) => {
+    if (inicio === -1) return; // Gemini no incluyó esta sección: la salteamos sin romper nada
+    let fin = lineas.length;
+    for (let j = i + 1; j < indices.length; j++) {
+      if (indices[j] !== -1) {
+        fin = indices[j];
+        break;
+      }
+    }
+    secciones.push({
+      key: SECCIONES_INFORME_DEF[i].key,
+      label: SECCIONES_INFORME_DEF[i].label,
+      contenido: lineas.slice(inicio, fin).join('\n').trim(),
+    });
+  });
+
+  const primerIndice = indices.find((i) => i !== -1);
+  const intro = primerIndice !== undefined && primerIndice > 0 ? lineas.slice(0, primerIndice).join('\n').trim() : '';
+
+  return { intro, secciones };
+}
+
 export default function Home() {
   // --- Formulario inicial ---
   const [apiKey, setApiKey] = useState('');
@@ -77,6 +120,7 @@ export default function Home() {
   const [informeMarkdown, setInformeMarkdown] = useState('');
   const [notas, setNotas] = useState<Notas | null>(null);
   const [descargandoPdf, setDescargandoPdf] = useState(false);
+  const [seccionInformeActiva, setSeccionInformeActiva] = useState(0);
 
   // --- Sesión de usuario (Supabase) ---
   const router = useRouter();
@@ -302,6 +346,7 @@ export default function Home() {
       if (res.ok) {
         setInformeMarkdown(data.informe_markdown || '');
         setNotas(data.notas || null);
+        setSeccionInformeActiva(0);
         setPaso('informe');
         guardarEnProgreso(data.notas || null, data.informe_markdown || '');
       } else {
@@ -686,35 +731,98 @@ export default function Home() {
         )}
 
         {/* PASO 4: Informe final */}
-        {paso === 'informe' && (
-          <div className="space-y-4 animate-fade-in-up">
-            {notas && (
-              <div
-                className={`bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border ${
-                  colorDeNota(notas.global).borde
-                } p-6 rounded-2xl flex items-center justify-between shadow-xl shadow-purple-950/30 animate-scale-in`}
-              >
-                <div>
-                  <span className="text-slate-800 font-semibold block">Nota Global</span>
-                  <span className="text-slate-500 text-xs">Resultado de tu simulación</span>
+        {paso === 'informe' && (() => {
+          const { intro, secciones } = parsearInformeEnSecciones(informeMarkdown);
+          const seccionNotas = secciones.find((s) => s.key === 'notas');
+          const otrasSecciones = secciones.filter((s) => s.key !== 'notas');
+
+          // Si Gemini no siguió la estructura esperada (0 secciones detectadas),
+          // no partimos nada: mostramos el markdown completo como antes, para
+          // no perder información por un parseo que no encontró match.
+          const huboParseo = secciones.length > 0;
+          const tabs = huboParseo
+            ? [
+                {
+                  key: 'resumen',
+                  label: '📊 Resumen',
+                  contenido: [intro, seccionNotas?.contenido].filter(Boolean).join('\n\n'),
+                },
+                ...otrasSecciones,
+              ]
+            : [{ key: 'todo', label: '📄 Informe', contenido: informeMarkdown }];
+          const indiceActivo = Math.min(seccionInformeActiva, tabs.length - 1);
+          const tabActiva = tabs[indiceActivo];
+
+          return (
+            <div className="space-y-4 animate-fade-in-up">
+              {notas && (
+                <div className="space-y-3">
+                  <div
+                    className={`bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border ${
+                      colorDeNota(notas.global).borde
+                    } p-6 rounded-2xl flex items-center justify-between shadow-xl shadow-purple-950/30 animate-scale-in`}
+                  >
+                    <div>
+                      <span className="text-slate-800 font-semibold block">Nota Global</span>
+                      <span className="text-slate-500 text-xs">Resultado de tu simulación</span>
+                    </div>
+                    <span
+                      className={`text-4xl font-extrabold ${colorDeNota(notas.global).texto} ring-4 ${
+                        colorDeNota(notas.global).anillo
+                      } bg-white rounded-full w-24 h-24 flex items-center justify-center`}
+                    >
+                      {notas.global}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    {[
+                      { label: 'Técnica', valor: notas.tecnica },
+                      { label: 'STAR', valor: notas.star },
+                      { label: 'Oratoria', valor: notas.oratoria },
+                      { label: 'Tono', valor: notas.tono },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className={`bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border ${
+                          colorDeNota(item.valor).borde
+                        } rounded-xl p-3 text-center shadow-md shadow-purple-950/10`}
+                      >
+                        <p className={`text-xl font-bold ${colorDeNota(item.valor).texto}`}>{item.valor}</p>
+                        <p className="text-[11px] text-slate-500 mt-0.5">{item.label}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <span
-                  className={`text-4xl font-extrabold ${colorDeNota(notas.global).texto} ring-4 ${
-                    colorDeNota(notas.global).anillo
-                  } bg-white rounded-full w-24 h-24 flex items-center justify-center`}
-                >
-                  {notas.global}
-                </span>
-              </div>
-            )}
+              )}
 
-            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl shadow-xl shadow-purple-950/30">
-              <div className="text-slate-700 text-sm leading-relaxed prose prose-slate max-w-none">
-                <ReactMarkdown>{informeMarkdown}</ReactMarkdown>
+              <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 overflow-hidden">
+                {tabs.length > 1 && (
+                  <div className="flex flex-wrap gap-1.5 bg-slate-100 border-b border-slate-200 p-2.5">
+                    {tabs.map((tab, i) => (
+                      <button
+                        type="button"
+                        key={tab.key}
+                        onClick={() => setSeccionInformeActiva(i)}
+                        className={`px-3 py-1.5 text-xs sm:text-sm rounded-full whitespace-nowrap transition-all ${
+                          i === indiceActivo
+                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow'
+                            : 'text-slate-600 hover:text-slate-800 hover:bg-white/80'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div className="p-5">
+                  <div className="text-slate-700 text-sm leading-relaxed prose prose-slate max-w-none">
+                    <ReactMarkdown>{tabActiva?.contenido || informeMarkdown}</ReactMarkdown>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div className="flex gap-3">
+              <div className="flex gap-3">
               <button
                 onClick={handleDescargarPdf}
                 disabled={descargandoPdf}
@@ -729,9 +837,10 @@ export default function Home() {
               >
                 🔄 Hacer otra simulación
               </button>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );
