@@ -80,6 +80,19 @@ def obtener_modelos_disponibles(client: genai.Client) -> list[str]:
     except Exception:
         return MODELOS_FALLBACK
 
+    # OJO — lección aprendida en producción: filtrar por "contiene 'flash' y
+    # no contiene 'pro'" es demasiado laxo. "gemini-3.1-flash-lite-image"
+    # pasó ese filtro (tiene "flash", no tiene "pro") pero es un modelo
+    # especializado en IMÁGENES con límite 0 en el free tier, y nos rompió
+    # /api/evaluar-respuesta en pleno taller de prueba. En vez de ir
+    # bloqueando palabra por palabra cada variante rara que vamos
+    # descubriendo a las malas, usamos una ALLOWLIST estricta por patrón:
+    # solo "gemini-<versión>-flash" o "gemini-<versión>-flash-lite", sin
+    # ningún sufijo extra (-image, -tts, -live, -embedding, etc.). Cualquier
+    # variante de propósito especial que Google saque en el futuro queda
+    # afuera por default, en vez de colarse hasta que la descubramos rota.
+    PATRON_MODELO_VALIDO = re.compile(r"^gemini-\d+(?:\.\d+)?-flash(?:-lite)?$")
+
     candidatos = []
     for m in modelos_google:
         nombre = (getattr(m, "name", "") or "").replace("models/", "")
@@ -87,12 +100,7 @@ def obtener_modelos_disponibles(client: genai.Client) -> list[str]:
             continue
         metodos = getattr(m, "supported_actions", None) or getattr(m, "supported_generation_methods", None) or []
         acepta_generacion = any("generateContent" in str(x) for x in metodos) if metodos else True
-        # A propósito solo consideramos modelos "flash": los "pro" en el plan
-        # gratuito casi siempre tienen cupo 0 (lección aprendida a las malas
-        # más arriba). Tampoco tiene sentido armar una lista enorme: topeamos
-        # la cantidad de candidatos más abajo para no multiplicar de más los
-        # pedidos reales si varios modelos fallan en cadena.
-        if "flash" in nombre.lower() and "pro" not in nombre.lower() and acepta_generacion:
+        if PATRON_MODELO_VALIDO.match(nombre.lower()) and acepta_generacion:
             candidatos.append(nombre)
 
     if not candidatos:
@@ -108,8 +116,12 @@ def obtener_modelos_disponibles(client: genai.Client) -> list[str]:
             return 100
         return 50
 
-    candidatos = sorted(set(candidatos), key=prioridad)
-    return candidatos[:4]  # tope de seguridad: no probar decenas de modelos en cadena
+    # OJO: dedup con dict.fromkeys() en vez de set() para no perder el orden
+    # en que Google los devolvió — con set() el orden es no-determinístico
+    # entre corridas para los que empatan en prioridad.
+    candidatos_unicos = list(dict.fromkeys(candidatos))
+    candidatos_ordenados = sorted(candidatos_unicos, key=prioridad)
+    return candidatos_ordenados[:4]  # tope de seguridad: no probar decenas de modelos en cadena
 
 
 # OJO: a propósito NO usamos response_mime_type="application/json" (modo JSON
