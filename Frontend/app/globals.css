@@ -99,3 +99,53 @@ body {
   background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 58, 237, 0.24), transparent),
     radial-gradient(ellipse 60% 40% at 100% 0%, rgba(37, 99, 235, 0.15), transparent);
 }
+
+/* Estilos del markdown del informe final. OJO: el plugin @tailwindcss/typography
+   no está instalado, así que las clases "prose" que se usaban antes no hacían
+   NADA (el texto se veía plano, sin jerarquía visual). Estos estilos reemplazan
+   eso a mano, targeteando el contenedor .informe-contenido donde renderizamos
+   el <ReactMarkdown> del informe. */
+.informe-contenido h2 {
+  font-family: var(--font-display), Georgia, 'Times New Roman', serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #312e81; /* indigo-900 */
+  margin: 1.25rem 0 0.6rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid #e0e7ff; /* indigo-100 */
+}
+
+.informe-contenido h2:first-child {
+  margin-top: 0;
+}
+
+.informe-contenido p {
+  margin: 0 0 0.85rem;
+  line-height: 1.65;
+}
+
+.informe-contenido ul,
+.informe-contenido ol {
+  margin: 0.35rem 0 0.9rem;
+  padding-left: 1.3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.informe-contenido ul {
+  list-style: disc;
+}
+
+.informe-contenido ol {
+  list-style: decimal;
+}
+
+.informe-contenido li {
+  line-height: 1.55;
+}
+
+.informe-contenido strong {
+  color: #1e293b; /* slate-800 */
+  font-weight: 700;
+}

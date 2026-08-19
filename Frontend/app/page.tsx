@@ -816,7 +816,7 @@ export default function Home() {
                   </div>
                 )}
                 <div className="p-5">
-                  <div className="text-slate-700 text-sm leading-relaxed prose prose-slate max-w-none">
+                  <div className="text-slate-700 text-sm leading-relaxed informe-contenido max-w-none">
                     <ReactMarkdown>{tabActiva?.contenido || informeMarkdown}</ReactMarkdown>
                   </div>
                 </div>

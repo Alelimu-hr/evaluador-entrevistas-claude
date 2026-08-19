@@ -538,35 +538,58 @@ async def informe_final(
       entrevista fue mala, decilo sin filtros (pero seguí siendo constructivo, con
       consejos accionables). Si estuvo bien, reconocelo con el mismo nivel de exigencia.
     - Usá EXACTAMENTE esta estructura y estos títulos (podés ajustar el contenido,
-      no el formato ni los emojis):
+      no el formato ni los emojis).
+    - MUY IMPORTANTE, formato Markdown real (esto es lo que hace que se lea bien,
+      no lo saltees):
+      * Cada uno de los 7 títulos numerados de abajo va precedido por "## "
+        (encabezado Markdown nivel 2), solo en su propia línea.
+      * SIEMPRE dejá una línea en blanco entre un título y el texto que le sigue
+        (nunca escribas el título pegado al párrafo en la misma línea).
+      * Para listas DENTRO de una sección (el desglose de notas, los 3 consejos,
+        etc.) usá SIEMPRE viñetas con guion "- ", nunca numeración tipo "1. 2. 3."
+        — si numerás los ítems internos, se confunden visualmente con la
+        numeración de las 7 secciones principales y arruinan la lectura.
+      * El párrafo de apertura después del título "📊 Informe Final de Selección"
+        también va separado por una línea en blanco, como un párrafo propio.
 
-    📊 Informe Final de Selección
+    ## 📊 Informe Final de Selección
+
     (un párrafo de apertura directo, sin filtros, con el veredicto general)
 
-    1. 🎯 DESGLOSE DE NOTAS
-    (lista con NOTA_GLOBAL, NOTA_TECNICA, NOTA_STAR, NOTA_ORATORIA, NOTA_TONO, cada
-    una en x/10 con una breve justificación entre paréntesis)
+    ## 1. 🎯 DESGLOSE DE NOTAS
 
-    2. ⏱️ ANÁLISIS DE SÍNTESIS, TIEMPO Y RITMO POR RESPUESTA
-    (un ítem por cada pregunta, citando su duración y PPM reales, con crítica concreta
-    de qué le faltó o qué estuvo bien en el contenido de esa respuesta puntual)
+    (lista con guiones "- " de NOTA_GLOBAL, NOTA_TECNICA, NOTA_STAR, NOTA_ORATORIA,
+    NOTA_TONO, cada una en x/10 con una breve justificación entre paréntesis)
 
-    3. 💡 EVALUACIÓN TÉCNICA Y GAP ANALYSIS
+    ## 2. ⏱️ ANÁLISIS DE SÍNTESIS, TIEMPO Y RITMO POR RESPUESTA
+
+    (un ítem con guion "- " por cada pregunta, citando su duración y PPM reales,
+    con crítica concreta de qué le faltó o qué estuvo bien en el contenido de esa
+    respuesta puntual)
+
+    ## 3. 💡 EVALUACIÓN TÉCNICA Y GAP ANALYSIS
+
     (qué se espera para ese rol/seniority y qué gap concreto mostró el candidato)
 
-    4. 🌟 ANÁLISIS METODOLOGÍA S.T.A.R. Y DETALLE
-    (Contexto, Tarea, Acción y Resultado, cada uno con ✅ o ❌ según si estuvo
-    presente en las respuestas, y una explicación breve)
+    ## 4. 🌟 ANÁLISIS METODOLOGÍA S.T.A.R. Y DETALLE
 
-    5. 🎭 ANÁLISIS DE EMOCIONALIDAD Y TONO VOCAL
+    (Contexto, Tarea, Acción y Resultado, cada uno como ítem con guion "- " y con
+    ✅ o ❌ según si estuvo presente en las respuestas, y una explicación breve)
+
+    ## 5. 🎭 ANÁLISIS DE EMOCIONALIDAD Y TONO VOCAL
+
     (párrafo sobre seguridad, energía y profesionalismo percibido en la voz)
 
-    6. 🚀 3 CONSEJOS CLAVE DE MEJORA CRÍTICOS
-    (3 consejos numerados, concretos y accionables)
+    ## 6. 🚀 3 CONSEJOS CLAVE DE MEJORA CRÍTICOS
 
-    7. 📌 RESPUESTAS MODELO SUGERIDAS (EJEMPLOS IDEALES)
-    (para cada pregunta, una respuesta ideal completa redactada en primera persona
-    siguiendo STAR, marcando entre paréntesis qué parte es Contexto/Tarea/Acción/Resultado)
+    (3 consejos como ítems con guion "- ", concretos y accionables — NO uses
+    numeración acá)
+
+    ## 7. 📌 RESPUESTAS MODELO SUGERIDAS (EJEMPLOS IDEALES)
+
+    (para cada pregunta, un ítem con guion "- " con una respuesta ideal completa
+    redactada en primera persona siguiendo STAR, marcando entre paréntesis qué
+    parte es Contexto/Tarea/Acción/Resultado)
 
     Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más
     (sin bloques de código, sin texto fuera del JSON):
