@@ -74,7 +74,14 @@ JSON_CONFIG = types.GenerateContentConfig(
 def get_client(api_key: str) -> genai.Client:
     if not api_key or not api_key.strip():
         raise HTTPException(status_code=400, detail="Falta la API Key de Gemini en los headers.")
-    return genai.Client(api_key=api_key.strip())
+    # OJO: sin timeout explícito, el cliente puede quedarse colgado
+    # indefinidamente si la conexión con Google se cuelga (no falla, no tira
+    # excepción, simplemente nunca responde). Eso deja al usuario mirando el
+    # spinner de "Analizando..." para siempre, sin caer nunca en nuestra
+    # lógica de fallback/reintento porque técnicamente no hubo ninguna
+    # excepción que atrapar. Con este timeout, a los 45s se corta solo, se
+    # lanza una excepción real, y ahí sí entra el fallback al próximo modelo.
+    return genai.Client(api_key=api_key.strip(), http_options={"timeout": 45000})
 
 
 def _es_error_de_cuota(e: Exception) -> bool:
@@ -301,7 +308,7 @@ async def validar_key(x_gemini_api_key: str = Header(None, alias="x-gemini-api-k
     if not x_gemini_api_key or not x_gemini_api_key.strip():
         return {"valido": False, "detalle": "Falta la API Key."}
     try:
-        client = genai.Client(api_key=x_gemini_api_key.strip())
+        client = genai.Client(api_key=x_gemini_api_key.strip(), http_options={"timeout": 15000})
         modelos = list(client.models.list())
         if not modelos:
             return {"valido": False, "detalle": "La API Key no devolvió modelos disponibles."}
