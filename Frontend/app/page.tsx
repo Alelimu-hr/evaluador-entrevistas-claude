@@ -579,18 +579,33 @@ export default function Home() {
                   </span>
                 </div>
 
-                <div className="mt-3 pt-3 border-t border-slate-200 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-                  <a
-                    href="https://aistudio.google.com/apikey"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-indigo-600 underline hover:text-indigo-700 transition-colors"
-                  >
-                    👉 Conseguí tu API Key gratuita acá
-                  </a>
-                  <span className="text-slate-600">
-                    · Es 100% gratis y te lleva menos de 1 minuto generarla con tu cuenta de Google.
-                  </span>
+                <div className="mt-3 pt-3 border-t border-slate-200 text-xs">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <a
+                      href="https://aistudio.google.com/apikey"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-indigo-600 underline hover:text-indigo-700 transition-colors font-medium"
+                    >
+                      👉 Conseguí tu API Key gratuita acá
+                    </a>
+                    <span className="text-slate-600">· Es 100% gratis y te lleva menos de 1 minuto.</span>
+                  </div>
+
+                  <ol className="mt-2.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {[
+                      'Entrá con tu cuenta de Google.',
+                      'Arriba de la página, hacé clic en "Crear clave de API".',
+                      'Esperá unos segundos: se abre tu clave, lista para copiar.',
+                    ].map((paso, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-slate-500">
+                        <span className="shrink-0 w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold flex items-center justify-center mt-0.5">
+                          {i + 1}
+                        </span>
+                        {paso}
+                      </li>
+                    ))}
+                  </ol>
                 </div>
               </div>
             </div>
