@@ -39,6 +39,48 @@ type Paso = 'form' | 'pregunta' | 'resumen' | 'informe';
 
 type EstadoKey = 'vacio' | 'verificando' | 'valida' | 'invalida';
 
+// El navegador decide con qué formato graba (MediaRecorder), y eso varía
+// mucho por dispositivo: en Android suele ser webm/opus, en iPhone (Safari,
+// y Chrome/Firefox en iOS que usan el mismo motor) SIEMPRE es mp4/aac, nunca
+// webm. Antes el código forzaba la etiqueta "audio/webm" sin importar el
+// formato real, lo que rompía la reproducción y a veces el análisis en
+// celular. Ahora usamos el mimeType real que reporta el MediaRecorder para
+// nombrar el archivo con la extensión correcta.
+function extensionDeMime(mime: string): string {
+  if (mime.includes('mp4')) return 'mp4';
+  if (mime.includes('ogg')) return 'ogg';
+  if (mime.includes('webm')) return 'webm';
+  return 'webm';
+}
+
+// Opciones de "Enfoque de la Entrevista" del formulario inicial, con una
+// descripción corta de qué evalúa cada una (para que quien no sabe qué
+// significa "STAR" o "Deep Dive" pueda elegir con criterio).
+const ENFOQUES: { value: string; label: string; descripcion: string }[] = [
+  {
+    value: 'Mixta (Técnica + Conductual)',
+    label: 'Mixta',
+    descripcion: 'Combina preguntas técnicas y de comportamiento — ideal para una práctica general y equilibrada.',
+  },
+  {
+    value: 'Metodología STAR / Conductual',
+    label: 'STAR / Conductual',
+    descripcion:
+      'Preguntas sobre situaciones que ya viviste (Situación, Tarea, Acción, Resultado) — practica cómo contás tus logros y decisiones.',
+  },
+  {
+    value: 'Técnica Estricta',
+    label: 'Técnica Estricta',
+    descripcion: 'Preguntas centradas en conocimientos y habilidades específicas del rol.',
+  },
+  {
+    value: 'Deep Dive: brechas entre el CV y la Job Description',
+    label: 'Deep Dive: CV vs. JD',
+    descripcion:
+      'Preguntas enfocadas en las diferencias entre tu CV y la descripción del puesto — te prepara para justificar esos gaps.',
+  },
+];
+
 function colorDeNota(nota: number) {
   if (nota >= 7) return { texto: 'text-emerald-600', anillo: 'ring-emerald-300', borde: 'border-emerald-200' };
   if (nota >= 4) return { texto: 'text-amber-600', anillo: 'ring-amber-300', borde: 'border-amber-200' };
@@ -92,7 +134,7 @@ export default function Home() {
   // --- Formulario inicial ---
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
-  const [rol, setRol] = useState('Desarrollador Fullstack');
+  const [rol, setRol] = useState('');
   const [seniority, setSeniority] = useState('Semi-Senior');
   const [enfoque, setEnfoque] = useState('Mixta (Técnica + Conductual)');
   const [idioma, setIdioma] = useState('Español');
@@ -104,6 +146,10 @@ export default function Home() {
   // --- Flujo de la simulación ---
   const [paso, setPaso] = useState<Paso>('form');
   const [preguntas, setPreguntas] = useState<string[]>([]);
+  // Preguntas "de repuesto" pedidas en la misma llamada que las principales
+  // (ver /api/generar-pregunta en el backend). Se usan para el botón
+  // "Cambiar pregunta" sin gastar cuota extra de Gemini.
+  const [preguntasReserva, setPreguntasReserva] = useState<string[]>([]);
   const [preguntaIndex, setPreguntaIndex] = useState(0);
   const [historial, setHistorial] = useState<RespuestaGuardada[]>([]);
 
@@ -187,6 +233,7 @@ export default function Home() {
   const reiniciarTodo = () => {
     setPaso('form');
     setPreguntas([]);
+    setPreguntasReserva([]);
     setPreguntaIndex(0);
     setHistorial([]);
     setAudioBlob(null);
@@ -220,7 +267,12 @@ export default function Home() {
 
       const data = await res.json();
       if (res.ok && data.preguntas?.length > 0) {
-        setPreguntas(data.preguntas);
+        // El backend manda "cantidad" preguntas + una reserva chica al
+        // final (mismo request, sin gasto extra de cuota). Separamos acá:
+        // las primeras "cantidad" son las que se usan, el resto queda
+        // guardado para el botón "Cambiar pregunta".
+        setPreguntas(data.preguntas.slice(0, cantidad));
+        setPreguntasReserva(data.preguntas.slice(cantidad));
         setPreguntaIndex(0);
         setHistorial([]);
         setPaso('pregunta');
@@ -238,7 +290,24 @@ export default function Home() {
   const iniciarGrabacion = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+
+      // Le pedimos al navegador el mejor formato que sepa grabar de esta
+      // lista (en vez de asumir siempre webm, que en iPhone ni existe).
+      const TIPOS_AUDIO_PREFERIDOS = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/aac',
+        'audio/ogg;codecs=opus',
+      ];
+      const tipoSoportado =
+        typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported
+          ? TIPOS_AUDIO_PREFERIDOS.find((t) => MediaRecorder.isTypeSupported(t))
+          : undefined;
+
+      const mediaRecorder = tipoSoportado
+        ? new MediaRecorder(stream, { mimeType: tipoSoportado })
+        : new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -247,7 +316,12 @@ export default function Home() {
       };
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        // Usamos el mimeType que el propio MediaRecorder reporta como
+        // realmente usado (no el que pedimos): así el Blob queda etiquetado
+        // con el formato de verdad, y el <audio> lo puede reproducir en
+        // cualquier dispositivo.
+        const tipoReal = mediaRecorder.mimeType || tipoSoportado || 'audio/webm';
+        const blob = new Blob(audioChunksRef.current, { type: tipoReal });
         setAudioBlob(blob);
         setAudioUrl(URL.createObjectURL(blob));
         stream.getTracks().forEach((t) => t.stop());
@@ -274,7 +348,7 @@ export default function Home() {
     const formData = new FormData();
     formData.append('pregunta', preguntas[preguntaIndex]);
     formData.append('idioma', idioma);
-    formData.append('audio', blob, 'respuesta.webm');
+    formData.append('audio', blob, `respuesta.${extensionDeMime(blob.type)}`);
 
     try {
       const res = await fetch(`${API_URL}/api/evaluar-respuesta`, {
@@ -294,6 +368,17 @@ export default function Home() {
     } finally {
       setCargandoFeedback(false);
     }
+  };
+
+  const handleCambiarPregunta = () => {
+    if (preguntasReserva.length === 0) return;
+    const [siguiente, ...resto] = preguntasReserva;
+    setPreguntas((prev) => {
+      const copia = [...prev];
+      copia[preguntaIndex] = siguiente;
+      return copia;
+    });
+    setPreguntasReserva(resto);
   };
 
   const handleGuardarYSiguiente = () => {
@@ -333,7 +418,9 @@ export default function Home() {
         }))
       )
     );
-    historial.forEach((h, i) => formData.append('audios', h.audioBlob, `respuesta_${i}.webm`));
+    historial.forEach((h, i) =>
+      formData.append('audios', h.audioBlob, `respuesta_${i}.${extensionDeMime(h.audioBlob.type)}`)
+    );
 
     try {
       const res = await fetch(`${API_URL}/api/informe-final`, {
@@ -453,6 +540,9 @@ export default function Home() {
               Preguntas personalizadas a tu rol y tu CV, feedback de oratoria en cada respuesta, y un informe final
               con tu diagnóstico completo.
             </p>
+            <p className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-4">
+              🌎 Gratis y para cualquier rol o industria — no hace falta que sea un puesto técnico.
+            </p>
           </div>
         )}
 
@@ -523,7 +613,8 @@ export default function Home() {
                     type="text"
                     value={rol}
                     onChange={(e) => setRol(e.target.value)}
-                    className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
+                    placeholder="Ej: Analista de Marketing, Vendedor, Líder de Legales, Desarrollador..."
+                    className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
                     required
                   />
                 </div>
@@ -546,12 +637,7 @@ export default function Home() {
                 <div>
                   <label className="block text-xs text-slate-600 mb-2">Enfoque de la Entrevista</label>
                   <div className="flex flex-wrap gap-1.5 bg-slate-100 border border-slate-200 rounded-2xl p-1.5">
-                    {[
-                      { value: 'Mixta (Técnica + Conductual)', label: 'Mixta' },
-                      { value: 'Metodología STAR / Conductual', label: 'STAR / Conductual' },
-                      { value: 'Técnica Estricta', label: 'Técnica Estricta' },
-                      { value: 'Deep Dive: brechas entre el CV y la Job Description', label: 'Deep Dive: CV vs. JD' },
-                    ].map((opt) => (
+                    {ENFOQUES.map((opt) => (
                       <button
                         type="button"
                         key={opt.value}
@@ -566,6 +652,9 @@ export default function Home() {
                       </button>
                     ))}
                   </div>
+                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                    {ENFOQUES.find((o) => o.value === enfoque)?.descripcion}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-xs text-slate-600 mb-2">Idioma</label>
@@ -601,7 +690,11 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-600 mb-1">Job Description (JD)</label>
+                <label className="block text-xs text-slate-600 mb-1">Descripción del puesto</label>
+                <p className="text-xs text-slate-500 mb-1.5">
+                  Pegá la descripción del puesto para el que vas a tener la entrevista, si la tenés — así las
+                  preguntas se ajustan mejor a ese rol.
+                </p>
                 <textarea
                   rows={3}
                   placeholder="Pegá aquí las responsabilidades y requisitos de la vacante..."
@@ -613,6 +706,10 @@ export default function Home() {
 
               <div>
                 <label className="block text-xs text-slate-600 mb-1">Adjuntar Curriculum Vitae (CV)</label>
+                <p className="text-xs text-slate-500 mb-1.5">
+                  Adjuntá tu CV para que la app pueda leerlo y hacer preguntas orientadas a tu experiencia real
+                  (PDF, TXT o DOCX). Es opcional, pero mejora mucho la práctica.
+                </p>
                 <input
                   type="file"
                   accept=".pdf,.txt,.docx"
@@ -645,9 +742,22 @@ export default function Home() {
 
             {/* key={preguntaIndex} para que la pregunta haga un fade sutil cada vez que avanza */}
             <div key={preguntaIndex} className="space-y-3 animate-fade-in-up">
-              <span className="inline-block text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
-                🤖 PREGUNTA {preguntaIndex + 1} DE {preguntas.length}
-              </span>
+              <div className="flex items-start justify-between gap-3">
+                <span className="inline-block text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-3 py-1 rounded-full">
+                  🤖 PREGUNTA {preguntaIndex + 1} DE {preguntas.length}
+                </span>
+
+                {!grabando && !audioBlob && preguntasReserva.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleCambiarPregunta}
+                    title="¿Muy técnica o muy específica? Probá con otra."
+                    className="shrink-0 text-xs font-medium text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 hover:bg-indigo-50 px-3 py-1 rounded-full transition-all"
+                  >
+                    🔄 Cambiar pregunta
+                  </button>
+                )}
+              </div>
 
               <p className="text-lg text-slate-800 font-medium">{preguntas[preguntaIndex]}</p>
 
@@ -672,9 +782,15 @@ export default function Home() {
               </div>
 
               {cargandoFeedback && (
-                <p className="text-sm text-slate-500 flex items-center gap-2 animate-fade-in">
-                  <Spinner /> Analizando ritmo, fluidez y tono emocional del audio...
-                </p>
+                <div className="space-y-1 animate-fade-in">
+                  <p className="text-sm text-slate-500 flex items-center gap-2">
+                    <Spinner /> Analizando ritmo, fluidez y tono emocional del audio...
+                  </p>
+                  <p className="text-xs text-amber-600">
+                    📱 No cambies de app ni bloquees la pantalla hasta que termine — si estás en el celular, podés
+                    perder el resultado.
+                  </p>
+                </div>
               )}
 
               {feedbackActual && !cargandoFeedback && (
@@ -725,6 +841,12 @@ export default function Home() {
                 ? 'Analizando tus respuestas y generando el informe...'
                 : '🚀 Generar Evaluación y Reporte de Métricas'}
             </button>
+            {cargandoInforme && (
+              <p className="text-xs text-amber-300 text-center -mt-2 animate-fade-in">
+                📱 Este paso puede tardar un poco, sobre todo en celular — no cambies de app ni bloquees la
+                pantalla hasta que termine.
+              </p>
+            )}
           </div>
         )}
 

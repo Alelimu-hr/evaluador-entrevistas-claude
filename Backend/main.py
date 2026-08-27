@@ -410,14 +410,33 @@ async def generar_pregunta(
                 # Seguimos sin el CV en vez de colgar la petición para siempre.
                 cv_texto = ""
 
+    # OJO: pedimos "cantidad_preguntas" + una reserva chica de más. Esas
+    # preguntas extra no se muestran de entrada: el frontend las guarda
+    # aparte y las usa para el botón "Cambiar pregunta" (swap in-place si a
+    # alguien le toca una pregunta muy específica/técnica que no sabe
+    # responder). Van todas en la MISMA llamada a Gemini, así que esto no
+    # consume cuota extra.
+    try:
+        cantidad_int = max(1, int(cantidad_preguntas))
+    except (TypeError, ValueError):
+        cantidad_int = 3
+    reserva_extra = 2
+    total_a_generar = cantidad_int + reserva_extra
+
     prompt = f"""
     Actúa como un reclutador exigente.
-    Genera exactamente {cantidad_preguntas} preguntas de entrevista en idioma {idioma}.
+    Genera exactamente {total_a_generar} preguntas de entrevista en idioma {idioma}.
     Rol objetivo: {rol}
     Seniority: {seniority}
     Enfoque: {enfoque}
     JD: {jd if jd else 'No provista'}
     CV: {cv_texto if cv_texto else 'No provisto'}
+
+    Las primeras {cantidad_int} preguntas son las que se van a usar en la
+    entrevista. Las últimas {reserva_extra} son preguntas "de repuesto":
+    deben cubrir los mismos temas/enfoque pero NO ser reformulaciones triviales
+    de las primeras, para que sirvan como alternativa real si el candidato
+    pide cambiar una pregunta.
 
     Cada pregunta debe ser abierta, natural y de máximo 2 oraciones.
 
