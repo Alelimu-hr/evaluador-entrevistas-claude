@@ -109,3 +109,4 @@ if st.button("🚀 Generar Evaluación y Feedback para Candidato", type="primary
 
         except Exception as e:
             st.error(f"Ocurrió un error general: {e}")
+            

@@ -608,7 +608,7 @@ export default function Home() {
             <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1">Puesto / Rol</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">Puesto / Rol</label>
                   <input
                     type="text"
                     value={rol}
@@ -619,7 +619,7 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-600 mb-1">Seniority</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">Seniority</label>
                   <select
                     value={seniority}
                     onChange={(e) => setSeniority(e.target.value)}
@@ -635,7 +635,7 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
                 <div>
-                  <label className="block text-xs text-slate-600 mb-2">Enfoque de la Entrevista</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-2">Enfoque de la Entrevista</label>
                   <div className="flex flex-wrap gap-1.5 bg-slate-100 border border-slate-200 rounded-2xl p-1.5">
                     {ENFOQUES.map((opt) => (
                       <button
@@ -657,7 +657,7 @@ export default function Home() {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-600 mb-2">Idioma</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-2">Idioma</label>
                   <div className="flex bg-slate-100 border border-slate-200 rounded-full p-1.5 gap-1">
                     {['Español', 'Inglés'].map((opt) => (
                       <button
@@ -678,7 +678,7 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-600 mb-1">Cantidad de Preguntas</label>
+                <label className="block text-sm font-semibold text-slate-800 mb-1">Cantidad de Preguntas</label>
                 <input
                   type="number"
                   min="1"
@@ -690,7 +690,7 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-600 mb-1">Descripción del puesto</label>
+                <label className="block text-sm font-semibold text-slate-800 mb-1">Descripción del puesto</label>
                 <p className="text-xs text-slate-500 mb-1.5">
                   Pegá la descripción del puesto para el que vas a tener la entrevista, si la tenés — así las
                   preguntas se ajustan mejor a ese rol.
@@ -705,7 +705,7 @@ export default function Home() {
               </div>
 
               <div>
-                <label className="block text-xs text-slate-600 mb-1">Adjuntar Curriculum Vitae (CV)</label>
+                <label className="block text-sm font-semibold text-slate-800 mb-1">Adjuntar Curriculum Vitae (CV)</label>
                 <p className="text-xs text-slate-500 mb-1.5">
                   Adjuntá tu CV para que la app pueda leerlo y hacer preguntas orientadas a tu experiencia real
                   (PDF, TXT o DOCX). Es opcional, pero mejora mucho la práctica.
