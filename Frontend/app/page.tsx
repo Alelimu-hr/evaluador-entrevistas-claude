@@ -562,7 +562,7 @@ export default function Home() {
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder="AIzaSy..."
                     required
-                    className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
+                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
                   />
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
                     {estadoKey === 'verificando' && <Spinner className="text-slate-400" />}
@@ -629,7 +629,7 @@ export default function Home() {
                     value={rol}
                     onChange={(e) => setRol(e.target.value)}
                     placeholder="Ej: Analista de Marketing, Vendedor, Líder de Legales, Desarrollador..."
-                    className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
+                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
                     required
                   />
                 </div>
@@ -638,7 +638,7 @@ export default function Home() {
                   <select
                     value={seniority}
                     onChange={(e) => setSeniority(e.target.value)}
-                    className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
+                    className="w-full bg-white border border-purple-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
                   >
                     <option value="Junior">Junior</option>
                     <option value="Semi-Senior">Semi-Senior</option>
@@ -652,7 +652,7 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-800 mb-1">Enfoque de la Entrevista</label>
                   <p className="text-xs text-slate-500 mb-2">Elegí una y leé de qué se trata antes de arrancar 👇</p>
-                  <div className="flex flex-wrap gap-1.5 bg-slate-100 border border-slate-200 rounded-2xl p-1.5">
+                  <div className="flex flex-wrap gap-1.5 bg-slate-100 border border-slate-300 rounded-2xl p-1.5">
                     {ENFOQUES.map((opt) => (
                       <button
                         type="button"
@@ -674,7 +674,7 @@ export default function Home() {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-800 mb-2">Idioma</label>
-                  <div className="flex bg-slate-100 border border-slate-200 rounded-full p-1.5 gap-1">
+                  <div className="flex bg-slate-100 border border-slate-300 rounded-full p-1.5 gap-1">
                     {['Español', 'Inglés'].map((opt) => (
                       <button
                         type="button"
@@ -701,7 +701,7 @@ export default function Home() {
                   max="10"
                   value={cantidad}
                   onChange={(e) => setCantidad(Number(e.target.value))}
-                  className="w-full bg-white border border-slate-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40"
+                  className="w-full bg-white border border-purple-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
                 />
               </div>
 
@@ -716,7 +716,7 @@ export default function Home() {
                   placeholder="Pegá aquí las responsabilidades y requisitos de la vacante..."
                   value={jd}
                   onChange={(e) => setJd(e.target.value)}
-                  className="w-full bg-white border border-slate-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
                 />
               </div>
 
