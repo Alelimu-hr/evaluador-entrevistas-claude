@@ -142,7 +142,7 @@ JSON_CONFIG = types.GenerateContentConfig(
 )
 
 
-def get_client(api_key: str) -> genai.Client:
+def get_client(api_key: str, timeout_ms: int = 45000) -> genai.Client:
     if not api_key or not api_key.strip():
         raise HTTPException(status_code=400, detail="Falta la API Key de Gemini en los headers.")
     # OJO: sin timeout explícito, el cliente puede quedarse colgado
@@ -150,9 +150,13 @@ def get_client(api_key: str) -> genai.Client:
     # excepción, simplemente nunca responde). Eso deja al usuario mirando el
     # spinner de "Analizando..." para siempre, sin caer nunca en nuestra
     # lógica de fallback/reintento porque técnicamente no hubo ninguna
-    # excepción que atrapar. Con este timeout, a los 45s se corta solo, se
-    # lanza una excepción real, y ahí sí entra el fallback al próximo modelo.
-    return genai.Client(api_key=api_key.strip(), http_options={"timeout": 45000})
+    # excepción que atrapar. Con este timeout, se corta solo, se lanza una
+    # excepción real, y ahí sí entra el fallback al próximo modelo.
+    # /api/informe-final manda TODOS los audios de la entrevista de una
+    # (payload más pesado, análisis más largo) y le pasamos un timeout mayor
+    # a propósito para no cortarlo antes de tiempo en un pedido legítimamente
+    # más lento, distinto del resto de los endpoints que son livianos.
+    return genai.Client(api_key=api_key.strip(), http_options={"timeout": timeout_ms})
 
 
 def _es_error_de_cuota(e: Exception) -> bool:
@@ -556,7 +560,7 @@ async def informe_final(
 ):
     """Genera el informe final completo escuchando TODAS las respuestas
     grabadas de la simulación (no solo su transcripción)."""
-    client = get_client(x_gemini_api_key)
+    client = get_client(x_gemini_api_key, timeout_ms=90000)
 
     try:
         meta = json.loads(preguntas_meta)

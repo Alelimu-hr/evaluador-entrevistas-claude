@@ -650,7 +650,8 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-2">Enfoque de la Entrevista</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">Enfoque de la Entrevista</label>
+                  <p className="text-xs text-slate-500 mb-2">Elegí una y leé de qué se trata antes de arrancar 👇</p>
                   <div className="flex flex-wrap gap-1.5 bg-slate-100 border border-slate-200 rounded-2xl p-1.5">
                     {ENFOQUES.map((opt) => (
                       <button
