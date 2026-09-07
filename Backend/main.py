@@ -56,7 +56,12 @@ app.add_middleware(
 # de error. Nos quedamos solo con modelos "flash", que sí están disponibles
 # gratis (gemini-1.5-flash y gemini-2.0-flash ya fueron discontinuados por
 # Google, por eso no están en esta lista).
-MODELOS_FALLBACK = ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-3.7-flash"]
+# OJO: "gemini-2.5-flash" y "gemini-2.5-flash-lite" quedaron discontinuados
+# para keys/proyectos nuevos (Google devuelve 404 NOT_FOUND y en el mensaje
+# de error indica directamente el reemplazo). Actualizado a la generación
+# vigente. Si vuelve a pasar en el futuro, el mensaje 404 de Google siempre
+# dice el nombre correcto al que migrar.
+MODELOS_FALLBACK = ["gemini-3.6-flash", "gemini-3.7-flash", "gemini-3.5-flash-lite"]
 
 
 def obtener_modelos_disponibles(client: genai.Client) -> list[str]:
@@ -506,8 +511,20 @@ async def evaluar_respuesta(
         # cuota agotada (para que no parezca que la app está rota).
         if he.status_code == 429:
             aviso = f"{he.detail} Tu respuesta quedó guardada igual."
+        elif he.status_code == 503:
+            aviso = (
+                "Google está con mucha demanda en este momento (no es un problema tuyo ni de tu "
+                "cuota). Tu respuesta quedó guardada igual."
+            )
         else:
-            aviso = "No se pudo analizar el audio en detalle, pero tu respuesta quedó guardada."
+            # Antes esto tapaba CUALQUIER otro motivo de fallo (JSON mal formado,
+            # error 502, etc.) con un mensaje genérico que no decía nada. Ahora
+            # mostramos el detalle real para poder diagnosticar sin depender de
+            # mirar los logs de Render cada vez.
+            aviso = (
+                "No se pudo analizar el audio en detalle, pero tu respuesta quedó guardada. "
+                f"(Detalle: {str(he.detail)[:200]})"
+            )
         data = {
             "transcripcion": "",
             "palabras_aprox": 0,
