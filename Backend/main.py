@@ -176,12 +176,24 @@ def _es_error_de_cuota_por_minuto(e: Exception) -> bool:
 
 
 def _es_error_temporal(e: Exception) -> bool:
-    texto = str(e)
+    # OJO: al principio solo reconocíamos 503/UNAVAILABLE como "temporal".
+    # Pero un 504 DEADLINE_EXCEEDED (el gateway de Google se cansó de
+    # esperar) y un timeout de nuestro propio cliente ("read operation
+    # timed out") son la MISMA situación de fondo — Google respondiendo
+    # lento por demanda alta — solo que se manifiestan con otro texto. Sin
+    # esto, esos casos caían en el mensaje genérico de error en vez del
+    # mensaje claro de "es transitorio, reintentá".
+    texto = str(e).lower()
     return (
         "503" in texto
-        or "UNAVAILABLE" in texto
-        or "overloaded" in texto.lower()
-        or "high demand" in texto.lower()
+        or "504" in texto
+        or "unavailable" in texto
+        or "deadline_exceeded" in texto
+        or "deadline exceeded" in texto
+        or "timed out" in texto
+        or "timeout" in texto
+        or "overloaded" in texto
+        or "high demand" in texto
     )
 
 
