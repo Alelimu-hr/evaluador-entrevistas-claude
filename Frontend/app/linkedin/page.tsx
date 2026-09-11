@@ -27,6 +27,7 @@ export default function LinkedinPage() {
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
   const [rolObjetivo, setRolObjetivo] = useState('');
+  const [objetivoLibre, setObjetivoLibre] = useState('');
   const [idioma, setIdioma] = useState('Español');
   const [perfilFile, setPerfilFile] = useState<File | null>(null);
   const [cargando, setCargando] = useState(false);
@@ -77,6 +78,7 @@ export default function LinkedinPage() {
     const formData = new FormData();
     formData.append('rol_objetivo', rolObjetivo);
     formData.append('idioma', idioma);
+    formData.append('objetivo_libre', objetivoLibre);
     formData.append('perfil', perfilFile);
 
     try {
@@ -254,6 +256,22 @@ export default function LinkedinPage() {
                     <option value="Español">Español</option>
                     <option value="Inglés">Inglés</option>
                   </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">
+                    Contanos más sobre lo que buscás (opcional)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={objetivoLibre}
+                    onChange={(e) => setObjetivoLibre(e.target.value)}
+                    placeholder='Ej: "Quiero pasar a un rol de gestión de personas, pero todavía no tengo tanto seniority — busco algo intermedio entre People Manager y HRBP Sr."'
+                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    Útil si tu objetivo no es un puesto único y cerrado — un mix de roles, una transición, una
+                    ambición por encima de tu nivel actual, etc. Cuanto más contexto real, mejores las sugerencias.
+                  </p>
                 </div>
               </div>
 

@@ -711,6 +711,7 @@ async def analizar_perfil_linkedin(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
     rol_objetivo: str = Form(...),
     idioma: str = Form("Español"),
+    objetivo_libre: str = Form(None),
     perfil: UploadFile = File(...),
 ):
     """Analiza el PDF que LinkedIn genera al exportar el PROPIO perfil del
@@ -748,6 +749,14 @@ async def analizar_perfil_linkedin(
     buscador interno de LinkedIn (que prioriza palabras clave relevantes al rol).
 
     Rol/puesto al que apunta esta persona: {rol_objetivo}
+
+    Contexto adicional que la persona escribió con sus propias palabras sobre lo
+    que busca lograr (puede matizar, combinar roles, o explicar una situación
+    particular — ej. "quiero pasar a role de gestión de personas pero todavía no
+    tengo tanto seniority, así que busco algo intermedio"). Si está presente,
+    dale prioridad por sobre el campo de rol solo, y hacé que el headline, el
+    "acerca de" y las palabras clave sugeridas reflejen ese matiz real, no un
+    único título genérico: {objetivo_libre if objetivo_libre and objetivo_libre.strip() else 'No provisto'}
 
     A continuación, el texto extraído del PDF que la persona exportó de su propio
     perfil de LinkedIn:
