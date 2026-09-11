@@ -36,6 +36,21 @@ export default function LinkedinPage() {
 
   const [puntajes, setPuntajes] = useState<Puntajes | null>(null);
   const [informeMarkdown, setInformeMarkdown] = useState('');
+  const [titularesSugeridos, setTitularesSugeridos] = useState<string[]>([]);
+  const [acercaDeSugerido, setAcercaDeSugerido] = useState('');
+  // Qué botón de "Copiar" mostró el check verde últimamente (por índice, o
+  // 'acerca_de' para esa sección) — se resetea solo después de 2 segundos.
+  const [copiado, setCopiado] = useState<string | null>(null);
+
+  const copiarTexto = async (texto: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(texto);
+      setCopiado(id);
+      setTimeout(() => setCopiado((actual) => (actual === id ? null : actual)), 2000);
+    } catch {
+      alert('No se pudo copiar automáticamente. Seleccioná el texto a mano.');
+    }
+  };
 
   // Misma validación de API Key que el simulador de entrevistas: se chequea
   // contra el backend medio segundo después de dejar de tipear, sin gastar
@@ -64,6 +79,8 @@ export default function LinkedinPage() {
     setPerfilFile(null);
     setPuntajes(null);
     setInformeMarkdown('');
+    setTitularesSugeridos([]);
+    setAcercaDeSugerido('');
     setError('');
   };
 
@@ -93,6 +110,8 @@ export default function LinkedinPage() {
       }
       setPuntajes(data.puntajes || null);
       setInformeMarkdown(data.informe_markdown || '');
+      setTitularesSugeridos(Array.isArray(data.titulares_sugeridos) ? data.titulares_sugeridos : []);
+      setAcercaDeSugerido(data.acerca_de_sugerido || '');
     } catch (err: any) {
       setError(err.message || 'Ocurrió un error inesperado.');
     } finally {
@@ -364,6 +383,49 @@ export default function LinkedinPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {(titularesSugeridos.length > 0 || acercaDeSugerido) && (
+              <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5 space-y-4">
+                <p className="text-sm font-semibold text-slate-800">📋 Listo para copiar y pegar en tu perfil</p>
+
+                {titularesSugeridos.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Titular</p>
+                    {titularesSugeridos.map((titular, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3"
+                      >
+                        <p className="flex-1 text-sm text-slate-700">{titular}</p>
+                        <button
+                          type="button"
+                          onClick={() => copiarTexto(titular, `titular-${i}`)}
+                          className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                        >
+                          {copiado === `titular-${i}` ? '✓ Copiado' : '📋 Copiar'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {acercaDeSugerido && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Acerca de</p>
+                    <div className="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
+                      <p className="flex-1 text-sm text-slate-700 whitespace-pre-line">{acercaDeSugerido}</p>
+                      <button
+                        type="button"
+                        onClick={() => copiarTexto(acercaDeSugerido, 'acerca_de')}
+                        className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                      >
+                        {copiado === 'acerca_de' ? '✓ Copiado' : '📋 Copiar'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 

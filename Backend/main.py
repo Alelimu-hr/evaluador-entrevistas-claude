@@ -820,10 +820,43 @@ async def analizar_perfil_linkedin(
     (lista con guion "- " de palabras clave/skills que le faltan al perfil para el
     rol objetivo, que un reclutador buscaría en LinkedIn)
 
-    ## 6. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA
+    ## 6. 🔎 TIPS: CÓMO TE ENCUENTRAN LOS RECLUTADORES (BÚSQUEDA BOOLEANA)
+
+    (Esta sección es nueva y muy importante — seguí exactamente esta lógica:
+    1. Un párrafo breve explicando que los reclutadores (sobre todo con LinkedIn
+       Recruiter) no leen perfiles uno por uno: escriben búsquedas con operadores
+       booleanos (AND, OR, NOT, comillas para frase exacta) y el sistema solo
+       muestra perfiles que contienen esas palabras EXACTAS en algún lugar
+       (titular, "Acerca de", experiencia o aptitudes) — no entiende sinónimos ni
+       contexto como una IA.
+    2. Con guion "- ", 1 o 2 ejemplos REALISTAS de búsqueda booleana que un
+       reclutador escribiría para encontrar a alguien con el rol objetivo de esta
+       persona, usando el formato real de LinkedIn Recruiter (paréntesis, AND, OR,
+       comillas). Basate en las palabras clave de la sección 5.
+    3. Un párrafo evaluando honestamente si el perfil ACTUAL (tal como está hoy,
+       antes de los cambios sugeridos) matchearía o no esas búsquedas, y por qué
+       (casi siempre NO va a matchear si el titular/palabras clave no están
+       escritos literalmente en el perfil actual — decilo explícito).
+    4. Un párrafo mostrando que, aplicando el titular/"Acerca de" sugeridos en las
+       secciones 2 y 3, el perfil SÍ empezaría a matchear esas búsquedas, citando
+       qué término exacto ahora aparece.
+    5. Cerrá con un ítem con guion "- " remarcando la idea clave: no alcanza con
+       tener la experiencia relevante, el término EXACTO que buscaría un
+       reclutador tiene que estar escrito palabra por palabra en el perfil.)
+
+    ## 7. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA
 
     (3 acciones como ítems con guion "- ", concretas y accionables — NO uses
     numeración acá)
+
+    Además de "informe_markdown", devolvé también estos dos campos en TEXTO PLANO
+    (sin markdown, sin "**", sin "#", sin viñetas) porque van a un botón de
+    "copiar y pegar" directo al perfil real de LinkedIn, que no soporta formato:
+    - "titulares_sugeridos": un array con las mismas 2-3 alternativas de titular
+      de la sección 2, palabra por palabra, cada una como un string plano.
+    - "acerca_de_sugerido": la versión reescrita completa de la sección 3, como
+      un solo string plano (usá "\\n\\n" para separar párrafos), palabra por
+      palabra igual a la que pusiste en el informe.
 
     Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más (sin
     bloques de código, sin texto fuera del JSON):
@@ -835,6 +868,8 @@ async def analizar_perfil_linkedin(
         "experiencia": 7.5,
         "palabras_clave": 6.0
       }},
+      "titulares_sugeridos": ["alternativa 1 en texto plano", "alternativa 2 en texto plano"],
+      "acerca_de_sugerido": "el 'acerca de' reescrito en texto plano",
       "informe_markdown": "el informe completo en markdown, con la estructura de arriba"
     }}
     """
@@ -842,6 +877,8 @@ async def analizar_perfil_linkedin(
     texto, _modelo = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG)
     data = extraer_json_seguro(texto)
     data.setdefault("puntajes", {})
+    data.setdefault("titulares_sugeridos", [])
+    data.setdefault("acerca_de_sugerido", "")
     data.setdefault("informe_markdown", texto)
     return data
 
