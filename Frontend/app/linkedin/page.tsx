@@ -180,6 +180,29 @@ export default function LinkedinPage() {
         </header>
 
         {!hayResultado && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 animate-fade-in-up">
+            <Link
+              href="/"
+              className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
+            >
+              <p className="text-2xl">🎙️</p>
+              <p className="font-semibold text-slate-800 text-sm mt-1.5">Practicá tu entrevista</p>
+              <p className="text-xs text-slate-500 mt-0.5">Simulá una entrevista real y recibí feedback con IA.</p>
+            </Link>
+            <div className="relative overflow-hidden text-left p-4 rounded-2xl border border-transparent bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-lg shadow-purple-500/30">
+              <span className="absolute top-3 right-3 text-[10px] font-semibold uppercase tracking-wide text-white/70">
+                Estás acá
+              </span>
+              <p className="text-2xl">💼</p>
+              <p className="font-semibold text-white text-sm mt-1.5">Mejorá tu perfil de LinkedIn</p>
+              <p className="text-xs text-white/80 mt-0.5">
+                Análisis de tu perfil con sugerencias listas para copiar y pegar.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!hayResultado && (
           <div className="text-center pt-2 pb-2 animate-fade-in-up">
             <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
               Optimización de perfil con IA
