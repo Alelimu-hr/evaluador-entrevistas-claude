@@ -795,6 +795,15 @@ async def analizar_perfil_linkedin(
     (crítica del titular actual y 2-3 alternativas concretas ya redactadas, listas
     para copiar y pegar, pensadas para el rol objetivo)
 
+    REGLA IMPORTANTE para las alternativas de titular: nunca le asignes a la persona
+    un título de seniority/liderazgo (Leader, Head, Manager, Director, Sr., etc.) que
+    su experiencia en el perfil no respalde todavía. Si el rol objetivo o el contexto
+    adicional muestran una ASPIRACIÓN por encima de su nivel actual, reflejá esa
+    dirección de crecimiento sin inventar un título que no tiene (por ejemplo, usando
+    las áreas de expertise sin el título de liderazgo, o frases como "con foco en" /
+    "en camino a", en vez de directamente "Leader" o "Manager"). Un titular inflado
+    genera desconfianza cuando el reclutador lo compara con la experiencia real.
+
     ## 3. 📝 SECCIÓN "ACERCA DE"
 
     (qué falla en la sección actual —si no está, decilo— y una versión reescrita
