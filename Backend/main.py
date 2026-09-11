@@ -690,6 +690,128 @@ async def informe_final(
     return data
 
 
+@app.post("/api/analizar-perfil-linkedin")
+async def analizar_perfil_linkedin(
+    x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
+    rol_objetivo: str = Form(...),
+    idioma: str = Form("Español"),
+    perfil: UploadFile = File(...),
+):
+    """Analiza el PDF que LinkedIn genera al exportar el PROPIO perfil del
+    usuario (Perfil > botón 'Más' > 'Guardar en PDF') y devuelve sugerencias
+    concretas de mejora. Reutiliza extraer_texto_cv porque la extracción de
+    texto de un PDF es la misma lógica, sea CV o perfil de LinkedIn."""
+    client = get_client(x_gemini_api_key)
+
+    perfil_bytes = await perfil.read()
+    if not perfil_bytes:
+        raise HTTPException(status_code=400, detail="El archivo llegó vacío.")
+
+    future = _pdf_executor.submit(extraer_texto_cv, perfil, perfil_bytes)
+    try:
+        perfil_texto = future.result(timeout=PDF_TIMEOUT_SEGUNDOS)
+    except FutureTimeoutError:
+        raise HTTPException(
+            status_code=400,
+            detail="El PDF tardó demasiado en procesarse. Probá con otro archivo.",
+        )
+
+    if not perfil_texto or len(perfil_texto.strip()) < 50:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "No pudimos leer texto de ese PDF. Asegurate de subir el PDF que "
+                "exporta LinkedIn desde tu propio perfil (botón 'Más' > 'Guardar en "
+                "PDF'), no una captura de pantalla ni otro tipo de archivo."
+            ),
+        )
+
+    prompt = f"""
+    Actuá como un consultor experto en LinkedIn y reclutamiento, especializado en
+    optimizar perfiles para que destaquen ante reclutadores humanos Y ante el
+    buscador interno de LinkedIn (que prioriza palabras clave relevantes al rol).
+
+    Rol/puesto al que apunta esta persona: {rol_objetivo}
+
+    A continuación, el texto extraído del PDF que la persona exportó de su propio
+    perfil de LinkedIn:
+    ---
+    {perfil_texto[:12000]}
+    ---
+
+    DIRECTIVAS DE ESTILO PARA EL INFORME (campo "informe_markdown"):
+    - Escribilo 100% en idioma {idioma}, en Markdown.
+    - Tono directo y constructivo, como un consultor de carrera real: señalá lo que
+      no funciona sin filtros, pero siempre con sugerencias concretas y accionables,
+      no solo críticas.
+    - Usá EXACTAMENTE esta estructura y estos títulos (podés ajustar el contenido,
+      no el formato ni los emojis).
+    - MUY IMPORTANTE, formato Markdown real:
+      * Cada título numerado de abajo va precedido por "## " (encabezado Markdown
+        nivel 2), solo en su propia línea.
+      * SIEMPRE dejá una línea en blanco entre un título y el texto que le sigue.
+      * Para listas DENTRO de una sección usá SIEMPRE viñetas con guion "- ", nunca
+        numeración tipo "1. 2. 3.".
+      * El párrafo de apertura después del título "📈 Informe de tu Perfil de
+        LinkedIn" también va separado por una línea en blanco, como un párrafo propio.
+
+    ## 📈 Informe de tu Perfil de LinkedIn
+
+    (un párrafo de apertura directo con el veredicto general, pensando en el rol objetivo)
+
+    ## 1. 🎯 DESGLOSE DE PUNTAJES
+
+    (lista con guiones "- " de PUNTAJE_GLOBAL, PUNTAJE_HEADLINE, PUNTAJE_ACERCA_DE,
+    PUNTAJE_EXPERIENCIA, PUNTAJE_PALABRAS_CLAVE, cada uno en x/10 con una breve
+    justificación entre paréntesis)
+
+    ## 2. 🖋️ TITULAR (HEADLINE)
+
+    (crítica del titular actual y 2-3 alternativas concretas ya redactadas, listas
+    para copiar y pegar, pensadas para el rol objetivo)
+
+    ## 3. 📝 SECCIÓN "ACERCA DE"
+
+    (qué falla en la sección actual —si no está, decilo— y una versión reescrita
+    completa sugerida, en primera persona, de 3-4 párrafos)
+
+    ## 4. 💼 EXPERIENCIA LABORAL
+
+    (un ítem con guion "- " por cada rol relevante, señalando si la descripción
+    muestra logros medibles o solo tareas, con sugerencia concreta de cómo
+    reescribir al menos una)
+
+    ## 5. 🔑 PALABRAS CLAVE PARA RECLUTADORES
+
+    (lista con guion "- " de palabras clave/skills que le faltan al perfil para el
+    rol objetivo, que un reclutador buscaría en LinkedIn)
+
+    ## 6. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA
+
+    (3 acciones como ítems con guion "- ", concretas y accionables — NO uses
+    numeración acá)
+
+    Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más (sin
+    bloques de código, sin texto fuera del JSON):
+    {{
+      "puntajes": {{
+        "global": 7.0,
+        "headline": 6.5,
+        "acerca_de": 7.0,
+        "experiencia": 7.5,
+        "palabras_clave": 6.0
+      }},
+      "informe_markdown": "el informe completo en markdown, con la estructura de arriba"
+    }}
+    """
+
+    texto, _modelo = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG)
+    data = extraer_json_seguro(texto)
+    data.setdefault("puntajes", {})
+    data.setdefault("informe_markdown", texto)
+    return data
+
+
 def _escapar_para_reportlab(texto: str) -> str:
     return texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
@@ -733,7 +855,12 @@ def _markdown_a_story(md_texto: str, styles) -> list:
 
 
 @app.post("/api/descargar-pdf")
-async def descargar_pdf(informe_markdown: str = Form(...), rol: str = Form("Executive")):
+async def descargar_pdf(
+    informe_markdown: str = Form(...),
+    rol: str = Form("Executive"),
+    titulo: str = Form(None),
+    nombre_archivo: str = Form(None),
+):
     try:
         buffer = io.BytesIO()
         doc = SimpleDocTemplate(
@@ -760,8 +887,9 @@ async def descargar_pdf(informe_markdown: str = Form(...), rol: str = Form("Exec
             ),
         }
 
+        titulo_final = titulo or f"Reporte de Simulación de Entrevista — {rol}"
         story = [
-            Paragraph(_inline_markdown_a_reportlab(f"Reporte de Simulación de Entrevista — {rol}"), styles["Titulo"]),
+            Paragraph(_inline_markdown_a_reportlab(titulo_final), styles["Titulo"]),
             Spacer(1, 6),
         ]
         story.extend(_markdown_a_story(informe_markdown, styles))
@@ -769,10 +897,17 @@ async def descargar_pdf(informe_markdown: str = Form(...), rol: str = Form("Exec
         doc.build(story)
         buffer.seek(0)
 
+        # OJO: el nombre de archivo va en un header HTTP, que solo admite
+        # ASCII — sacamos tildes/ñ/emojis para no romper la descarga en
+        # algunos navegadores.
+        base_archivo = nombre_archivo or f"Reporte_Entrevista_{rol}"
+        base_archivo = base_archivo.encode("ascii", "ignore").decode("ascii")
+        base_archivo = re.sub(r"[^A-Za-z0-9_\-]+", "_", base_archivo).strip("_") or "Reporte"
+
         return StreamingResponse(
             buffer,
             media_type="application/pdf",
-            headers={"Content-Disposition": f"attachment; filename=Reporte_Entrevista_{rol}.pdf"},
+            headers={"Content-Disposition": f"attachment; filename={base_archivo}.pdf"},
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generando PDF: {str(e)}")
