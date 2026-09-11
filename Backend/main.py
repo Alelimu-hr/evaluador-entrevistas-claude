@@ -709,7 +709,7 @@ async def informe_final(
 @app.post("/api/analizar-perfil-linkedin")
 async def analizar_perfil_linkedin(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
-    rol_objetivo: str = Form(...),
+    rol_objetivo: str = Form(None),
     idioma: str = Form("Español"),
     objetivo_libre: str = Form(None),
     perfil: UploadFile = File(...),
@@ -743,11 +743,15 @@ async def analizar_perfil_linkedin(
             ),
         )
 
-    prompt = f"""
-    Actuá como un consultor experto en LinkedIn y reclutamiento, especializado en
-    optimizar perfiles para que destaquen ante reclutadores humanos Y ante el
-    buscador interno de LinkedIn (que prioriza palabras clave relevantes al rol).
+    # Modo "dirigido" (con rol objetivo) vs. "objetivo" (sin rol — evaluar el
+    # perfil tal como está, con criterios universales, sin comparar contra
+    # ninguna vacante puntual). Esto cambia varias partes del prompt, así que
+    # armamos los bloques de texto por separado en vez de meter un "if" gigante
+    # dentro del f-string.
+    tiene_rol = bool(rol_objetivo and rol_objetivo.strip())
 
+    if tiene_rol:
+        bloque_contexto = f"""
     Rol/puesto al que apunta esta persona: {rol_objetivo}
 
     Contexto adicional que la persona escribió con sus propias palabras sobre lo
@@ -757,7 +761,52 @@ async def analizar_perfil_linkedin(
     dale prioridad por sobre el campo de rol solo, y hacé que el headline, el
     "acerca de" y las palabras clave sugeridas reflejen ese matiz real, no un
     único título genérico: {objetivo_libre if objetivo_libre and objetivo_libre.strip() else 'No provisto'}
+    """
+        instruccion_apertura = "pensando en el rol objetivo indicado arriba"
+        instruccion_headline = "pensadas específicamente para el rol objetivo"
+        instruccion_palabras_clave = (
+            "que le faltan al perfil para EL ROL OBJETIVO indicado, que un reclutador "
+            "buscando ese rol puntual buscaría en LinkedIn"
+        )
+        instruccion_booleano = (
+            "que un reclutador escribiría para encontrar a alguien con el ROL OBJETIVO "
+            "de esta persona (el que indicó, no necesariamente el que tiene hoy)"
+        )
+    else:
+        bloque_contexto = """
+    Esta persona NO indicó ningún rol objetivo puntual: quiere un análisis
+    OBJETIVO de su perfil tal como está, sin compararlo contra ninguna vacante
+    específica. Evaluá con criterios universales de un buen perfil de LinkedIn
+    (claridad, estructura, logros concretos vs. tareas genéricas, densidad de
+    palabras clave), e inferí vos mismo cuál es su área/campo profesional a
+    partir de su propia experiencia real — NO le asignes un objetivo o
+    aspiración que la persona no expresó.
+    """
+        instruccion_apertura = (
+            "sobre la calidad y claridad general del perfil — SIN apuntar a un rol "
+            "específico, ya que la persona no indicó ninguno"
+        )
+        instruccion_headline = (
+            "que reflejen con más claridad y fuerza su trayectoria y área profesional "
+            "REAL actual (inferida de su experiencia), sin inventarle un objetivo que "
+            "no expresó"
+        )
+        instruccion_palabras_clave = (
+            "que son estándar en SU PROPIO campo profesional (inferido de su "
+            "experiencia real, no de un rol aspiracional) y le faltan para que el "
+            "perfil sea más encontrable en general"
+        )
+        instruccion_booleano = (
+            "que un reclutador escribiría para encontrar a alguien con la EXPERIENCIA "
+            "Y EL PUESTO ACTUAL de esta persona (no un objetivo aspiracional, porque no "
+            "indicó ninguno)"
+        )
 
+    prompt = f"""
+    Actuá como un consultor experto en LinkedIn y reclutamiento, especializado en
+    optimizar perfiles para que destaquen ante reclutadores humanos Y ante el
+    buscador interno de LinkedIn (que prioriza palabras clave relevantes).
+    {bloque_contexto}
     A continuación, el texto extraído del PDF que la persona exportó de su propio
     perfil de LinkedIn:
     ---
@@ -782,7 +831,7 @@ async def analizar_perfil_linkedin(
 
     ## 📈 Informe de tu Perfil de LinkedIn
 
-    (un párrafo de apertura directo con el veredicto general, pensando en el rol objetivo)
+    (un párrafo de apertura directo con el veredicto general, {instruccion_apertura})
 
     ## 1. 🎯 DESGLOSE DE PUNTAJES
 
@@ -793,12 +842,12 @@ async def analizar_perfil_linkedin(
     ## 2. 🖋️ TITULAR (HEADLINE)
 
     (crítica del titular actual y 2-3 alternativas concretas ya redactadas, listas
-    para copiar y pegar, pensadas para el rol objetivo)
+    para copiar y pegar, {instruccion_headline})
 
     REGLA IMPORTANTE para las alternativas de titular: nunca le asignes a la persona
     un título de seniority/liderazgo (Leader, Head, Manager, Director, Sr., etc.) que
     su experiencia en el perfil no respalde todavía. Si el rol objetivo o el contexto
-    adicional muestran una ASPIRACIÓN por encima de su nivel actual, reflejá esa
+    adicional (cuando la persona los indicó) muestran una ASPIRACIÓN por encima de su nivel actual, reflejá esa
     dirección de crecimiento sin inventar un título que no tiene (por ejemplo, usando
     las áreas de expertise sin el título de liderazgo, o frases como "con foco en" /
     "en camino a", en vez de directamente "Leader" o "Manager"). Un titular inflado
@@ -817,8 +866,7 @@ async def analizar_perfil_linkedin(
 
     ## 5. 🔑 PALABRAS CLAVE PARA RECLUTADORES
 
-    (lista con guion "- " de palabras clave/skills que le faltan al perfil para el
-    rol objetivo, que un reclutador buscaría en LinkedIn)
+    (lista con guion "- " de palabras clave/skills {instruccion_palabras_clave})
 
     ## 6. 🔎 TIPS: CÓMO TE ENCUENTRAN LOS RECLUTADORES (BÚSQUEDA BOOLEANA)
 
@@ -829,9 +877,8 @@ async def analizar_perfil_linkedin(
        muestra perfiles que contienen esas palabras EXACTAS en algún lugar
        (titular, "Acerca de", experiencia o aptitudes) — no entiende sinónimos ni
        contexto como una IA.
-    2. Con guion "- ", 1 o 2 ejemplos REALISTAS de búsqueda booleana que un
-       reclutador escribiría para encontrar a alguien con el rol objetivo de esta
-       persona, usando el formato real de LinkedIn Recruiter (paréntesis, AND, OR,
+    2. Con guion "- ", 1 o 2 ejemplos REALISTAS de búsqueda booleana {instruccion_booleano},
+       usando el formato real de LinkedIn Recruiter (paréntesis, AND, OR,
        comillas). Basate en las palabras clave de la sección 5.
     3. Un párrafo evaluando honestamente si el perfil ACTUAL (tal como está hoy,
        antes de los cambios sugeridos) matchearía o no esas búsquedas, y por qué

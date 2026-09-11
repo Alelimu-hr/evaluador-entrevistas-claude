@@ -8,6 +8,7 @@ import { Spinner } from '@/components/Spinner';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 type EstadoKey = 'vacio' | 'verificando' | 'valida' | 'invalida';
+type ModoAnalisis = 'dirigido' | 'objetivo';
 
 type Puntajes = {
   global: number;
@@ -26,6 +27,7 @@ function colorDeNota(nota: number) {
 export default function LinkedinPage() {
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
+  const [modo, setModo] = useState<ModoAnalisis>('dirigido');
   const [rolObjetivo, setRolObjetivo] = useState('');
   const [objetivoLibre, setObjetivoLibre] = useState('');
   const [idioma, setIdioma] = useState('Español');
@@ -88,14 +90,22 @@ export default function LinkedinPage() {
     e.preventDefault();
     if (!apiKey) return alert('Pegá tu clave de Google AI Studio para probar.');
     if (!perfilFile) return alert('Subí el PDF de tu perfil de LinkedIn.');
+    if (modo === 'dirigido' && !rolObjetivo.trim()) {
+      return alert('Poné el puesto al que apuntás, o elegí "Analizar tal cual está" si preferís un análisis objetivo.');
+    }
 
     setCargando(true);
     setError('');
 
     const formData = new FormData();
-    formData.append('rol_objetivo', rolObjetivo);
+    // En modo "objetivo" no mandamos rol/párrafo aunque hayan quedado
+    // tipeados de un cambio de modo anterior — el backend decide qué tipo de
+    // análisis hacer según si recibe o no un rol_objetivo.
+    if (modo === 'dirigido') {
+      formData.append('rol_objetivo', rolObjetivo);
+      formData.append('objetivo_libre', objetivoLibre);
+    }
     formData.append('idioma', idioma);
-    formData.append('objetivo_libre', objetivoLibre);
     formData.append('perfil', perfilFile);
 
     try {
@@ -246,25 +256,61 @@ export default function LinkedinPage() {
               </p>
             )}
 
-            {/* Rol objetivo + idioma */}
+            {/* Modo de análisis + rol objetivo + idioma */}
             <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-1">
-                    Puesto al que apuntás
-                  </label>
-                  <input
-                    type="text"
-                    value={rolObjetivo}
-                    onChange={(e) => setRolObjetivo(e.target.value)}
-                    placeholder="Ej: Analista Contable, Líder de Ventas, Desarrollador Backend..."
-                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
-                    required
-                  />
-                  <p className="text-xs text-slate-500 mt-1">
-                    Así te sugerimos palabras clave y ajustes pensados para ESE rol puntual.
-                  </p>
+              <div>
+                <label className="block text-sm font-semibold text-slate-800 mb-2">¿Qué tipo de análisis querés?</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setModo('dirigido')}
+                    className={`text-left p-3 rounded-xl border transition-all ${
+                      modo === 'dirigido'
+                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                        : 'border-slate-200 bg-white hover:border-purple-300'
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-slate-800">🎯 En función de una posición</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Analizamos tu perfil pensando en el rol al que te gustaría adaptarlo.
+                    </p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setModo('objetivo')}
+                    className={`text-left p-3 rounded-xl border transition-all ${
+                      modo === 'objetivo'
+                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                        : 'border-slate-200 bg-white hover:border-purple-300'
+                    }`}
+                  >
+                    <p className="text-sm font-semibold text-slate-800">📄 Tu LinkedIn tal cual está</p>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Análisis objetivo de tu perfil actual, sin compararlo contra ninguna vacante puntual.
+                    </p>
+                  </button>
                 </div>
+              </div>
+
+              <div className={`grid grid-cols-1 ${modo === 'dirigido' ? 'md:grid-cols-2' : ''} gap-4`}>
+                {modo === 'dirigido' && (
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-800 mb-1">
+                      Puesto al que apuntás
+                    </label>
+                    <input
+                      type="text"
+                      value={rolObjetivo}
+                      onChange={(e) => setRolObjetivo(e.target.value)}
+                      placeholder="Ej: Analista Contable, Líder de Ventas, Desarrollador Backend..."
+                      className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                      required
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      Así te sugerimos palabras clave y ajustes pensados para ESE rol puntual.
+                    </p>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-semibold text-slate-800 mb-1">Idioma del informe</label>
                   <select
@@ -276,22 +322,24 @@ export default function LinkedinPage() {
                     <option value="Inglés">Inglés</option>
                   </select>
                 </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-semibold text-slate-800 mb-1">
-                    Contanos más sobre lo que buscás (opcional)
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={objetivoLibre}
-                    onChange={(e) => setObjetivoLibre(e.target.value)}
-                    placeholder='Ej: "Quiero pasar a un rol de gestión de personas, pero todavía no tengo tanto seniority — busco algo intermedio entre People Manager y HRBP Sr."'
-                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
-                  />
-                  <p className="text-xs text-slate-500 mt-1">
-                    Útil si tu objetivo no es un puesto único y cerrado — un mix de roles, una transición, una
-                    ambición por encima de tu nivel actual, etc. Cuanto más contexto real, mejores las sugerencias.
-                  </p>
-                </div>
+                {modo === 'dirigido' && (
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-slate-800 mb-1">
+                      Contanos más sobre lo que buscás (opcional)
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={objetivoLibre}
+                      onChange={(e) => setObjetivoLibre(e.target.value)}
+                      placeholder='Ej: "Quiero pasar a un rol de gestión de personas, pero todavía no tengo tanto seniority — busco algo intermedio entre People Manager y HRBP Sr."'
+                      className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">
+                      Útil si tu objetivo no es un puesto único y cerrado — un mix de roles, una transición, una
+                      ambición por encima de tu nivel actual, etc. Cuanto más contexto real, mejores las sugerencias.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Cómo conseguir el PDF de LinkedIn */}
