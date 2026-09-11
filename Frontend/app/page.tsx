@@ -515,9 +515,6 @@ export default function Home() {
             🎙 Simulador de Entrevistas
           </h1>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/linkedin" className="text-slate-400 hover:text-white transition-colors">
-              💼 Mejorá tu LinkedIn
-            </Link>
             <Link href="/progreso" className="text-slate-400 hover:text-white transition-colors">
               📈 Mi Progreso
             </Link>
