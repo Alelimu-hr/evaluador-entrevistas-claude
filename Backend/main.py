@@ -266,23 +266,39 @@ def llamar_gemini_con_fallback(client: genai.Client, contents, config=None, mode
     )
 
 
+def _intentar_parsear_json(candidato: str):
+    """Prueba json.loads en modo estricto y, si falla, en modo no estricto.
+    OJO — bug real detectado en producción con el informe de LinkedIn (que
+    trae un 'informe_markdown' largo): Gemini a veces devuelve saltos de
+    línea "crudos" dentro del valor string del JSON en vez de escapados como
+    \\n. Eso es inválido para JSON en modo estricto (json.loads tira
+    "Invalid control character"), aunque el JSON es perfectamente
+    recuperable. strict=False le permite a json.loads aceptar caracteres de
+    control sueltos dentro de un string sin romper el parseo, así que lo
+    probamos como segunda opción antes de rendirnos."""
+    for strict in (True, False):
+        try:
+            return json.loads(candidato, strict=strict)
+        except json.JSONDecodeError:
+            continue
+    return None
+
+
 def extraer_json_seguro(texto: str):
     if not texto or not texto.strip():
         raise HTTPException(status_code=500, detail="Gemini devolvió una respuesta vacía.")
 
     limpio = texto.strip().replace("```json", "").replace("```", "")
 
-    try:
-        return json.loads(limpio)
-    except json.JSONDecodeError:
-        pass
+    resultado = _intentar_parsear_json(limpio)
+    if resultado is not None:
+        return resultado
 
     match = re.search(r"\{.*\}", limpio, re.DOTALL)
     if match:
-        try:
-            return json.loads(match.group(0))
-        except json.JSONDecodeError:
-            pass
+        resultado = _intentar_parsear_json(match.group(0))
+        if resultado is not None:
+            return resultado
 
     raise HTTPException(
         status_code=500,
