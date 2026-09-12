@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
+import { createClient } from '@/lib/supabase/client';
 import { Spinner } from '@/components/Spinner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -86,6 +87,30 @@ export default function LinkedinPage() {
     setError('');
   };
 
+  // Registra el análisis para poder ver uso/adopción de esta herramienta,
+  // igual que guardarEnProgreso() hace para el simulador de entrevistas con
+  // la tabla "simulaciones". Nunca bloquea ni rompe la UI si falla (ej: la
+  // tabla todavía no existe en Supabase, o el usuario no está logueado) —
+  // solo lo logueamos en consola para poder diagnosticarlo si hace falta.
+  const guardarAnalisisEnSupabase = async (puntajesResultado: Puntajes | null) => {
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      await supabase.from('analisis_linkedin').insert({
+        user_id: user.id,
+        modo,
+        rol_objetivo: modo === 'dirigido' ? rolObjetivo : null,
+        puntaje_global: puntajesResultado?.global ?? null,
+      });
+    } catch (err) {
+      console.error('No se pudo guardar el análisis de LinkedIn en el historial:', err);
+    }
+  };
+
   const handleAnalizar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!apiKey) return alert('Pegá tu clave de Google AI Studio para probar.');
@@ -122,6 +147,7 @@ export default function LinkedinPage() {
       setInformeMarkdown(data.informe_markdown || '');
       setTitularesSugeridos(Array.isArray(data.titulares_sugeridos) ? data.titulares_sugeridos : []);
       setAcercaDeSugerido(data.acerca_de_sugerido || '');
+      guardarAnalisisEnSupabase(data.puntajes);
     } catch (err: any) {
       setError(err.message || 'Ocurrió un error inesperado.');
     } finally {
