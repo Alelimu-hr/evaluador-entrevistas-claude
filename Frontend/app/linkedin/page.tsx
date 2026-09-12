@@ -25,6 +25,30 @@ function colorDeNota(nota: number) {
   return { texto: 'text-red-600', anillo: 'ring-red-300', borde: 'border-red-200' };
 }
 
+// El backend siempre estructura el informe con "## 2. ..." (Titular), "## 3. ..."
+// (Acerca de) y "## 4. ..." (Experiencia) en ese orden exacto (ver prompt en
+// Backend/main.py). Partimos el markdown en esos puntos para poder insertar los
+// botones de "copiar y pegar" justo debajo de cada sección, en vez de juntarlos
+// todos en un bloque aparte al principio. Si el formato viniera distinto a lo
+// esperado (la IA no respetó la estructura), hacemos fallback a mostrar todo el
+// informe de un tirón, sin cortar nada.
+function partirInformeEnSecciones(markdown: string) {
+  const idxTitular = markdown.indexOf('## 2.');
+  const idxAcercaDe = markdown.indexOf('## 3.');
+  const idxExperiencia = markdown.indexOf('## 4.');
+  const ok = idxTitular !== -1 && idxAcercaDe !== -1 && idxExperiencia !== -1 && idxTitular < idxAcercaDe && idxAcercaDe < idxExperiencia;
+  if (!ok) {
+    return { ok: false as const, intro: markdown, seccionTitular: '', seccionAcercaDe: '', resto: '' };
+  }
+  return {
+    ok: true as const,
+    intro: markdown.slice(0, idxTitular).trim(),
+    seccionTitular: markdown.slice(idxTitular, idxAcercaDe).trim(),
+    seccionAcercaDe: markdown.slice(idxAcercaDe, idxExperiencia).trim(),
+    resto: markdown.slice(idxExperiencia).trim(),
+  };
+}
+
 export default function LinkedinPage() {
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
@@ -483,54 +507,110 @@ export default function LinkedinPage() {
               </div>
             )}
 
-            {(titularesSugeridos.length > 0 || acercaDeSugerido) && (
-              <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5 space-y-4">
-                <p className="text-sm font-semibold text-slate-800">📋 Listo para copiar y pegar en tu perfil</p>
+            {(() => {
+              const partes = partirInformeEnSecciones(informeMarkdown);
+              return (
+                <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5">
+                  <div className="text-slate-700 text-sm leading-relaxed informe-contenido max-w-none">
+                    <ReactMarkdown>{partes.intro}</ReactMarkdown>
 
-                {titularesSugeridos.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Titular</p>
-                    {titularesSugeridos.map((titular, i) => (
-                      <div
-                        key={i}
-                        className="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3"
-                      >
-                        <p className="flex-1 text-sm text-slate-700">{titular}</p>
-                        <button
-                          type="button"
-                          onClick={() => copiarTexto(titular, `titular-${i}`)}
-                          className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
-                        >
-                          {copiado === `titular-${i}` ? '✓ Copiado' : '📋 Copiar'}
-                        </button>
+                    {partes.ok && (
+                      <>
+                        <ReactMarkdown>{partes.seccionTitular}</ReactMarkdown>
+                        {titularesSugeridos.length > 0 && (
+                          <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 -mt-2 mb-4 space-y-2">
+                            <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                              📋 Copiá y pegá en tu perfil
+                            </p>
+                            {titularesSugeridos.map((titular, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-2 bg-white border border-indigo-100 rounded-lg p-2.5"
+                              >
+                                <p className="flex-1 text-sm text-slate-700">{titular}</p>
+                                <button
+                                  type="button"
+                                  onClick={() => copiarTexto(titular, `titular-${i}`)}
+                                  className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                                >
+                                  {copiado === `titular-${i}` ? '✓ Copiado' : '📋 Copiar'}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <ReactMarkdown>{partes.seccionAcercaDe}</ReactMarkdown>
+                        {acercaDeSugerido && (
+                          <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 -mt-2 mb-4 space-y-2">
+                            <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                              📋 Copiá y pegá en tu perfil
+                            </p>
+                            <div className="flex items-start gap-2 bg-white border border-indigo-100 rounded-lg p-2.5">
+                              <p className="flex-1 text-sm text-slate-700 whitespace-pre-line">{acercaDeSugerido}</p>
+                              <button
+                                type="button"
+                                onClick={() => copiarTexto(acercaDeSugerido, 'acerca_de')}
+                                className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                              >
+                                {copiado === 'acerca_de' ? '✓ Copiado' : '📋 Copiar'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        <ReactMarkdown>{partes.resto}</ReactMarkdown>
+                      </>
+                    )}
+
+                    {/* Fallback: si el informe no vino con la estructura esperada, no
+                        perdemos los botones de copiar — los mostramos igual al final. */}
+                    {!partes.ok && (titularesSugeridos.length > 0 || acercaDeSugerido) && (
+                      <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 mt-4 space-y-3">
+                        <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
+                          📋 Listo para copiar y pegar en tu perfil
+                        </p>
+                        {titularesSugeridos.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Titular</p>
+                            {titularesSugeridos.map((titular, i) => (
+                              <div
+                                key={i}
+                                className="flex items-start gap-2 bg-white border border-indigo-100 rounded-lg p-2.5"
+                              >
+                                <p className="flex-1 text-sm text-slate-700">{titular}</p>
+                                <button
+                                  type="button"
+                                  onClick={() => copiarTexto(titular, `titular-${i}`)}
+                                  className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                                >
+                                  {copiado === `titular-${i}` ? '✓ Copiado' : '📋 Copiar'}
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {acercaDeSugerido && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Acerca de</p>
+                            <div className="flex items-start gap-2 bg-white border border-indigo-100 rounded-lg p-2.5">
+                              <p className="flex-1 text-sm text-slate-700 whitespace-pre-line">{acercaDeSugerido}</p>
+                              <button
+                                type="button"
+                                onClick={() => copiarTexto(acercaDeSugerido, 'acerca_de')}
+                                className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
+                              >
+                                {copiado === 'acerca_de' ? '✓ Copiado' : '📋 Copiar'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ))}
+                    )}
                   </div>
-                )}
-
-                {acercaDeSugerido && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Acerca de</p>
-                    <div className="flex items-start gap-2 bg-slate-50 border border-slate-200 rounded-lg p-3">
-                      <p className="flex-1 text-sm text-slate-700 whitespace-pre-line">{acercaDeSugerido}</p>
-                      <button
-                        type="button"
-                        onClick={() => copiarTexto(acercaDeSugerido, 'acerca_de')}
-                        className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
-                      >
-                        {copiado === 'acerca_de' ? '✓ Copiado' : '📋 Copiar'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5">
-              <div className="text-slate-700 text-sm leading-relaxed informe-contenido max-w-none">
-                <ReactMarkdown>{informeMarkdown}</ReactMarkdown>
-              </div>
-            </div>
+                </div>
+              );
+            })()}
 
             <div className="flex gap-3">
               <button
