@@ -5,3 +5,4 @@ google-genai
 pypdf
 reportlab
 imageio-ffmpeg
+json-repair

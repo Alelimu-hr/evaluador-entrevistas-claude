@@ -23,6 +23,14 @@ from reportlab.lib import colors
 
 import imageio_ffmpeg
 
+try:
+    from json_repair import repair_json
+except ImportError:
+    # Si por lo que sea la librería no está instalada (ej: falló el deploy de
+    # una dependencia nueva), no queremos que el servidor entero deje de
+    # arrancar por esto — seguimos sin el fallback extra de reparación.
+    repair_json = None
+
 # Binario de ffmpeg (bundleado por imageio-ffmpeg, no depende de que el
 # sistema operativo lo tenga instalado). Lo usamos directo por subprocess
 # en vez de pasar por pydub, porque pydub todavía no está arreglado para
@@ -281,6 +289,20 @@ def _intentar_parsear_json(candidato: str):
             return json.loads(candidato, strict=strict)
         except json.JSONDecodeError:
             continue
+
+    # Último recurso: json_repair está pensado justo para esto — arregla
+    # comillas sin escapar, comas colgantes, JSON cortado a la mitad, etc.,
+    # cosas que un LLM comete de vez en cuando y que strict=False NO arregla
+    # (ese solo tolera caracteres de control sueltos, no un JSON realmente
+    # mal formado). Si tampoco puede, devolvemos None y seguimos con el resto
+    # de los intentos/el error final, nunca dejamos que reviente acá.
+    if repair_json is not None:
+        try:
+            reparado = repair_json(candidato)
+            if reparado:
+                return json.loads(reparado)
+        except Exception:
+            pass
     return None
 
 
@@ -300,9 +322,14 @@ def extraer_json_seguro(texto: str):
         if resultado is not None:
             return resultado
 
+    # Ningún intento funcionó: dejamos el texto COMPLETO en los logs de
+    # Render (para poder diagnosticar la próxima vez sin depender de que el
+    # mensaje corto que ve el usuario alcance) y le mostramos un poco más de
+    # contexto que antes (era muy poco, 150 caracteres, para diagnosticar algo).
+    print(f"[extraer_json_seguro] no se pudo parsear ni reparar. Texto completo:\n{texto}", flush=True)
     raise HTTPException(
         status_code=500,
-        detail=f"La API no devolvió un JSON válido. Texto recibido: '{texto[:150]}...'",
+        detail=f"La API no devolvió un JSON válido. Texto recibido: '{texto[:400]}...'",
     )
 
 
