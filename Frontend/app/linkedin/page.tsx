@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import { createClient } from '@/lib/supabase/client';
+import { registrarEventoFunnel } from '@/lib/analytics';
 import { Spinner } from '@/components/Spinner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -79,6 +80,13 @@ export default function LinkedinPage() {
     }
   };
 
+  // Primer escalón del embudo: entró logueado a la pantalla. Una vez por
+  // carga de página (si recarga o vuelve a entrar, cuenta de nuevo — se
+  // dedupea con COUNT DISTINCT al analizar, ver lib/analytics.ts).
+  useEffect(() => {
+    registrarEventoFunnel('linkedin', 'formulario_visto');
+  }, []);
+
   // Misma validación de API Key que el simulador de entrevistas: se chequea
   // contra el backend medio segundo después de dejar de tipear, sin gastar
   // cuota de generación de Gemini.
@@ -94,7 +102,9 @@ export default function LinkedinPage() {
           headers: { 'x-gemini-api-key': apiKey.trim() },
         });
         const data = await res.json();
-        setEstadoKey(data.valido ? 'valida' : 'invalida');
+        const valido = !!data.valido;
+        setEstadoKey(valido ? 'valida' : 'invalida');
+        if (valido) registrarEventoFunnel('linkedin', 'api_key_valida'); // 2do escalón
       } catch {
         setEstadoKey('invalida');
       }
@@ -154,6 +164,7 @@ export default function LinkedinPage() {
 
     setCargando(true);
     setError('');
+    registrarEventoFunnel('linkedin', 'envio_formulario'); // 3er escalón
 
     const formData = new FormData();
     // En modo "objetivo" no mandamos rol/párrafo aunque hayan quedado
@@ -190,6 +201,7 @@ export default function LinkedinPage() {
       setPalabrasClaveASumar(Array.isArray(data.palabras_clave_a_sumar) ? data.palabras_clave_a_sumar : []);
       setPalabrasClaveFuturas(Array.isArray(data.palabras_clave_futuras) ? data.palabras_clave_futuras : []);
       guardarAnalisisEnSupabase(data.puntajes);
+      registrarEventoFunnel('linkedin', 'completado_exito'); // 4to escalón
     } catch (err: any) {
       setError(err.message || 'Ocurrió un error inesperado.');
     } finally {

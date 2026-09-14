@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import confetti from 'canvas-confetti';
 import { createClient } from '@/lib/supabase/client';
+import { registrarEventoFunnel } from '@/lib/analytics';
 import { Spinner } from '@/components/Spinner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -179,6 +180,13 @@ export default function Home() {
     supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
   }, []);
 
+  // Primer escalón del embudo: entró logueado a la pantalla. Una vez por
+  // carga de página (si recarga o vuelve a entrar, cuenta de nuevo — se
+  // dedupea con COUNT DISTINCT al analizar, ver lib/analytics.ts).
+  useEffect(() => {
+    registrarEventoFunnel('entrevista', 'formulario_visto');
+  }, []);
+
   const handleCerrarSesion = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -210,7 +218,9 @@ export default function Home() {
           headers: { 'x-gemini-api-key': apiKey.trim() },
         });
         const data = await res.json();
-        setEstadoKey(data.valido ? 'valida' : 'invalida');
+        const valido = !!data.valido;
+        setEstadoKey(valido ? 'valida' : 'invalida');
+        if (valido) registrarEventoFunnel('entrevista', 'api_key_valida'); // 2do escalón
       } catch {
         setEstadoKey('invalida');
       }
@@ -248,6 +258,7 @@ export default function Home() {
     if (!apiKey) return alert('Pega tu clave de Google AI Studio para probar.');
 
     setCargandoPreguntas(true);
+    registrarEventoFunnel('entrevista', 'envio_formulario'); // 3er escalón
 
     const formData = new FormData();
     formData.append('rol', rol);
@@ -434,6 +445,7 @@ export default function Home() {
         setNotas(data.notas || null);
         setPaso('informe');
         guardarEnProgreso(data.notas || null, data.informe_markdown || '');
+        registrarEventoFunnel('entrevista', 'completado_exito'); // 4to escalón
       } else {
         alert(data.detail || 'Error al generar el informe.');
       }
