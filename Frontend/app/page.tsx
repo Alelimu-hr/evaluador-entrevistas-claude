@@ -240,6 +240,16 @@ export default function Home() {
     }
   }, [paso]);
 
+  // Los pasos (form/pregunta/resumen/informe) son cambios de estado dentro de
+  // la misma página, no navegación real entre URLs — el navegador no tiene
+  // motivo para resetear el scroll solo porque cambió el contenido. Sin esto,
+  // si la persona llega a "informe" habiendo scrolleado hacia abajo durante
+  // las preguntas, la pantalla nueva arranca a mitad de camino en vez de
+  // arriba del todo.
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [paso]);
+
   const reiniciarTodo = () => {
     setPaso('form');
     setPreguntas([]);
