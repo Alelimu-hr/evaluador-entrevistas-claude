@@ -852,26 +852,41 @@ async def analizar_perfil_linkedin(
         )
 
     prompt = f"""
-    Actuá como un consultor experto en LinkedIn y reclutamiento, especializado en
-    optimizar perfiles para que destaquen ante reclutadores humanos Y ante el
-    buscador interno de LinkedIn (que prioriza palabras clave relevantes).
+    Actuá como un consultor experto en LinkedIn y reclutamiento. Tu OBJETIVO
+    PRINCIPAL, casi excluyente, es maximizar las chances de que esta persona
+    sea ENCONTRADA por reclutadores y headhunters en LinkedIn (que la
+    "hunteen") — más gente encontrando este perfil en una búsqueda es la
+    métrica de éxito de todo tu análisis. La redacción, el storytelling y la
+    prolijidad del perfil NO son un fin en sí mismos: son un medio para ese
+    objetivo (un perfil se lee bien y además dice las palabras que un
+    reclutador escribe en su buscador). Ante cualquier disyuntiva entre "esto
+    suena más elegante" y "esto tiene más términos de búsqueda reales que un
+    reclutador usaría", elegí siempre la segunda opción.
 
     Basá tu análisis en marcos y prácticas reconocidas del rubro, aplicándolos
-    con criterio (no los nombres literalmente en el informe, son para vos):
-    - El SSI (Social Selling Index) de LinkedIn, para pensar el perfil en
-      términos de qué tan bien establece marca profesional, encuentra a las
-      personas correctas y genera relaciones — no solo como una lista de datos.
-    - El framework AIDA (Atención, Interés, Deseo, Acción) para evaluar y
-      mejorar el titular y las primeras líneas del "Acerca de", que son lo
-      primero que ve un reclutador antes de decidir si sigue leyendo.
+    con criterio. IMPORTANTE: son para guiar TU razonamiento interno, NUNCA
+    los nombres ni los mencionás en el texto del informe que lee la persona
+    (nunca escribas "framework AIDA", "método STAR", "según el SSI", etc. —
+    el informe tiene que sonar 100% a vos como consultor, no a una lista de
+    metodologías):
     - Las mejores prácticas de LinkedIn Talent Solutions sobre cómo indexan y
       priorizan los reclutadores un perfil en sus búsquedas (relevancia de
-      palabras clave en título/experiencia/aptitudes, completitud del perfil).
+      palabras clave EXACTAS en título/experiencia/aptitudes, completitud del
+      perfil) — este es el criterio más importante de todos.
+    - El SSI (Social Selling Index) de LinkedIn, para pensar el perfil en
+      términos de qué tan ENCONTRABLE es y qué tan bien conecta con las
+      personas correctas — no solo como una lista de datos prolija.
+    - El framework AIDA (Atención, Interés, Deseo, Acción) para que el
+      titular y las primeras líneas del "Acerca de" retengan la atención del
+      reclutador el tiempo suficiente para que note las palabras clave — no
+      como un objetivo de redacción aislado.
     - Estándares de Talent Acquisition (en línea con SHRM) para diferenciar
       tareas de logros: todo logro fuerte responde qué se hizo, para qué, y
-      con qué resultado — no alcanza con listar responsabilidades.
+      con qué resultado, usando los términos exactos que un selector busca —
+      no alcanza con listar responsabilidades.
     - El método STAR (Situación, Tarea, Acción, Resultado) para estructurar
-      las reescrituras de experiencia laboral de la sección 4.
+      las reescrituras de experiencia laboral de la sección 4, siempre
+      priorizando que el texto incluya las palabras clave reales del rol.
     {bloque_contexto}
     A continuación, el texto extraído del PDF que la persona exportó de su propio
     perfil de LinkedIn:
@@ -919,8 +934,12 @@ async def analizar_perfil_linkedin(
 
     ## 2. 🖋️ TITULAR (HEADLINE)
 
-    (crítica del titular actual y 2-3 alternativas concretas ya redactadas, listas
-    para copiar y pegar, {instruccion_headline})
+    (crítica del titular actual priorizando cuántos términos de búsqueda reales
+    tiene hoy, y 2-3 alternativas concretas ya redactadas, listas para copiar y
+    pegar, {instruccion_headline}. Cada alternativa tiene que maximizar la
+    cantidad de palabras clave exactas que un reclutador buscaría, dentro del
+    límite de caracteres del titular de LinkedIn — priorizá esto por sobre que
+    "suene lindo".)
 
     REGLA IMPORTANTE para las alternativas de titular: nunca le asignes a la persona
     un título de seniority/liderazgo (Leader, Head, Manager, Director, Sr., etc.) que
@@ -935,8 +954,14 @@ async def analizar_perfil_linkedin(
 
     ## 3. 📝 SECCIÓN "ACERCA DE"
 
-    (qué falla en la sección actual —si no está, decilo— y una versión reescrita
-    completa sugerida, en primera persona, de 3-4 párrafos)
+    (qué falla en la sección actual —si no está, decilo—, evaluando ante todo
+    cuántos términos de búsqueda reales de su campo aparecen hoy escritos de
+    forma literal. Después, una versión reescrita completa sugerida, en primera
+    persona, de 3-4 párrafos, priorizando meter la mayor cantidad posible de
+    palabras clave reales de forma natural. Cerrala SIEMPRE con un bloque corto
+    tipo "Áreas de expertise:" con esas palabras clave en formato de lista o
+    separadas por "|" — es el lugar más efectivo para sumar términos exactos de
+    búsqueda sin que la prosa se sienta forzada.)
 
     CAMPO "experiencia_markdown" — contiene:
 
@@ -961,6 +986,10 @@ async def analizar_perfil_linkedin(
        "Gestión de...").
     2. Mostrar el IMPACTO o el PARA QUÉ de esa tarea (qué mejoró, a quién le
        sirvió, qué problema resolvió), no solo repetir qué se hizo.
+    3. Incluir los términos de búsqueda EXACTOS y reales de ese rol/industria
+       (los mismos que un reclutador escribiría) — si el "Antes" ya los tiene,
+       conservalos; si los dice de forma indirecta o con sinónimos, en el
+       "Después" usá el término literal que se busca en LinkedIn.
     Y nunca inventes una métrica, porcentaje o resultado numérico que la
     persona no mencionó (ej. "aumenté las ventas un 35%" si ese número no está
     en el texto original). Si el perfil ya trae un número o resultado
@@ -974,11 +1003,15 @@ async def analizar_perfil_linkedin(
 
     ## 5. 🔑 PALABRAS CLAVE PARA RECLUTADORES
 
-    (Dividí esta sección en dos partes con estos subtítulos exactos:
+    (Esta es la sección más importante de todo el informe — el objetivo número
+    uno de este análisis es que más reclutadores encuentren este perfil, y acá
+    es donde eso se juega. Sé generoso/a: mejor pecar de dar más términos útiles
+    que de quedarte corto/a. Dividí esta sección en dos partes con estos
+    subtítulos exactos:
 
     ### ✅ Podés sumar ya
 
-    Con guion "- ", entre 4 y 6 palabras clave {instruccion_palabras_clave} que
+    Con guion "- ", entre 6 y 8 palabras clave {instruccion_palabras_clave} que
     además tengan ALGO concreto en la experiencia real de la persona donde
     apoyarse (una tarea, logro o responsabilidad que ya tuvo, aunque no la haya
     descripto con ese término exacto). NO inventes tareas que la persona no hizo.

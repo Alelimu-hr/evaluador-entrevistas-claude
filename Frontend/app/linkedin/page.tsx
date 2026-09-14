@@ -174,11 +174,15 @@ export default function LinkedinPage() {
 
   const handleDescargarPdf = async () => {
     setDescargandoPdf(true);
+    // En modo "objetivo" no hay rolObjetivo — si lo metiéramos igual acá,
+    // el título y el nombre de archivo quedarían con un "—" o un "_" colgando
+    // sin nada después.
+    const tieneRol = modo === 'dirigido' && rolObjetivo.trim();
     const formData = new FormData();
     formData.append('informe_markdown', informeMarkdown);
     formData.append('rol', rolObjetivo);
-    formData.append('titulo', `Informe de Perfil de LinkedIn — ${rolObjetivo}`);
-    formData.append('nombre_archivo', `Perfil_LinkedIn_${rolObjetivo}`);
+    formData.append('titulo', tieneRol ? `Informe de Perfil de LinkedIn — ${rolObjetivo}` : 'Informe de Perfil de LinkedIn');
+    formData.append('nombre_archivo', tieneRol ? `Perfil_LinkedIn_${rolObjetivo}` : 'Perfil_LinkedIn');
 
     try {
       const res = await fetch(`${API_URL}/api/descargar-pdf`, {
