@@ -840,7 +840,7 @@ async def analizar_perfil_linkedin(
     {perfil_texto[:12000]}
     ---
 
-    DIRECTIVAS DE ESTILO PARA EL INFORME (campo "informe_markdown"):
+    DIRECTIVAS DE ESTILO PARA EL INFORME:
     - Escribilo 100% en idioma {idioma}, en Markdown.
     - Tono directo y constructivo, como un consultor de carrera real: señalá lo que
       no funciona sin filtros, pero siempre con sugerencias concretas y accionables,
@@ -855,6 +855,16 @@ async def analizar_perfil_linkedin(
         numeración tipo "1. 2. 3.".
       * El párrafo de apertura después del título "📈 Informe de tu Perfil de
         LinkedIn" también va separado por una línea en blanco, como un párrafo propio.
+    - MUY IMPORTANTE, el informe entero NO va en un solo campo: lo partimos en 6
+      campos de markdown independientes (ver el JSON de más abajo), uno por bloque
+      de secciones. Esto es a propósito, para que el frontend pueda ubicar los
+      botones de "copiar y pegar" siempre en el lugar correcto sin tener que
+      adivinar dónde empieza o termina cada sección buscando texto. Cada campo
+      tiene que ser markdown válido y autocontenido (con sus propios títulos "## "),
+      de forma que si los concatenamos en orden con una línea en blanco en el medio,
+      el resultado sea el informe completo y coherente.
+
+    CAMPO "intro_markdown" — contiene:
 
     ## 📈 Informe de tu Perfil de LinkedIn
 
@@ -865,6 +875,8 @@ async def analizar_perfil_linkedin(
     (lista con guiones "- " de PUNTAJE_GLOBAL, PUNTAJE_HEADLINE, PUNTAJE_ACERCA_DE,
     PUNTAJE_EXPERIENCIA, PUNTAJE_PALABRAS_CLAVE, cada uno en x/10 con una breve
     justificación entre paréntesis)
+
+    CAMPO "titular_markdown" — contiene:
 
     ## 2. 🖋️ TITULAR (HEADLINE)
 
@@ -880,20 +892,55 @@ async def analizar_perfil_linkedin(
     "en camino a", en vez de directamente "Leader" o "Manager"). Un titular inflado
     genera desconfianza cuando el reclutador lo compara con la experiencia real.
 
+    CAMPO "acerca_de_markdown" — contiene:
+
     ## 3. 📝 SECCIÓN "ACERCA DE"
 
     (qué falla en la sección actual —si no está, decilo— y una versión reescrita
     completa sugerida, en primera persona, de 3-4 párrafos)
 
+    CAMPO "experiencia_markdown" — contiene:
+
     ## 4. 💼 EXPERIENCIA LABORAL
 
-    (un ítem con guion "- " por cada rol relevante, señalando si la descripción
-    muestra logros medibles o solo tareas, con sugerencia concreta de cómo
-    reescribir al menos una)
+    (para CADA rol relevante del perfil — no solo el primero o uno al azar, todos
+    los que aporten — un bloque así:
+    - "**[Empresa — Puesto]**" en negrita como encabezado del ítem.
+    - Un párrafo corto señalando si la descripción actual muestra logros medibles
+      o solo tareas genéricas.
+    - "📋 Versión sugerida para copiar y pegar:" seguido de un párrafo entre
+      comillas con la descripción reescrita completa para ese rol, con logros
+      medibles cuando sea posible, lista para pegar directo en LinkedIn.
+    Repetí este bloque completo para cada experiencia relevante.)
+
+    CAMPO "palabras_clave_markdown" — contiene:
 
     ## 5. 🔑 PALABRAS CLAVE PARA RECLUTADORES
 
-    (lista con guion "- " de palabras clave/skills {instruccion_palabras_clave})
+    (Dividí esta sección en dos partes con estos subtítulos exactos:
+
+    ### ✅ Podés sumar ya
+
+    Con guion "- ", entre 4 y 6 palabras clave {instruccion_palabras_clave} que
+    además tengan ALGO concreto en la experiencia real de la persona donde
+    apoyarse (una tarea, logro o responsabilidad que ya tuvo, aunque no la haya
+    descripto con ese término exacto). NO inventes tareas que la persona no hizo.
+    Para cada una:
+    - La palabra clave en negrita.
+    - "📍 Dónde sumarla:" indicando el lugar puntual y real (ej. "en tu experiencia
+      en [Empresa], en la línea donde contás [tarea]", o "en el Acerca de").
+    - "📋 Lista para copiar y pegar ahí:" con una frase ya redactada que incorpora
+      el término naturalmente en ese contexto real.
+
+    ### 🔲 Todavía no están respaldadas en tu perfil
+
+    Un párrafo breve aclarando que estos términos son búsquedas frecuentes en su
+    campo pero no aparecen respaldados por nada concreto en su perfil actual, y
+    que NO hay que sumarlos si no los hizo — pero que si en algún momento tuvo ese
+    tipo de responsabilidad y no la detalló, valdría la pena agregarla. Después,
+    con guion "- ", la lista de esos términos.)
+
+    CAMPO "cierre_markdown" — contiene:
 
     ## 6. 🔎 TIPS: CÓMO TE ENCUENTRAN LOS RECLUTADORES (BÚSQUEDA BOOLEANA)
 
@@ -923,14 +970,23 @@ async def analizar_perfil_linkedin(
     (3 acciones como ítems con guion "- ", concretas y accionables — NO uses
     numeración acá)
 
-    Además de "informe_markdown", devolvé también estos dos campos en TEXTO PLANO
-    (sin markdown, sin "**", sin "#", sin viñetas) porque van a un botón de
-    "copiar y pegar" directo al perfil real de LinkedIn, que no soporta formato:
-    - "titulares_sugeridos": un array con las mismas 2-3 alternativas de titular
-      de la sección 2, palabra por palabra, cada una como un string plano.
-    - "acerca_de_sugerido": la versión reescrita completa de la sección 3, como
-      un solo string plano (usá "\\n\\n" para separar párrafos), palabra por
-      palabra igual a la que pusiste en el informe.
+    Además de los 6 campos de markdown, devolvé también estos campos en TEXTO
+    PLANO (sin markdown, sin "**", sin "#", sin viñetas) porque van a botones de
+    "copiar y pegar" directo al perfil real de LinkedIn, que no soporta formato.
+    Cada uno tiene que coincidir PALABRA POR PALABRA con lo que escribiste en el
+    campo de markdown correspondiente:
+    - "titulares_sugeridos": array con las mismas 2-3 alternativas de titular de
+      "titular_markdown", cada una como un string plano.
+    - "acerca_de_sugerido": la versión reescrita completa de "acerca_de_markdown",
+      como un solo string plano (usá "\\n\\n" para separar párrafos).
+    - "experiencias_sugeridas": array de objetos {{"puesto": "Empresa — Puesto",
+      "texto_sugerido": "la versión reescrita en texto plano"}}, uno por cada
+      experiencia de "experiencia_markdown", en el mismo orden.
+    - "palabras_clave_a_sumar": array de objetos {{"palabra": "...", "ubicacion":
+      "...", "frase_sugerida": "..."}}, uno por cada palabra clave de la sección
+      "✅ Podés sumar ya" de "palabras_clave_markdown", en texto plano.
+    - "palabras_clave_futuras": array de strings con los términos de la sección
+      "🔲 Todavía no están respaldadas en tu perfil".
 
     Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más (sin
     bloques de código, sin texto fuera del JSON):
@@ -942,9 +998,17 @@ async def analizar_perfil_linkedin(
         "experiencia": 7.5,
         "palabras_clave": 6.0
       }},
+      "intro_markdown": "## 📈 Informe...\\n\\n...\\n\\n## 1. 🎯 DESGLOSE DE PUNTAJES\\n\\n...",
+      "titular_markdown": "## 2. 🖋️ TITULAR (HEADLINE)\\n\\n...",
+      "acerca_de_markdown": "## 3. 📝 SECCIÓN \\"ACERCA DE\\"\\n\\n...",
+      "experiencia_markdown": "## 4. 💼 EXPERIENCIA LABORAL\\n\\n...",
+      "palabras_clave_markdown": "## 5. 🔑 PALABRAS CLAVE PARA RECLUTADORES\\n\\n...",
+      "cierre_markdown": "## 6. 🔎 TIPS...\\n\\n...\\n\\n## 7. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA\\n\\n...",
       "titulares_sugeridos": ["alternativa 1 en texto plano", "alternativa 2 en texto plano"],
       "acerca_de_sugerido": "el 'acerca de' reescrito en texto plano",
-      "informe_markdown": "el informe completo en markdown, con la estructura de arriba"
+      "experiencias_sugeridas": [{{"puesto": "Empresa — Puesto", "texto_sugerido": "..."}}],
+      "palabras_clave_a_sumar": [{{"palabra": "...", "ubicacion": "...", "frase_sugerida": "..."}}],
+      "palabras_clave_futuras": ["término 1", "término 2"]
     }}
     """
 
@@ -953,7 +1017,36 @@ async def analizar_perfil_linkedin(
     data.setdefault("puntajes", {})
     data.setdefault("titulares_sugeridos", [])
     data.setdefault("acerca_de_sugerido", "")
-    data.setdefault("informe_markdown", texto)
+    data.setdefault("experiencias_sugeridas", [])
+    data.setdefault("palabras_clave_a_sumar", [])
+    data.setdefault("palabras_clave_futuras", [])
+    for campo in (
+        "intro_markdown",
+        "titular_markdown",
+        "acerca_de_markdown",
+        "experiencia_markdown",
+        "palabras_clave_markdown",
+        "cierre_markdown",
+    ):
+        data.setdefault(campo, "")
+
+    # El "informe_markdown" completo lo arma el backend concatenando los 6
+    # campos, en vez de pedírselo a Gemini como un campo aparte: así garantizamos
+    # que el texto que se descarga en PDF sea EXACTAMENTE la suma de las partes
+    # que ya validamos/usamos en pantalla, sin una segunda versión que se pueda
+    # desincronizar.
+    data["informe_markdown"] = "\n\n".join(
+        parte
+        for parte in (
+            data["intro_markdown"],
+            data["titular_markdown"],
+            data["acerca_de_markdown"],
+            data["experiencia_markdown"],
+            data["palabras_clave_markdown"],
+            data["cierre_markdown"],
+        )
+        if parte
+    ).strip()
     return data
 
 

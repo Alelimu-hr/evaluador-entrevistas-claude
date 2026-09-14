@@ -577,7 +577,10 @@ export default function Home() {
               <div className="pointer-events-none absolute -bottom-24 -left-10 w-48 h-48 bg-blue-200/40 rounded-full blur-3xl" />
 
               <div className="relative">
-                <label className="block text-sm font-semibold text-slate-800 mb-2">🔑 API Key de Gemini:</label>
+                <label className="block text-sm font-semibold text-slate-800 mb-2">
+                  🔑 API Key de Gemini:{' '}
+                  <span className="text-xs font-normal text-slate-400">— así conectás con la IA que hace el análisis</span>
+                </label>
                 <div className="relative">
                   <input
                     type="password"
