@@ -20,17 +20,6 @@ type Puntajes = {
   palabras_clave: number;
 };
 
-type ExperienciaSugerida = {
-  puesto: string;
-  texto_sugerido: string;
-};
-
-type PalabraClaveASumar = {
-  palabra: string;
-  ubicacion: string;
-  frase_sugerida: string;
-};
-
 function colorDeNota(nota: number) {
   if (nota >= 7) return { texto: 'text-emerald-600', anillo: 'ring-emerald-300', borde: 'border-emerald-200' };
   if (nota >= 4) return { texto: 'text-amber-600', anillo: 'ring-amber-300', borde: 'border-amber-200' };
@@ -51,9 +40,11 @@ export default function LinkedinPage() {
 
   const [puntajes, setPuntajes] = useState<Puntajes | null>(null);
   // El backend devuelve el informe ya partido en estos 6 campos de markdown
-  // (uno por bloque de secciones), en vez de un solo bloque gigante — así el
-  // frontend sabe exactamente dónde insertar cada botón de "copiar y pegar"
-  // sin tener que adivinarlo buscando texto dentro del markdown.
+  // (uno por bloque de secciones), en vez de un solo bloque gigante — esto es
+  // lo que evita el bug de andar buscando texto para cortar el markdown (ver
+  // Backend/main.py). Las sugerencias (titular, acerca de, experiencia,
+  // palabras clave) van adentro de este mismo texto, en prosa — la persona
+  // las selecciona y copia directo de ahí, sin cajitas de copiar aparte.
   const [informeMarkdown, setInformeMarkdown] = useState(''); // versión completa, solo para el PDF
   const [introMarkdown, setIntroMarkdown] = useState('');
   const [titularMarkdown, setTitularMarkdown] = useState('');
@@ -61,24 +52,6 @@ export default function LinkedinPage() {
   const [experienciaMarkdown, setExperienciaMarkdown] = useState('');
   const [palabrasClaveMarkdown, setPalabrasClaveMarkdown] = useState('');
   const [cierreMarkdown, setCierreMarkdown] = useState('');
-  const [titularesSugeridos, setTitularesSugeridos] = useState<string[]>([]);
-  const [acercaDeSugerido, setAcercaDeSugerido] = useState('');
-  const [experienciasSugeridas, setExperienciasSugeridas] = useState<ExperienciaSugerida[]>([]);
-  const [palabrasClaveASumar, setPalabrasClaveASumar] = useState<PalabraClaveASumar[]>([]);
-  const [palabrasClaveFuturas, setPalabrasClaveFuturas] = useState<string[]>([]);
-  // Qué botón de "Copiar" mostró el check verde últimamente (por id único de
-  // cada texto copiable) — se resetea solo después de 2 segundos.
-  const [copiado, setCopiado] = useState<string | null>(null);
-
-  const copiarTexto = async (texto: string, id: string) => {
-    try {
-      await navigator.clipboard.writeText(texto);
-      setCopiado(id);
-      setTimeout(() => setCopiado((actual) => (actual === id ? null : actual)), 2000);
-    } catch {
-      alert('No se pudo copiar automáticamente. Seleccioná el texto a mano.');
-    }
-  };
 
   // Primer escalón del embudo: entró logueado a la pantalla. Una vez por
   // carga de página (si recarga o vuelve a entrar, cuenta de nuevo — se
@@ -122,11 +95,6 @@ export default function LinkedinPage() {
     setExperienciaMarkdown('');
     setPalabrasClaveMarkdown('');
     setCierreMarkdown('');
-    setTitularesSugeridos([]);
-    setAcercaDeSugerido('');
-    setExperienciasSugeridas([]);
-    setPalabrasClaveASumar([]);
-    setPalabrasClaveFuturas([]);
     setError('');
   };
 
@@ -195,11 +163,6 @@ export default function LinkedinPage() {
       setExperienciaMarkdown(data.experiencia_markdown || '');
       setPalabrasClaveMarkdown(data.palabras_clave_markdown || '');
       setCierreMarkdown(data.cierre_markdown || '');
-      setTitularesSugeridos(Array.isArray(data.titulares_sugeridos) ? data.titulares_sugeridos : []);
-      setAcercaDeSugerido(data.acerca_de_sugerido || '');
-      setExperienciasSugeridas(Array.isArray(data.experiencias_sugeridas) ? data.experiencias_sugeridas : []);
-      setPalabrasClaveASumar(Array.isArray(data.palabras_clave_a_sumar) ? data.palabras_clave_a_sumar : []);
-      setPalabrasClaveFuturas(Array.isArray(data.palabras_clave_futuras) ? data.palabras_clave_futuras : []);
       guardarAnalisisEnSupabase(data.puntajes);
       registrarEventoFunnel('linkedin', 'completado_exito'); // 4to escalón
     } catch (err: any) {
@@ -543,110 +506,10 @@ export default function LinkedinPage() {
             <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5">
               <div className="text-slate-700 text-sm leading-relaxed informe-contenido max-w-none">
                 <ReactMarkdown>{introMarkdown}</ReactMarkdown>
-
                 <ReactMarkdown>{titularMarkdown}</ReactMarkdown>
-                {titularesSugeridos.length > 0 && (
-                  <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 -mt-2 mb-4 space-y-2">
-                    <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
-                      📋 Copiá y pegá en tu perfil
-                    </p>
-                    {titularesSugeridos.map((titular, i) => (
-                      <div key={i} className="flex items-start gap-2 bg-white border border-indigo-100 rounded-lg p-2.5">
-                        <p className="flex-1 text-sm text-slate-700">{titular}</p>
-                        <button
-                          type="button"
-                          onClick={() => copiarTexto(titular, `titular-${i}`)}
-                          className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
-                        >
-                          {copiado === `titular-${i}` ? '✓ Copiado' : '📋 Copiar'}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 <ReactMarkdown>{acercaDeMarkdown}</ReactMarkdown>
-                {acercaDeSugerido && (
-                  <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 -mt-2 mb-4 space-y-2">
-                    <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
-                      📋 Copiá y pegá en tu perfil
-                    </p>
-                    <div className="flex items-start gap-2 bg-white border border-indigo-100 rounded-lg p-2.5">
-                      <p className="flex-1 text-sm text-slate-700 whitespace-pre-line">{acercaDeSugerido}</p>
-                      <button
-                        type="button"
-                        onClick={() => copiarTexto(acercaDeSugerido, 'acerca_de')}
-                        className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
-                      >
-                        {copiado === 'acerca_de' ? '✓ Copiado' : '📋 Copiar'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 <ReactMarkdown>{experienciaMarkdown}</ReactMarkdown>
-                {experienciasSugeridas.length > 0 && (
-                  <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 -mt-2 mb-4 space-y-2">
-                    <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
-                      📋 Copiá y pegá en tu perfil
-                    </p>
-                    {experienciasSugeridas.map((exp, i) => (
-                      <div key={i} className="bg-white border border-indigo-100 rounded-lg p-2.5">
-                        <p className="text-xs font-semibold text-slate-500 mb-1">{exp.puesto}</p>
-                        <div className="flex items-start gap-2">
-                          <p className="flex-1 text-sm text-slate-700">{exp.texto_sugerido}</p>
-                          <button
-                            type="button"
-                            onClick={() => copiarTexto(exp.texto_sugerido, `experiencia-${i}`)}
-                            className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
-                          >
-                            {copiado === `experiencia-${i}` ? '✓ Copiado' : '📋 Copiar'}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
                 <ReactMarkdown>{palabrasClaveMarkdown}</ReactMarkdown>
-                {palabrasClaveASumar.length > 0 && (
-                  <div className="bg-indigo-50/70 border border-indigo-100 rounded-xl p-3 -mt-2 mb-4 space-y-2">
-                    <p className="text-xs font-semibold text-indigo-700 uppercase tracking-wide">
-                      📋 Copiá y pegá en tu perfil
-                    </p>
-                    {palabrasClaveASumar.map((pc, i) => (
-                      <div key={i} className="bg-white border border-indigo-100 rounded-lg p-2.5">
-                        <p className="text-xs font-semibold text-slate-800">{pc.palabra}</p>
-                        <p className="text-xs text-slate-500 mb-1.5">📍 {pc.ubicacion}</p>
-                        <div className="flex items-start gap-2">
-                          <p className="flex-1 text-sm text-slate-700">{pc.frase_sugerida}</p>
-                          <button
-                            type="button"
-                            onClick={() => copiarTexto(pc.frase_sugerida, `palabra-clave-${i}`)}
-                            className="shrink-0 text-xs font-medium px-2.5 py-1.5 rounded-lg bg-white border border-purple-200 text-indigo-600 hover:bg-indigo-50 transition-colors whitespace-nowrap"
-                          >
-                            {copiado === `palabra-clave-${i}` ? '✓ Copiado' : '📋 Copiar'}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                {palabrasClaveFuturas.length > 0 && (
-                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 -mt-2 mb-4">
-                    <p className="text-xs font-semibold text-slate-600 mb-1.5">
-                      🔲 Todavía no están respaldadas en tu perfil — sumalas solo si realmente hiciste ese tipo de tareas
-                    </p>
-                    <div className="flex flex-wrap gap-1.5">
-                      {palabrasClaveFuturas.map((termino, i) => (
-                        <span key={i} className="text-xs bg-white border border-slate-200 text-slate-600 px-2 py-1 rounded-full">
-                          {termino}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 <ReactMarkdown>{cierreMarkdown}</ReactMarkdown>
               </div>
             </div>

@@ -970,24 +970,6 @@ async def analizar_perfil_linkedin(
     (3 acciones como ítems con guion "- ", concretas y accionables — NO uses
     numeración acá)
 
-    Además de los 6 campos de markdown, devolvé también estos campos en TEXTO
-    PLANO (sin markdown, sin "**", sin "#", sin viñetas) porque van a botones de
-    "copiar y pegar" directo al perfil real de LinkedIn, que no soporta formato.
-    Cada uno tiene que coincidir PALABRA POR PALABRA con lo que escribiste en el
-    campo de markdown correspondiente:
-    - "titulares_sugeridos": array con las mismas 2-3 alternativas de titular de
-      "titular_markdown", cada una como un string plano.
-    - "acerca_de_sugerido": la versión reescrita completa de "acerca_de_markdown",
-      como un solo string plano (usá "\\n\\n" para separar párrafos).
-    - "experiencias_sugeridas": array de objetos {{"puesto": "Empresa — Puesto",
-      "texto_sugerido": "la versión reescrita en texto plano"}}, uno por cada
-      experiencia de "experiencia_markdown", en el mismo orden.
-    - "palabras_clave_a_sumar": array de objetos {{"palabra": "...", "ubicacion":
-      "...", "frase_sugerida": "..."}}, uno por cada palabra clave de la sección
-      "✅ Podés sumar ya" de "palabras_clave_markdown", en texto plano.
-    - "palabras_clave_futuras": array de strings con los términos de la sección
-      "🔲 Todavía no están respaldadas en tu perfil".
-
     Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más (sin
     bloques de código, sin texto fuera del JSON):
     {{
@@ -1003,23 +985,13 @@ async def analizar_perfil_linkedin(
       "acerca_de_markdown": "## 3. 📝 SECCIÓN \\"ACERCA DE\\"\\n\\n...",
       "experiencia_markdown": "## 4. 💼 EXPERIENCIA LABORAL\\n\\n...",
       "palabras_clave_markdown": "## 5. 🔑 PALABRAS CLAVE PARA RECLUTADORES\\n\\n...",
-      "cierre_markdown": "## 6. 🔎 TIPS...\\n\\n...\\n\\n## 7. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA\\n\\n...",
-      "titulares_sugeridos": ["alternativa 1 en texto plano", "alternativa 2 en texto plano"],
-      "acerca_de_sugerido": "el 'acerca de' reescrito en texto plano",
-      "experiencias_sugeridas": [{{"puesto": "Empresa — Puesto", "texto_sugerido": "..."}}],
-      "palabras_clave_a_sumar": [{{"palabra": "...", "ubicacion": "...", "frase_sugerida": "..."}}],
-      "palabras_clave_futuras": ["término 1", "término 2"]
+      "cierre_markdown": "## 6. 🔎 TIPS...\\n\\n...\\n\\n## 7. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA\\n\\n..."
     }}
     """
 
     texto, _modelo = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG)
     data = extraer_json_seguro(texto)
     data.setdefault("puntajes", {})
-    data.setdefault("titulares_sugeridos", [])
-    data.setdefault("acerca_de_sugerido", "")
-    data.setdefault("experiencias_sugeridas", [])
-    data.setdefault("palabras_clave_a_sumar", [])
-    data.setdefault("palabras_clave_futuras", [])
     for campo in (
         "intro_markdown",
         "titular_markdown",
