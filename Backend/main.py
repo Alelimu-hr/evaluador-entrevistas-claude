@@ -855,6 +855,23 @@ async def analizar_perfil_linkedin(
     Actuá como un consultor experto en LinkedIn y reclutamiento, especializado en
     optimizar perfiles para que destaquen ante reclutadores humanos Y ante el
     buscador interno de LinkedIn (que prioriza palabras clave relevantes).
+
+    Basá tu análisis en marcos y prácticas reconocidas del rubro, aplicándolos
+    con criterio (no los nombres literalmente en el informe, son para vos):
+    - El SSI (Social Selling Index) de LinkedIn, para pensar el perfil en
+      términos de qué tan bien establece marca profesional, encuentra a las
+      personas correctas y genera relaciones — no solo como una lista de datos.
+    - El framework AIDA (Atención, Interés, Deseo, Acción) para evaluar y
+      mejorar el titular y las primeras líneas del "Acerca de", que son lo
+      primero que ve un reclutador antes de decidir si sigue leyendo.
+    - Las mejores prácticas de LinkedIn Talent Solutions sobre cómo indexan y
+      priorizan los reclutadores un perfil en sus búsquedas (relevancia de
+      palabras clave en título/experiencia/aptitudes, completitud del perfil).
+    - Estándares de Talent Acquisition (en línea con SHRM) para diferenciar
+      tareas de logros: todo logro fuerte responde qué se hizo, para qué, y
+      con qué resultado — no alcanza con listar responsabilidades.
+    - El método STAR (Situación, Tarea, Acción, Resultado) para estructurar
+      las reescrituras de experiencia laboral de la sección 4.
     {bloque_contexto}
     A continuación, el texto extraído del PDF que la persona exportó de su propio
     perfil de LinkedIn:
