@@ -936,15 +936,22 @@ async def analizar_perfil_linkedin(
       reescrita completa para ese rol, lista para pegar directo en LinkedIn.
     Repetí este bloque completo para cada experiencia relevante.)
 
-    REGLA IMPORTANTE para las versiones "✅ Después": nunca inventes una métrica,
-    porcentaje o resultado numérico que la persona no mencionó (ej. "aumenté las
-    ventas un 35%" si ese número no está en el texto original). Si el perfil ya
-    trae un número o resultado concreto, usalo. Si NO lo trae pero la tarea
-    sugiere que probablemente hubo un impacto medible, mostrale a la persona
-    DÓNDE iría ese dato con un placeholder explícito para que lo complete ella
-    misma con el número real (ej. "reduje el tiempo de onboarding en [completar
-    con tu %/cifra real]"), en vez de inventarle un resultado falso que podría
-    quedar mal si un reclutador se lo pregunta.
+    REGLA IMPORTANTE para las versiones "✅ Después" — el "Después" NO puede ser
+    el mismo texto del "Antes" solo cortado en viñetas o reordenado: eso NO
+    cuenta como reescritura. Cada punto del "Después" tiene que:
+    1. Empezar con un verbo de acción fuerte (ej. "Diseñé", "Lideré", "Reduje",
+       "Implementé" — nunca sustantivos sueltos tipo "Dirección de..." o
+       "Gestión de...").
+    2. Mostrar el IMPACTO o el PARA QUÉ de esa tarea (qué mejoró, a quién le
+       sirvió, qué problema resolvió), no solo repetir qué se hizo.
+    Y nunca inventes una métrica, porcentaje o resultado numérico que la
+    persona no mencionó (ej. "aumenté las ventas un 35%" si ese número no está
+    en el texto original). Si el perfil ya trae un número o resultado
+    concreto, usalo. Si NO lo trae, el punto reescrito TIENE que incluir un
+    placeholder explícito donde iría ese dato — no es opcional, no lo dejes
+    pasar (ej. "reduje el tiempo de onboarding en [completar con tu %/cifra
+    real]"), en vez de inventarle un resultado falso que podría quedar mal si
+    un reclutador se lo pregunta.
 
     CAMPO "palabras_clave_markdown" — contiene:
 
