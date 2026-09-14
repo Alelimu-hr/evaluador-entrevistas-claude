@@ -908,10 +908,21 @@ async def analizar_perfil_linkedin(
     - "**[Empresa — Puesto]**" en negrita como encabezado del ítem.
     - Un párrafo corto señalando si la descripción actual muestra logros medibles
       o solo tareas genéricas.
-    - "📋 Versión sugerida para copiar y pegar:" seguido de un párrafo entre
-      comillas con la descripción reescrita completa para ese rol, con logros
-      medibles cuando sea posible, lista para pegar directo en LinkedIn.
+    - "❌ Antes:" seguido de un párrafo entre comillas con la descripción actual
+      (o una paráfrasis fiel si el texto original es muy pobre o inexistente).
+    - "✅ Después:" seguido de un párrafo entre comillas con la descripción
+      reescrita completa para ese rol, lista para pegar directo en LinkedIn.
     Repetí este bloque completo para cada experiencia relevante.)
+
+    REGLA IMPORTANTE para las versiones "✅ Después": nunca inventes una métrica,
+    porcentaje o resultado numérico que la persona no mencionó (ej. "aumenté las
+    ventas un 35%" si ese número no está en el texto original). Si el perfil ya
+    trae un número o resultado concreto, usalo. Si NO lo trae pero la tarea
+    sugiere que probablemente hubo un impacto medible, mostrale a la persona
+    DÓNDE iría ese dato con un placeholder explícito para que lo complete ella
+    misma con el número real (ej. "reduje el tiempo de onboarding en [completar
+    con tu %/cifra real]"), en vez de inventarle un resultado falso que podría
+    quedar mal si un reclutador se lo pregunta.
 
     CAMPO "palabras_clave_markdown" — contiene:
 
