@@ -243,7 +243,7 @@ export default function LinkedinPage() {
               <p className="text-2xl">💼</p>
               <p className="font-semibold text-white text-sm mt-1.5">Mejorá tu perfil de LinkedIn</p>
               <p className="text-xs text-white/80 mt-0.5">
-                Análisis de tu perfil con sugerencias listas para copiar y pegar.
+                Optimizá tu perfil para que los reclutadores te encuentren primero.
               </p>
             </div>
           </div>

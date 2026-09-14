@@ -1022,6 +1022,20 @@ async def analizar_perfil_linkedin(
     - "📋 Lista para copiar y pegar ahí:" con una frase ya redactada que incorpora
       el término naturalmente en ese contexto real.
 
+    REGLA IMPORTANTE para esas frases de "📋 Lista para copiar y pegar ahí": nunca
+    hagas que la persona se atribuya, en primera persona, un cargo o rol de
+    seniority/liderazgo que no tuvo (ej. "Actué como HR Lead...", "Como Team
+    Leader...", "Fui la Head de..." si eso no figura en su experiencia real) — es
+    el mismo problema de inflar un título que ya evitamos en el titular, y acá es
+    igual de grave porque la persona lo pegaría tal cual en su experiencia laboral.
+    La palabra clave tiene que entrar en la frase describiendo una TAREA, herramienta
+    o responsabilidad real que la persona ya tuvo, no un título que se apropia. Si la
+    única forma natural de meter el término implica un cargo que no tuvo, replanteá
+    la frase para que hable de la función o tarea en vez del cargo (ej. en vez de
+    "Actué como HR Lead estructurando el área de personas", mejor "Estructuré el área
+    de personas desde cero, cubriendo tareas propias de un rol de HR Lead" o directamente
+    dejar solo la tarea con el término de búsqueda, sin adjudicarse el título).
+
     ### 🔲 Todavía no están respaldadas en tu perfil
 
     Un párrafo breve aclarando que estos términos son búsquedas frecuentes en su

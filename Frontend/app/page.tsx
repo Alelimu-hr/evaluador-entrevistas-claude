@@ -557,7 +557,7 @@ export default function Home() {
               <p className="text-2xl">💼</p>
               <p className="font-semibold text-slate-800 text-sm mt-1.5">Mejorá tu perfil de LinkedIn</p>
               <p className="text-xs text-slate-500 mt-0.5">
-                Análisis de tu perfil con sugerencias listas para copiar y pegar.
+                Optimizá tu perfil para que los reclutadores te encuentren primero.
               </p>
             </Link>
           </div>
