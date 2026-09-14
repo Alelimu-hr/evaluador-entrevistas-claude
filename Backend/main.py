@@ -149,6 +149,28 @@ JSON_CONFIG = types.GenerateContentConfig(
     temperature=0.2,
 )
 
+# Config aparte para el análisis de LinkedIn, con temperatura más baja
+# (0.1 en vez de 0.2) para que la redacción varíe menos entre corridas del
+# mismo perfil. No la reutilizamos para el simulador de entrevistas a
+# propósito, para no tocar ese comportamiento sin que haga falta — ahí la
+# variedad entre preguntas/feedback es parte de la gracia.
+#
+# OJO: esto reduce la variación, no la elimina. Sigue habiendo dos fuentes de
+# "me dice cosas distintas cada vez" que ninguna config de temperatura arregla
+# del todo:
+# 1. El fallback entre modelos (MODELOS_FALLBACK): si el primer modelo está
+#    ocupado/con cuota agotada, se prueba el siguiente, y cada modelo tiene su
+#    propio "estilo" de redacción — un cambio de modelo entre corridas explica
+#    buena parte de las diferencias grandes. Probar la MISMA key muchas veces
+#    seguidas (como al testear) agota la cuota por minuto más rápido que un
+#    usuario real haciendo un solo análisis, así que quien más fallbacks ve
+#    somos nosotros probando, no necesariamente la gente real usándolo.
+# 2. Ningún modelo de LLM es 100% determinístico incluso a la misma
+#    temperatura — hay algo de azar en el muestreo de cada palabra.
+JSON_CONFIG_LINKEDIN = types.GenerateContentConfig(
+    temperature=0.1,
+)
+
 
 def get_client(api_key: str, timeout_ms: int = 45000) -> genai.Client:
     if not api_key or not api_key.strip():
@@ -1000,7 +1022,7 @@ async def analizar_perfil_linkedin(
     }}
     """
 
-    texto, _modelo = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG)
+    texto, modelo_usado = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG_LINKEDIN)
     data = extraer_json_seguro(texto)
     data.setdefault("puntajes", {})
     for campo in (
@@ -1012,6 +1034,12 @@ async def analizar_perfil_linkedin(
         "cierre_markdown",
     ):
         data.setdefault(campo, "")
+
+    # Devolvemos qué modelo respondió esta vez (no se muestra en la UI, pero
+    # queda visible en la respuesta de red / consola del navegador). Sirve
+    # para diagnosticar si dos análisis "distintos" del mismo perfil se deben
+    # a que cada uno lo resolvió un modelo diferente del fallback.
+    data["modelo_usado"] = modelo_usado
 
     # El "informe_markdown" completo lo arma el backend concatenando los 6
     # campos, en vez de pedírselo a Gemini como un campo aparte: así garantizamos
