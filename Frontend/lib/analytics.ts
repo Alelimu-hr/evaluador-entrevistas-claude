@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/client';
 
-export type HerramientaFunnel = 'entrevista' | 'linkedin';
+export type HerramientaFunnel = 'entrevista' | 'linkedin' | 'cv';
 
-// Los 4 escalones del embudo, iguales para las dos herramientas, para poder
+// Los 4 escalones del embudo, iguales para las tres herramientas, para poder
 // comparar peras con peras en una sola query de SQL:
 // 1. formulario_visto     -> entró logueado a la pantalla inicial
 // 2. api_key_valida       -> pegó una API Key y el backend la validó como correcta

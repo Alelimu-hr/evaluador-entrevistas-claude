@@ -171,6 +171,13 @@ JSON_CONFIG_LINKEDIN = types.GenerateContentConfig(
     temperature=0.1,
 )
 
+# Mismo criterio que JSON_CONFIG_LINKEDIN (temperatura baja para que la
+# redacción varíe poco entre corridas del mismo CV) — ver el comentario de
+# arriba para el detalle de por qué igual puede variar un poco.
+JSON_CONFIG_CV = types.GenerateContentConfig(
+    temperature=0.1,
+)
+
 
 def get_client(api_key: str, timeout_ms: int = 45000) -> genai.Client:
     if not api_key or not api_key.strip():
@@ -1124,6 +1131,300 @@ async def analizar_perfil_linkedin(
             data["titular_markdown"],
             data["acerca_de_markdown"],
             data["experiencia_markdown"],
+            data["palabras_clave_markdown"],
+            data["cierre_markdown"],
+        )
+        if parte
+    ).strip()
+    return data
+
+
+@app.post("/api/analizar-cv")
+async def analizar_cv(
+    x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
+    puesto_objetivo: str = Form(None),
+    idioma: str = Form("Español"),
+    cv: UploadFile = File(...),
+):
+    """Analiza un CV (PDF) y devuelve un informe de compatibilidad ATS +
+    sugerencias de reescritura. Mismo patrón que analizar_perfil_linkedin:
+    modo "dirigido" (con la descripción de un puesto pegada como texto, no un
+    link — para no meternos en temas de scraping) da un puntaje de match real
+    contra esa búsqueda puntual; modo "general" evalúa la salud general del CV
+    sin comparar contra ninguna vacante."""
+    client = get_client(x_gemini_api_key)
+
+    cv_bytes = await cv.read()
+    if not cv_bytes:
+        raise HTTPException(status_code=400, detail="El archivo llegó vacío.")
+
+    future = _pdf_executor.submit(extraer_texto_cv, cv, cv_bytes)
+    try:
+        cv_texto = future.result(timeout=PDF_TIMEOUT_SEGUNDOS)
+    except FutureTimeoutError:
+        raise HTTPException(
+            status_code=400,
+            detail="El PDF tardó demasiado en procesarse. Probá con otro archivo.",
+        )
+
+    if not cv_texto or len(cv_texto.strip()) < 50:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "No pudimos leer texto de ese PDF. Asegurate de subir tu CV como PDF "
+                "con texto real (no una imagen escaneada ni una captura de pantalla)."
+            ),
+        )
+
+    # Modo "dirigido" (con descripción de puesto pegada) vs. "general" (sin
+    # puesto — chequeo de salud del CV con criterios universales). Mismo
+    # patrón que en analizar_perfil_linkedin.
+    tiene_puesto = bool(puesto_objetivo and puesto_objetivo.strip())
+
+    if tiene_puesto:
+        bloque_contexto = f"""
+    Descripción del puesto al que esta persona quiere postularse (pegada por
+    ella misma, puede ser parcial o venir en cualquier formato — tratala como
+    la fuente de verdad de qué palabras clave y requisitos busca ese puesto
+    puntual):
+
+    {puesto_objetivo.strip()}
+    """
+        instruccion_apertura = "comparando el CV específicamente contra ESTE puesto"
+        instruccion_puntaje_match = (
+            "un PUNTAJE DE MATCH real contra el puesto pegado arriba — qué tan cerca "
+            "está este CV, en su estado actual, de pasar el filtro ATS y la lectura "
+            "humana para ESTA búsqueda puntual"
+        )
+        instruccion_palabras_clave = (
+            "que aparecen en la descripción del puesto pegada arriba y le faltan al "
+            "CV actual, redactadas tal cual las escribió quien publicó el aviso"
+        )
+        instruccion_puntaje_palabras_clave = "qué tan bien matchea el CV contra el puesto pegado"
+    else:
+        bloque_contexto = """
+    Esta persona NO pegó ninguna descripción de puesto puntual: quiere un
+    chequeo GENERAL de la salud de su CV — estructura, logros medibles vs.
+    tareas genéricas, y compatibilidad con sistemas ATS en general. Inferí vos
+    mismo su área/campo profesional a partir de su propia experiencia real.
+    """
+        instruccion_apertura = (
+            "sobre la salud general del CV — sin comparar contra un puesto específico, "
+            "ya que la persona no pegó ninguno"
+        )
+        instruccion_puntaje_match = (
+            "un PUNTAJE GENERAL de qué tan listo está este CV para pasar un filtro ATS "
+            "típico de su industria (inferida de su propia experiencia), sin comparar "
+            "contra ningún puesto puntual"
+        )
+        instruccion_palabras_clave = (
+            "que son estándar para SU PROPIO campo profesional (inferido de su "
+            "experiencia) y hoy no aparecen literalmente en el CV"
+        )
+        instruccion_puntaje_palabras_clave = "qué tan presente está la terminología estándar de su campo"
+
+    prompt = f"""
+    Actuá como un consultor experto en reclutamiento técnico y en cómo
+    funcionan los sistemas ATS (Applicant Tracking Systems) que usan la
+    mayoría de las empresas medianas/grandes para filtrar CVs antes de que los
+    vea un humano. Tu objetivo es ayudar a esta persona a que su CV pase ese
+    primer filtro automático Y además se lea bien si llega a un reclutador —
+    ambas cosas, no solo una.
+    {bloque_contexto}
+
+    MUY IMPORTANTE sobre el diagnóstico de formato: a continuación te paso el
+    texto que se extrajo de este CV con una herramienta de extracción simple y
+    genérica — el mismo tipo de proceso que usa un ATS real para leer un PDF
+    (ignora diseño, columnas, tablas e imágenes; solo saca el texto plano en
+    el orden en que lo encuentra). Si el texto extraído se ve desordenado, con
+    contenido mezclado fuera de secuencia, secciones que parecen faltar, o
+    texto que no tiene sentido en el orden en que aparece, ESO ES EN SÍ MISMO
+    evidencia de que el formato original (probablemente con columnas, tablas,
+    cuadros de texto o un diseño gráfico complejo) es riesgoso para un ATS
+    real — señalalo explícitamente como hallazgo, incluso si no podés ver el
+    diseño original. Si en cambio el texto se lee ordenado y coherente de
+    principio a fin, es una señal de que el formato es razonablemente seguro.
+
+    Texto extraído del CV:
+    \"\"\"
+    {cv_texto[:12000]}
+    \"\"\"
+
+    - Dirigite a la persona en segunda persona ("vos"), en {idioma}, con un
+      tono profesional pero cercano — honesto, sin vueltas, pero constructivo.
+    - Usá EXACTAMENTE esta estructura y estos títulos (podés ajustar el
+      contenido, no el formato ni los emojis).
+    - MUY IMPORTANTE, formato Markdown real:
+      * Cada título numerado va precedido por "## ", solo en su propia línea.
+      * SIEMPRE dejá una línea en blanco entre un título y el texto que le sigue.
+      * Para listas DENTRO de una sección usá SIEMPRE viñetas con guion "- ".
+    - MUY IMPORTANTE: el informe se parte en 5 campos de markdown
+      independientes (ver el JSON de más abajo), mismo motivo que en la
+      herramienta de LinkedIn — que el frontend ubique cada sección sin tener
+      que adivinar dónde empieza o termina buscando texto.
+
+    CAMPO "intro_markdown" — contiene:
+
+    ## 📄 Informe de tu CV
+
+    (dos o tres párrafos de apertura, {instruccion_apertura}:
+    1. El veredicto general.
+    2. Una explicación breve y clara, en términos simples, de cómo funciona
+       realmente un sistema ATS — que la mayoría de las empresas medianas/
+       grandes filtran los CVs automáticamente ANTES de que los vea un
+       humano, buscando coincidencias literales de palabras clave y
+       penalizando formatos que no pueden leer bien — para que la persona
+       entienda el POR QUÉ de las recomendaciones, no solo el qué.
+    3. Un resumen concreto de qué le cambiamos a su CV en la versión
+       reescrita de abajo (sección "🧾 Tu CV optimizado") y por qué — ej.
+       "reordenamos tu experiencia para que las palabras clave aparezcan en
+       las primeras líneas de cada puesto, sumamos cifras donde era posible
+       y reescribimos 6 viñetas que eran tareas genéricas", de forma que la
+       persona entienda exactamente qué cambió antes de mandarlo.)
+
+    ## 1. 🎯 PUNTAJE Y DIAGNÓSTICO
+
+    - **PUNTAJE GLOBAL:** x/10 — {instruccion_puntaje_match}, con una breve justificación.
+    - **PUNTAJE FORMATO ATS:** x/10 — basado específicamente en el diagnóstico del texto extraído explicado arriba.
+    - **PUNTAJE LOGROS CUANTIFICABLES:** x/10 — qué proporción de las responsabilidades descriptas tienen un resultado medible (número, %, cifra) vs. cuántas son tareas genéricas sin impacto demostrado.
+    - **PUNTAJE PALABRAS CLAVE:** x/10 — {instruccion_puntaje_palabras_clave}.
+
+    CAMPO "formato_markdown" — contiene:
+
+    ## 2. 🛠️ FORMATO Y COMPATIBILIDAD ATS
+
+    (explicá con el diagnóstico del texto extraído qué tan seguro es el
+    formato actual para un ATS, qué elementos probablemente lo complican si
+    los hay — columnas, tablas, texto en imágenes, encabezados/pies de
+    página, íconos en vez de texto, fuentes no estándar — y 3-4
+    recomendaciones concretas y accionables de formato, aunque no puedas ver
+    el diseño exacto del documento.)
+
+    CAMPO "logros_markdown" — contiene:
+
+    ## 3. 📈 LOGROS CUANTIFICABLES
+
+    (para CADA experiencia laboral relevante del CV — todas las que aporten,
+    no solo la primera — un bloque así:
+    - "**[Empresa — Puesto]**" en negrita como encabezado del ítem.
+    - "❌ Antes:" con la descripción actual tal cual aparece (o una paráfrasis
+      fiel si el texto extraído vino incompleto).
+    - "✅ Después:" con una reescritura que empieza con un verbo de acción
+      fuerte y muestra impacto/resultado.
+    Repetí para cada experiencia relevante.)
+
+    REGLA IMPORTANTE para las versiones "✅ Después" — el "Después" NO puede
+    ser el mismo texto del "Antes" solo cortado en viñetas o reordenado: eso
+    NO cuenta como reescritura. Cada punto del "Después" tiene que:
+    1. Empezar con un verbo de acción fuerte, nunca un sustantivo suelto.
+    2. Mostrar el IMPACTO o el PARA QUÉ de esa tarea, no solo repetir qué se hizo.
+    3. Si el CV ya trae un número o resultado concreto, usalo tal cual. Si NO
+       lo trae, el punto reescrito TIENE que incluir un placeholder explícito
+       donde iría ese dato — no es opcional, no lo dejes pasar (ej. "reduje el
+       tiempo de onboarding en [completar con tu %/cifra real]") — en vez de
+       inventarle un resultado falso.
+    Y nunca inventes ni le asignes a la persona un cargo o título de
+    seniority/liderazgo que el CV no respalda.
+
+    CAMPO "palabras_clave_markdown" — contiene:
+
+    ## 4. 🔑 PALABRAS CLAVE
+
+    (Dividí en dos partes con estos subtítulos exactos:
+
+    ### ✅ Podés sumar ya
+
+    Con guion "- ", entre 6 y 8 palabras clave {instruccion_palabras_clave}
+    que además tengan algo concreto en la experiencia real del CV donde
+    apoyarse. NO inventes tareas que la persona no hizo. Para cada una:
+    - La palabra clave en negrita.
+    - "📍 Dónde sumarla:" el lugar puntual y real del CV.
+    - "📋 Lista para copiar y pegar ahí:" una frase ya redactada que incorpora
+      el término naturalmente en ese contexto real. Nunca le hagas atribuirse,
+      en primera persona, un cargo o rol de seniority que no tuvo — la palabra
+      clave tiene que describir una tarea o herramienta real, no un título.
+
+    ### 🔲 Todavía no están respaldadas en el CV
+
+    Un párrafo breve aclarando que son términos frecuentes en su campo pero no
+    aparecen respaldados por nada concreto hoy, y que solo hay que sumarlos si
+    efectivamente los hizo. Después, con guion "- ", la lista de esos términos.)
+
+    CAMPO "cierre_markdown" — contiene:
+
+    ## 5. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA
+
+    (3 acciones concretas y priorizadas, en orden de impacto, basadas en todo
+    lo de arriba.)
+
+    CAMPO "cv_reescrito_markdown" — contiene EL CV COMPLETO reescrito, listo
+    para exportar y adjuntar directo en una postulación real (no son ejemplos
+    sueltos como en la sección de logros — es el documento entero armado).
+    Reglas para este campo:
+    - Usá TODA la información real del CV original: nombre, datos de
+      contacto, cada experiencia laboral, educación, certificaciones,
+      idiomas. NUNCA inventes un dato que no esté en el CV original (ni
+      fechas, ni empresas, ni títulos, ni cursos).
+    - Reescribí cada viñeta de experiencia con el mismo criterio ya aplicado
+      en "logros_markdown" (verbo de acción + impacto + placeholder si falta
+      una cifra real) — tienen que ser LAS MISMAS reescrituras, no versiones
+      nuevas distintas.
+    - Sumá naturalmente, donde haya respaldo real, las palabras clave ya
+      identificadas en "palabras_clave_markdown" — nunca una que no esté
+      respaldada en la experiencia real de la persona.
+    - Formato simple y 100% seguro para ATS: sin columnas, sin tablas, todo
+      en una sola columna lineal, en este orden: nombre y datos de contacto
+      → resumen profesional (2-3 líneas con palabras clave reales, nuevo,
+      vos lo escribís) → experiencia laboral (reescrita) → educación →
+      certificaciones/idiomas si los hay → habilidades/palabras clave.
+    - Formato Markdown real: "## " para cada sección, "- " para viñetas,
+      línea en blanco entre título y contenido.
+    - Nunca le asignes a la persona un cargo o título de seniority que el CV
+      original no respalda (misma regla que en el resto del informe).
+
+    Devolvé ÚNICAMENTE un JSON válido con esta forma exacta (sin texto antes
+    ni después, sin bloques de código):
+
+    {{
+      "puntajes": {{
+        "global": numero_del_1_al_10,
+        "formato_ats": numero_del_1_al_10,
+        "logros": numero_del_1_al_10,
+        "palabras_clave": numero_del_1_al_10
+      }},
+      "intro_markdown": "## 📄 Informe de tu CV\\n\\n...",
+      "formato_markdown": "## 2. 🛠️ FORMATO Y COMPATIBILIDAD ATS\\n\\n...",
+      "logros_markdown": "## 3. 📈 LOGROS CUANTIFICABLES\\n\\n...",
+      "palabras_clave_markdown": "## 4. 🔑 PALABRAS CLAVE\\n\\n...",
+      "cierre_markdown": "## 5. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA\\n\\n...",
+      "cv_reescrito_markdown": "## Juan Pérez\\n\\n...(CV completo reescrito)..."
+    }}
+    """
+
+    texto, modelo_usado = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG_CV)
+    data = extraer_json_seguro(texto)
+    data.setdefault("puntajes", {})
+    for campo in (
+        "intro_markdown",
+        "formato_markdown",
+        "logros_markdown",
+        "palabras_clave_markdown",
+        "cierre_markdown",
+        "cv_reescrito_markdown",
+    ):
+        data.setdefault(campo, "")
+
+    data["modelo_usado"] = modelo_usado
+    # "cv_reescrito_markdown" queda AFUERA de esta concatenación a propósito:
+    # es un documento aparte (el CV listo para adjuntar), no una sección más
+    # del informe de diagnóstico — el frontend lo ofrece como una descarga
+    # separada en vez de mezclarlo con el informe.
+    data["informe_markdown"] = "\n\n".join(
+        parte
+        for parte in (
+            data["intro_markdown"],
+            data["formato_markdown"],
+            data["logros_markdown"],
             data["palabras_clave_markdown"],
             data["cierre_markdown"],
         )
