@@ -62,12 +62,22 @@ export default function InicioPage() {
         {/* Los 4 cuadrantes — ninguno pre-seleccionado, esta es la elección real */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in-up">
           <Link
-            href="/simulador"
+            href="/guia-carrera"
             className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
           >
-            <p className="text-3xl">🎙️</p>
-            <p className="font-semibold text-slate-800 mt-2">Practicá tu entrevista</p>
-            <p className="text-xs text-slate-500 mt-1">Simulá una entrevista real y recibí feedback con IA.</p>
+            <p className="text-3xl">🧭</p>
+            <p className="font-semibold text-slate-800 mt-2">Guía de Salida Laboral</p>
+            <p className="text-xs text-slate-500 mt-1">Explorá áreas y roles para saber hacia dónde apuntar.</p>
+          </Link>
+          <Link
+            href="/cv"
+            className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
+          >
+            <p className="text-3xl">📄</p>
+            <p className="font-semibold text-slate-800 mt-2">Optimizá tu CV para cada búsqueda</p>
+            <p className="text-xs text-slate-500 mt-1">
+              Comparación contra el puesto: chequeo ATS y logros reescritos, listos para pegar.
+            </p>
           </Link>
           <Link
             href="/linkedin"
@@ -80,20 +90,12 @@ export default function InicioPage() {
             </p>
           </Link>
           <Link
-            href="/cv"
+            href="/simulador"
             className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
           >
-            <p className="text-3xl">📄</p>
-            <p className="font-semibold text-slate-800 mt-2">Optimizá tu CV</p>
-            <p className="text-xs text-slate-500 mt-1">Chequeo ATS y reescritura de logros, lista para pegar.</p>
-          </Link>
-          <Link
-            href="/guia-carrera"
-            className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
-          >
-            <p className="text-3xl">🧭</p>
-            <p className="font-semibold text-slate-800 mt-2">Guía de Salida Laboral</p>
-            <p className="text-xs text-slate-500 mt-1">Explorá áreas y roles para saber hacia dónde apuntar.</p>
+            <p className="text-3xl">🎙️</p>
+            <p className="font-semibold text-slate-800 mt-2">Practicá tu entrevista</p>
+            <p className="text-xs text-slate-500 mt-1">Simulá una entrevista real y recibí feedback con IA.</p>
           </Link>
         </div>
       </div>

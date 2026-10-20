@@ -1147,11 +1147,12 @@ async def analizar_cv(
     cv: UploadFile = File(...),
 ):
     """Analiza un CV (PDF) y devuelve un informe de compatibilidad ATS +
-    sugerencias de reescritura. Mismo patrón que analizar_perfil_linkedin:
-    modo "dirigido" (con la descripción de un puesto pegada como texto, no un
-    link — para no meternos en temas de scraping) da un puntaje de match real
-    contra esa búsqueda puntual; modo "general" evalúa la salud general del CV
-    sin comparar contra ninguna vacante."""
+    sugerencias de reescritura, comparado contra un puesto puntual (la
+    descripción se pega como texto, no un link — para no meternos en temas de
+    scraping). El frontend ahora siempre manda puesto_objetivo (se sacó el
+    modo "general" de la UI, Ale pidió que la herramienta sea siempre
+    dirigida), pero el endpoint deja la rama sin puesto funcionando por las
+    dudas — no hace falta tocarla para este cambio."""
     client = get_client(x_gemini_api_key)
 
     cv_bytes = await cv.read()

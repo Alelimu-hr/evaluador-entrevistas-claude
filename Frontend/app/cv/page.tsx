@@ -10,7 +10,6 @@ import { Spinner } from '@/components/Spinner';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 type EstadoKey = 'vacio' | 'verificando' | 'valida' | 'invalida';
-type ModoAnalisis = 'dirigido' | 'general';
 
 type Puntajes = {
   global: number;
@@ -28,7 +27,6 @@ function colorDeNota(nota: number) {
 export default function CvPage() {
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
-  const [modo, setModo] = useState<ModoAnalisis>('dirigido');
   const [puestoObjetivo, setPuestoObjetivo] = useState('');
   const [idioma, setIdioma] = useState('Español');
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -99,6 +97,8 @@ export default function CvPage() {
   // Registra el análisis para poder ver uso/adopción de esta herramienta,
   // igual que guardarAnalisisEnSupabase() en la de LinkedIn. Nunca bloquea ni
   // rompe la UI si falla (ej: la tabla todavía no existe en Supabase).
+  // "modo" queda fijo en 'dirigido' porque la tabla analisis_cv tiene un
+  // check constraint que todavía espera ese valor — ver sql_herramienta_cv.sql.
   const guardarAnalisisEnSupabase = async (puntajesResultado: Puntajes | null) => {
     try {
       const supabase = createClient();
@@ -109,7 +109,7 @@ export default function CvPage() {
 
       await supabase.from('analisis_cv').insert({
         user_id: user.id,
-        modo,
+        modo: 'dirigido',
         puntaje_global: puntajesResultado?.global ?? null,
       });
     } catch (err) {
@@ -121,8 +121,8 @@ export default function CvPage() {
     e.preventDefault();
     if (!apiKey) return alert('Pegá tu clave de Google AI Studio para probar.');
     if (!cvFile) return alert('Subí tu CV en PDF.');
-    if (modo === 'dirigido' && !puestoObjetivo.trim()) {
-      return alert('Pegá la descripción del puesto, o elegí "Chequeo general" si preferís un análisis sin comparar contra una vacante.');
+    if (!puestoObjetivo.trim()) {
+      return alert('Pegá la descripción del puesto al que querés aplicar.');
     }
 
     setCargando(true);
@@ -130,12 +130,7 @@ export default function CvPage() {
     registrarEventoFunnel('cv', 'envio_formulario'); // 3er escalón
 
     const formData = new FormData();
-    // En modo "general" no mandamos el puesto aunque haya quedado tipeado de
-    // un cambio de modo anterior — el backend decide qué tipo de análisis
-    // hacer según si recibe o no un puesto_objetivo.
-    if (modo === 'dirigido') {
-      formData.append('puesto_objetivo', puestoObjetivo);
-    }
+    formData.append('puesto_objetivo', puestoObjetivo);
     formData.append('idioma', idioma);
     formData.append('cv', cvFile);
 
@@ -242,7 +237,7 @@ export default function CvPage() {
         {/* Header */}
         <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
           <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            📄 Optimizá tu CV
+            📄 Optimizá tu CV para cada búsqueda
           </h1>
           <nav className="flex items-center gap-4 text-sm">
             <Link href="/" className="text-slate-400 hover:text-white transition-colors">
@@ -260,13 +255,23 @@ export default function CvPage() {
         {!hayResultado && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up">
             <Link
-              href="/simulador"
+              href="/guia-carrera"
               className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
             >
-              <p className="text-2xl">🎙️</p>
-              <p className="font-semibold text-slate-800 text-sm mt-1.5">Practicá tu entrevista</p>
-              <p className="text-xs text-slate-500 mt-0.5">Simulá una entrevista real y recibí feedback con IA.</p>
+              <p className="text-2xl">🧭</p>
+              <p className="font-semibold text-slate-800 text-sm mt-1.5">Guía de Salida Laboral</p>
+              <p className="text-xs text-slate-500 mt-0.5">Explorá áreas y roles para saber hacia dónde apuntar.</p>
             </Link>
+            <div className="relative overflow-hidden text-left p-4 rounded-2xl border border-transparent bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-lg shadow-purple-500/30">
+              <span className="absolute top-3 right-3 text-[10px] font-semibold uppercase tracking-wide text-white/70">
+                Estás acá
+              </span>
+              <p className="text-2xl">📄</p>
+              <p className="font-semibold text-white text-sm mt-1.5">Optimizá tu CV para cada búsqueda</p>
+              <p className="text-xs text-white/80 mt-0.5">
+                Comparación contra el puesto: chequeo ATS y logros reescritos, listos para pegar.
+              </p>
+            </div>
             <Link
               href="/linkedin"
               className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
@@ -277,23 +282,13 @@ export default function CvPage() {
                 Optimizá tu perfil para que los reclutadores te encuentren primero.
               </p>
             </Link>
-            <div className="relative overflow-hidden text-left p-4 rounded-2xl border border-transparent bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-lg shadow-purple-500/30">
-              <span className="absolute top-3 right-3 text-[10px] font-semibold uppercase tracking-wide text-white/70">
-                Estás acá
-              </span>
-              <p className="text-2xl">📄</p>
-              <p className="font-semibold text-white text-sm mt-1.5">Optimizá tu CV</p>
-              <p className="text-xs text-white/80 mt-0.5">
-                Chequeo ATS y reescritura de logros, lista para pegar.
-              </p>
-            </div>
             <Link
-              href="/guia-carrera"
+              href="/simulador"
               className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
             >
-              <p className="text-2xl">🧭</p>
-              <p className="font-semibold text-slate-800 text-sm mt-1.5">Guía de Salida Laboral</p>
-              <p className="text-xs text-slate-500 mt-0.5">Explorá áreas y roles para saber hacia dónde apuntar.</p>
+              <p className="text-2xl">🎙️</p>
+              <p className="font-semibold text-slate-800 text-sm mt-1.5">Practicá tu entrevista</p>
+              <p className="text-xs text-slate-500 mt-0.5">Simulá una entrevista real y recibí feedback con IA.</p>
             </Link>
           </div>
         )}
@@ -304,11 +299,12 @@ export default function CvPage() {
               Chequeo ATS con IA
             </p>
             <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
-              ¿Tu CV pasaría el filtro automático de una empresa?
+              ¿Tu CV está armado para ESTE puesto?
             </h2>
             <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
-              Subí tu CV en PDF y te decimos qué vería un sistema ATS al leerlo, qué palabras clave te faltan
-              y te reescribimos cada logro, listo para pegar.
+              Pegá el aviso del puesto al que querés aplicar y subí tu CV en PDF: te decimos qué vería un
+              sistema ATS al leerlo, qué palabras clave te faltan frente a esa búsqueda puntual, y te
+              reescribimos cada logro, listo para pegar.
             </p>
             <p className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-4">
               🌎 Gratis y para cualquier rol o industria.
@@ -378,61 +374,25 @@ export default function CvPage() {
               </p>
             )}
 
-            {/* Modo de análisis + puesto + idioma */}
+            {/* Puesto objetivo + idioma */}
             <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
-              <div>
-                <label className="block text-sm font-semibold text-slate-800 mb-2">¿Qué tipo de análisis querés?</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => setModo('dirigido')}
-                    className={`text-left p-3 rounded-xl border transition-all ${
-                      modo === 'dirigido'
-                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                        : 'border-slate-200 bg-white hover:border-purple-300'
-                    }`}
-                  >
-                    <p className="text-sm font-semibold text-slate-800">🎯 Contra un puesto puntual</p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Pegás el aviso y te damos un puntaje de match real contra esa búsqueda.
-                    </p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setModo('general')}
-                    className={`text-left p-3 rounded-xl border transition-all ${
-                      modo === 'general'
-                        ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                        : 'border-slate-200 bg-white hover:border-purple-300'
-                    }`}
-                  >
-                    <p className="text-sm font-semibold text-slate-800">📄 Chequeo general</p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Salud general del CV, sin compararlo contra ninguna vacante puntual.
-                    </p>
-                  </button>
-                </div>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {modo === 'dirigido' && (
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-semibold text-slate-800 mb-1">
-                      Pegá la descripción del puesto
-                    </label>
-                    <textarea
-                      rows={5}
-                      value={puestoObjetivo}
-                      onChange={(e) => setPuestoObjetivo(e.target.value)}
-                      placeholder="Pegá acá el texto del aviso (requisitos, responsabilidades, etc.) — cuanto más completo, mejor el análisis de match."
-                      className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
-                      required
-                    />
-                    <p className="text-xs text-slate-500 mt-1">
-                      No hace falta el link, solo pegá el texto del aviso — así no dependemos de scrapear ningún sitio.
-                    </p>
-                  </div>
-                )}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">
+                    Pegá la descripción del puesto
+                  </label>
+                  <textarea
+                    rows={5}
+                    value={puestoObjetivo}
+                    onChange={(e) => setPuestoObjetivo(e.target.value)}
+                    placeholder="Pegá acá el texto del aviso (requisitos, responsabilidades, etc.) — cuanto más completo, mejor el análisis de match."
+                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                    required
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    No hace falta el link, solo pegá el texto del aviso — así no dependemos de scrapear ningún sitio.
+                  </p>
+                </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-800 mb-1">Idioma del informe</label>
                   <select
