@@ -1,9 +1,13 @@
 import { createClient } from '@/lib/supabase/client';
 
-export type HerramientaFunnel = 'entrevista' | 'linkedin' | 'cv';
+export type HerramientaFunnel = 'entrevista' | 'linkedin' | 'cv' | 'plan_carrera';
 
-// Los 4 escalones del embudo, iguales para las tres herramientas, para poder
-// comparar peras con peras en una sola query de SQL:
+// Los 4 escalones del embudo, iguales para las cuatro herramientas, para poder
+// comparar peras con peras en una sola query de SQL. "plan_carrera" es la capa
+// de IA personalizada de la Guía de Salida Laboral ("cómo entro a este rol") —
+// a diferencia de navegar la guía en sí (que es puro contenido estático y no
+// se trackea, ver Frontend/app/guia-carrera/page.tsx), esto SÍ usa IA y API
+// Key, así que entra en el mismo modelo de embudo que las otras tres:
 // 1. formulario_visto     -> entró logueado a la pantalla inicial
 // 2. api_key_valida       -> pegó una API Key y el backend la validó como correcta
 // 3. envio_formulario     -> completó el resto del formulario y le dio al botón

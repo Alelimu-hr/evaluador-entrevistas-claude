@@ -178,6 +178,11 @@ JSON_CONFIG_CV = types.GenerateContentConfig(
     temperature=0.1,
 )
 
+# Mismo criterio que las dos de arriba.
+JSON_CONFIG_PLAN_CARRERA = types.GenerateContentConfig(
+    temperature=0.1,
+)
+
 
 def get_client(api_key: str, timeout_ms: int = 45000) -> genai.Client:
     if not api_key or not api_key.strip():
@@ -1427,6 +1432,219 @@ async def analizar_cv(
             data["formato_markdown"],
             data["logros_markdown"],
             data["palabras_clave_markdown"],
+            data["cierre_markdown"],
+        )
+        if parte
+    ).strip()
+    return data
+
+
+@app.post("/api/plan-transicion-carrera")
+async def plan_transicion_carrera(
+    x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
+    rol_objetivo: str = Form(...),
+    descripcion_rol: str = Form(...),
+    herramientas_rol: str = Form(...),
+    situacion_actual: str = Form(...),
+    idioma: str = Form("Español"),
+    cv: UploadFile = File(None),
+):
+    """Capa de IA personalizada de la Guía de Salida Laboral: dado un rol
+    objetivo (de los 44 roles estáticos de Frontend/lib/contenidoCarrera.ts —
+    el frontend manda nombre/descripcion/herramientas de ese archivo como
+    contexto, así el contenido fáctico sigue viviendo en un solo lugar) y la
+    situación actual de la persona (texto libre, más un CV en PDF opcional
+    para un diagnóstico más preciso), devuelve un plan concreto de cómo
+    transicionar a ese rol. Reutiliza extraer_texto_cv/_pdf_executor igual
+    que los otros dos endpoints que procesan PDF."""
+    client = get_client(x_gemini_api_key)
+
+    cv_texto = ""
+    if cv is not None:
+        cv_bytes = await cv.read()
+        if cv_bytes:
+            future = _pdf_executor.submit(extraer_texto_cv, cv, cv_bytes)
+            try:
+                cv_texto = future.result(timeout=PDF_TIMEOUT_SEGUNDOS)
+            except FutureTimeoutError:
+                raise HTTPException(
+                    status_code=400,
+                    detail="El PDF tardó demasiado en procesarse. Probá sin adjuntarlo, o con otro archivo.",
+                )
+            if not cv_texto or len(cv_texto.strip()) < 50:
+                # A diferencia de analizar-cv, acá el CV es un plus opcional,
+                # no el centro del análisis — si no se pudo leer, seguimos
+                # solo con lo que la persona escribió a mano en vez de cortar
+                # el flujo con un error.
+                cv_texto = ""
+
+    bloque_cv = (
+        f"""
+    Además, la persona adjuntó su CV actual. Usalo como la fuente MÁS
+    confiable de su experiencia real (por sobre lo que escribió a mano arriba
+    si hay contradicciones) para el diagnóstico de brecha:
+    ---
+    {cv_texto[:12000]}
+    ---
+    """
+        if cv_texto
+        else """
+    La persona no adjuntó un CV — basá el diagnóstico únicamente en lo que
+    escribió a mano arriba sobre su situación actual. Si es poco específico,
+    trabajá igual con lo que hay, sin inventarle experiencia que no mencionó.
+    """
+    )
+
+    prompt = f"""
+    Actuá como un consultor de carrera experto en transiciones profesionales,
+    asesorando a alguien que quiere pasar a trabajar en un rol específico
+    distinto del que tiene hoy (o entrar por primera vez a ese rol).
+
+    ROL OBJETIVO: {rol_objetivo}
+
+    Descripción de ese rol (contenido de referencia fijo, no lo cuestiones ni
+    lo reescribas, es contexto): {descripcion_rol}
+
+    Herramientas/skills habituales de ese rol (mismo criterio, es contexto):
+    {herramientas_rol}
+
+    Situación actual de la persona, en sus propias palabras (rol actual,
+    años de experiencia, skills que ya tiene, por qué le interesa este rol
+    objetivo):
+    ---
+    {situacion_actual.strip()}
+    ---
+    {bloque_cv}
+
+    REGLA ANTI-INFLACIÓN (igual que en las otras herramientas de este
+    sistema): nunca le sugieras a la persona que se presente con un título,
+    nivel de seniority o experiencia que no tiene todavía. El objetivo de
+    este plan es ayudarla a CONSEGUIR esa experiencia, no a simular que ya la
+    tiene. Si hoy está lejos del rol objetivo, decilo con honestidad y
+    enfocá el plan en achicar esa distancia real, no en maquillarla.
+
+    REGLA ANTI-FABRICACIÓN: no inventes cursos, certificaciones, empresas o
+    plataformas específicas que no sean ampliamente conocidas y reales (está
+    bien nombrar plataformas masivas y reales como Coursera, Udemy, YouTube,
+    freeCodeCamp, LinkedIn Learning, o equivalentes locales conocidas de
+    Argentina/Latam si aplican — pero no inventes nombres de cursos puntuales
+    ni garantices resultados). Nunca prometas un tiempo fijo de conseguir el
+    puesto (nada de "en 3 meses conseguís el trabajo") — el ritmo depende de
+    cada persona; hablá en fases, no en fechas. No le inventes a la persona
+    experiencia, logros o proyectos que no mencionó.
+
+    DIRECTIVAS DE ESTILO PARA EL INFORME:
+    - Escribilo 100% en idioma {idioma}, en Markdown.
+    - Tono directo, cálido y concreto — como un consultor de carrera real
+      que quiere que a esta persona le vaya bien, no un genérico "tips para
+      tu carrera" de internet. Todo lo que sugieras tiene que ser accionable
+      por ESTA persona puntual, no un consejo genérico que serviría para
+      cualquiera.
+    - Usá EXACTAMENTE esta estructura y estos títulos (podés ajustar el
+      contenido, no el formato ni los emojis).
+    - MUY IMPORTANTE, formato Markdown real: cada título numerado va
+      precedido por "## " en su propia línea, con una línea en blanco antes
+      y después. Para listas usá SIEMPRE guion "- ", nunca numeración "1. 2.".
+    - MUY IMPORTANTE: el informe NO va en un solo campo, lo partimos en 5
+      campos de markdown independientes (ver el JSON de abajo) — mismo
+      motivo que en las otras herramientas: el frontend ubica cada sección
+      sin tener que adivinar dónde corta el texto. Cada campo tiene que ser
+      markdown válido y autocontenido, de forma que concatenados en orden
+      con una línea en blanco en el medio formen el informe completo.
+
+    CAMPO "intro_markdown" — contiene:
+
+    ## 🧭 Tu plan para pasar a {rol_objetivo}
+
+    (un párrafo de apertura directo con el diagnóstico general — qué tan
+    cerca o lejos está hoy del rol objetivo, y por qué)
+
+    ## 1. 🎯 Qué tan preparado/a estás hoy
+
+    (un párrafo breve justificando el PUNTAJE_PREPARACION que vas a poner en
+    el JSON, en base a cuánto de lo que ya tiene se solapa con lo que pide
+    el rol objetivo)
+
+    CAMPO "brecha_markdown" — contiene:
+
+    ## 2. 🔍 Lo que ya tenés a favor vs. lo que te falta
+
+    ### ✅ Ya tenés esto a favor
+
+    (con guion "- ", cosas concretas de su situación actual/CV que SÍ le
+    sirven para este rol objetivo, aunque vengan de una experiencia distinta
+    — explicá brevemente por qué cada una es transferible)
+
+    ### 🔲 Esto es lo que te falta
+
+    (con guion "- ", gaps concretos y honestos: skills técnicas, herramientas,
+    tipo de experiencia o credenciales que hoy no tiene y el rol sí pide)
+
+    CAMPO "plan_markdown" — contiene:
+
+    ## 3. 🗺️ Tu hoja de ruta
+
+    (organizá en 3 fases con subtítulos "### Fase 1: ..." / "### Fase 2: ..."
+    / "### Fase 3: ..." — nombralas vos según el contenido, no uses fechas ni
+    plazos fijos. Cada fase con guion "- ": qué aprender/practicar, mencionando
+    tipos de recursos reales — cursos online de plataformas masivas conocidas,
+    documentación oficial, comunidades — sin inventar nombres de cursos
+    puntuales ni URLs)
+
+    CAMPO "portfolio_markdown" — contiene:
+
+    ## 4. 💼 Cómo demostrarlo
+
+    (2-3 ideas CONCRETAS y específicas para ESTE rol objetivo de algo que la
+    persona puede construir/hacer para tener algo real que mostrar — ej. un
+    proyecto con datos públicos, un caso de estudio, una pieza de portfolio —
+    no genérico tipo "hacé un portfolio". Después, un párrafo breve sobre
+    puertas de entrada realistas a este rol — posiciones junior/trainee,
+    pasantías, freelance, o transición interna si aplica — siendo honesto
+    sobre qué tan competitivo es entrar así, sin asegurar resultados)
+
+    CAMPO "cierre_markdown" — contiene:
+
+    ## 5. 🚀 3 próximos pasos para esta semana
+
+    (3 acciones como ítems con guion "- ", concretas, chiquitas y accionables
+    YA — no genéricas tipo "investigá sobre el rol", algo que pueda arrancar
+    hoy mismo)
+
+    Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más
+    (sin bloques de código, sin texto fuera del JSON):
+    {{
+      "puntajes": {{
+        "preparacion": numero_del_1_al_10
+      }},
+      "intro_markdown": "## 🧭 Tu plan para pasar a ...\\n\\n...\\n\\n## 1. 🎯 Qué tan preparado/a estás hoy\\n\\n...",
+      "brecha_markdown": "## 2. 🔍 Lo que ya tenés a favor vs. lo que te falta\\n\\n...",
+      "plan_markdown": "## 3. 🗺️ Tu hoja de ruta\\n\\n...",
+      "portfolio_markdown": "## 4. 💼 Cómo demostrarlo\\n\\n...",
+      "cierre_markdown": "## 5. 🚀 3 próximos pasos para esta semana\\n\\n..."
+    }}
+    """
+
+    texto, modelo_usado = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG_PLAN_CARRERA)
+    data = extraer_json_seguro(texto)
+    data.setdefault("puntajes", {})
+    for campo in (
+        "intro_markdown",
+        "brecha_markdown",
+        "plan_markdown",
+        "portfolio_markdown",
+        "cierre_markdown",
+    ):
+        data.setdefault(campo, "")
+
+    data["modelo_usado"] = modelo_usado
+    data["informe_markdown"] = "\n\n".join(
+        parte
+        for parte in (
+            data["intro_markdown"],
+            data["brecha_markdown"],
+            data["plan_markdown"],
+            data["portfolio_markdown"],
             data["cierre_markdown"],
         )
         if parte
