@@ -118,8 +118,16 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <footer className="text-center text-xs text-slate-500 pb-6">
-          Una herramienta de Freelo HR. <Link href="/nosotros" className="underline hover:text-slate-300">Conocé quién está detrás</Link>.
+        <footer className="text-center pb-6">
+          <Link
+            href="/nosotros"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:-translate-y-0.5 transition-all text-xs text-slate-400"
+          >
+            Powered by{' '}
+            <span className="font-semibold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              FreeloHR
+            </span>
+          </Link>
         </footer>
       </div>
     </div>

@@ -52,9 +52,9 @@ export default function NosotrosPage() {
             </p>
             <p>
               Sé lo difícil que está el mercado laboral últimamente, en áreas Tech y Non-Tech por igual. Y
-              sé lo frustrante que es fracasar en una entrevista — lo viví mil veces, y lo voy a seguir
+              sé lo frustrante que es fracasar en una entrevista, lo viví mil veces, y lo voy a seguir
               viviendo. Por eso arranqué armando un simulador de entrevistas conectado a IA, 100%
-              gratuito, con feedback real sobre oratoria, gap técnico, tono y ritmo de respuesta — y
+              gratuito, con feedback real sobre oratoria, gap técnico, tono y ritmo de respuesta, y
               respuestas modelo para que tengas con qué compararte. El prompt detrás me llevó mucho
               tiempo armarlo: metí ahí toda la materia técnica de RRHH que vengo trabajando hace más de
               una década.
@@ -63,7 +63,7 @@ export default function NosotrosPage() {
               De ahí sumé el resto: optimizar tu CV y tu LinkedIn contra una búsqueda puntual, y un
               simulador de negociación para cuando te llega una oferta. También un plan de carrera con IA
               que te puede ayudar si no sabés bien para dónde apuntar o si querés dar un cambio de rumbo a
-              tu rol profesional — te da asesoramiento como un coach de empleabilidad, mostrándote
+              tu rol profesional. Te da asesoramiento como un coach de empleabilidad, mostrándote
               opciones y herramientas para empezar con ese rol que tanto soñás. Todo con la misma idea:
               democratizar el acceso a herramientas que hoy usan las empresas para reclutar, para que vos
               también sepas cómo funcionan y le puedas sacar ventaja en tu próxima entrevista.
@@ -72,8 +72,8 @@ export default function NosotrosPage() {
             <p>
               Un par de cosas a tener en cuenta: la herramienta se conecta con modelos de Gemini 100%
               gratuitos (necesitás tu propia API Key, también gratis), así que a veces puede tardar un
-              poco más o tirar algún error puntual — simplemente esperá un momento y volvé a intentar. Y
-              te va a pedir crear un usuario, pero es solo para que la app guarde tus resultados — si
+              poco más o tirar algún error puntual. Simplemente esperá un momento y volvé a intentar. Y
+              te va a pedir crear un usuario, pero es solo para que la app guarde tus resultados. Si
               preferís no usar tu mail real, podés inventar uno.
             </p>
           </div>
