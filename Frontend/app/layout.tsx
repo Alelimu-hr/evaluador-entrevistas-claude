@@ -8,10 +8,29 @@ const fraunces = Fraunces({
   display: 'swap',
 })
 
+const TITULO = 'Asistente de Empleabilidad — Herramientas gratis con IA'
+const DESCRIPCION =
+  'Practicá entrevistas, optimizá tu CV y tu LinkedIn, armá tu plan de carrera y preparate para negociar tu oferta. Gratis, con tu propia API Key de Gemini.'
+
 export const metadata = {
-  title: 'Asistente de Empleabilidad — Herramientas gratis con IA',
-  description:
-    'Practicá entrevistas, optimizá tu CV y tu LinkedIn, armá tu plan de carrera y preparate para negociar tu oferta. Gratis, con tu propia API Key de Gemini.',
+  metadataBase: new URL('https://chelaburo.com'),
+  title: TITULO,
+  description: DESCRIPCION,
+  openGraph: {
+    title: TITULO,
+    description: DESCRIPCION,
+    url: 'https://chelaburo.com',
+    siteName: 'Asistente de Empleabilidad',
+    images: [{ url: '/og-image.png', width: 1200, height: 630 }],
+    locale: 'es_AR',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITULO,
+    description: DESCRIPCION,
+    images: ['/og-image.png'],
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
