@@ -43,6 +43,9 @@ export default async function ProgresoPage() {
           </h1>
           <nav className="flex items-center gap-4 text-sm">
             <Link href="/" className="text-slate-400 hover:text-white transition-colors">
+              🏠 Inicio
+            </Link>
+            <Link href="/simulador" className="text-slate-400 hover:text-white transition-colors">
               🎙 Simulador
             </Link>
             <span className="text-slate-600 hidden sm:inline">{user.email}</span>
@@ -53,7 +56,7 @@ export default async function ProgresoPage() {
           <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-8 rounded-2xl text-center text-slate-600 shadow-xl shadow-purple-950/30 animate-fade-in-up">
             Todavía no completaste ninguna simulación.
             <br />
-            <Link href="/" className="text-indigo-600 underline hover:text-indigo-700">
+            <Link href="/simulador" className="text-indigo-600 underline hover:text-indigo-700">
               Empezá tu primera práctica →
             </Link>
           </div>

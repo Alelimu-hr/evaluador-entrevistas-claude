@@ -246,6 +246,9 @@ export default function CvPage() {
           </h1>
           <nav className="flex items-center gap-4 text-sm">
             <Link href="/" className="text-slate-400 hover:text-white transition-colors">
+              🏠 Inicio
+            </Link>
+            <Link href="/simulador" className="text-slate-400 hover:text-white transition-colors">
               🎙 Simulador de Entrevistas
             </Link>
             <Link href="/linkedin" className="text-slate-400 hover:text-white transition-colors">
@@ -257,7 +260,7 @@ export default function CvPage() {
         {!hayResultado && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up">
             <Link
-              href="/"
+              href="/simulador"
               className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
             >
               <p className="text-2xl">🎙️</p>
