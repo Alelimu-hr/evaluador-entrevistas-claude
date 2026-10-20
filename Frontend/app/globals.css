@@ -100,6 +100,19 @@ body {
     radial-gradient(ellipse 60% 40% at 100% 0%, rgba(37, 99, 235, 0.15), transparent);
 }
 
+/* Fondo "mesh gradient" para la landing pública — más formas/color que .bg-app
+   (que se usa en todas las pantallas internas), pensado para dar una primera
+   impresión más cuidada sin usar fotos (evita el look de banco de imágenes
+   genérico, pesa casi nada, y no hay temas de derechos de uso). */
+.bg-landing {
+  background-color: #050811;
+  background-image: radial-gradient(ellipse 70% 50% at 12% -10%, rgba(124, 58, 237, 0.32), transparent),
+    radial-gradient(ellipse 60% 45% at 105% 5%, rgba(37, 99, 235, 0.24), transparent),
+    radial-gradient(ellipse 55% 45% at 50% 105%, rgba(168, 85, 247, 0.18), transparent),
+    radial-gradient(ellipse 40% 35% at 90% 85%, rgba(59, 130, 246, 0.16), transparent);
+  background-attachment: fixed;
+}
+
 /* Estilos del markdown del informe final. OJO: el plugin @tailwindcss/typography
    no está instalado, así que las clases "prose" que se usaban antes no hacían
    NADA (el texto se veía plano, sin jerarquía visual). Estos estilos reemplazan

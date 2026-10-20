@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 // aparte, comparado con match exacto. "/login" sí usa startsWith, por si en
 // el futuro hay subrutas tipo /login/reset-password.
 const RUTA_PUBLICA_EXACTA = '/';
-const RUTAS_PUBLICAS_PREFIJO = ['/login'];
+const RUTAS_PUBLICAS_PREFIJO = ['/login', '/nosotros'];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });

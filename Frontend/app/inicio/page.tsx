@@ -36,6 +36,9 @@ export default function InicioPage() {
             <Link href="/progreso" className="text-slate-400 hover:text-white transition-colors">
               📈 Mi Progreso
             </Link>
+            <Link href="/nosotros" className="text-slate-400 hover:text-white transition-colors">
+              🙋 Nosotros
+            </Link>
             {userEmail && <span className="text-slate-600 hidden sm:inline">{userEmail}</span>}
             <button
               onClick={handleCerrarSesion}
@@ -54,8 +57,8 @@ export default function InicioPage() {
             ¿Con qué querés avanzar hoy?
           </h2>
           <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
-            Elegí una herramienta para empezar. Son gratis porque usás tu propia API Key de Gemini, que es
-            la que te conecta con el modelo de IA.
+            Elegí una herramienta para empezar. Son gratis: usás tu propia API Key de Gemini, la que te
+            conecta con el modelo de IA.
           </p>
         </div>
 

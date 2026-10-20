@@ -63,7 +63,7 @@ function TarjetaHerramienta({ href, emoji, titulo, texto }: { href: string; emoj
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-app text-white p-6 font-sans">
+    <div className="min-h-screen bg-landing text-white p-6 font-sans">
       <div className="max-w-4xl mx-auto space-y-12">
         {/* Header */}
         <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
@@ -93,8 +93,8 @@ export default function LandingPage() {
             para negociar tu oferta — con feedback de IA, paso a paso.
           </p>
           <p className="text-slate-400 text-sm mt-3 max-w-xl mx-auto">
-            100% gratis, para siempre: funciona con tu propia API Key de Gemini (también gratis), que es la
-            que te conecta directo con el modelo de IA — por eso no tiene costo para vos, y nunca la guardamos.
+            Gratis para siempre: usás tu propia API Key de Gemini, la que te conecta con el modelo de IA —
+            nunca la guardamos.
           </p>
           <Link
             href="/login"
@@ -119,7 +119,7 @@ export default function LandingPage() {
         </div>
 
         <footer className="text-center text-xs text-slate-500 pb-6">
-          Una herramienta de Freelo HR.
+          Una herramienta de Freelo HR. <Link href="/nosotros" className="underline hover:text-slate-300">Conocé quién está detrás</Link>.
         </footer>
       </div>
     </div>
