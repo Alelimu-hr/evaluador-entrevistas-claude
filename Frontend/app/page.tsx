@@ -67,7 +67,7 @@ export default function InicioPage() {
           >
             <p className="text-3xl">🧭</p>
             <p className="font-semibold text-slate-800 mt-2">Guía de Salida Laboral</p>
-            <p className="text-xs text-slate-500 mt-1">Explorá 44 roles en 9 áreas y armá tu plan de carrera con IA para entrar al que te interesa.</p>
+            <p className="text-xs text-slate-500 mt-1">Explorá áreas y roles, y armá tu plan de carrera con IA para entrar al que te interesa.</p>
           </Link>
           <Link
             href="/cv"

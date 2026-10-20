@@ -260,7 +260,7 @@ export default function CvPage() {
             >
               <p className="text-2xl">🧭</p>
               <p className="font-semibold text-slate-800 text-sm mt-1.5">Guía de Salida Laboral</p>
-              <p className="text-xs text-slate-500 mt-0.5">Explorá 44 roles en 9 áreas y armá tu plan de carrera con IA para entrar al que te interesa.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Explorá áreas y roles, y armá tu plan de carrera con IA para entrar al que te interesa.</p>
             </Link>
             <div className="relative overflow-hidden text-left p-4 rounded-2xl border border-transparent bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-lg shadow-purple-500/30">
               <span className="absolute top-3 right-3 text-[10px] font-semibold uppercase tracking-wide text-white/70">

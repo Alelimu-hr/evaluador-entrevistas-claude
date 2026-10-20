@@ -244,7 +244,7 @@ export default function GuiaCarreraPage() {
               </span>
               <p className="text-2xl">🧭</p>
               <p className="font-semibold text-white text-sm mt-1.5">Guía de Salida Laboral</p>
-              <p className="text-xs text-white/80 mt-0.5">Explorá 44 roles en 9 áreas y armá tu plan de carrera con IA para entrar al que te interesa.</p>
+              <p className="text-xs text-white/80 mt-0.5">Explorá áreas y roles, y armá tu plan de carrera con IA para entrar al que te interesa.</p>
             </div>
             <Link
               href="/cv"
