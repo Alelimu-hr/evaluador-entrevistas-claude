@@ -47,9 +47,8 @@ export default function NosotrosPage() {
 
           <div className="space-y-4 text-sm leading-relaxed text-slate-700">
             <p>
-              Armé esta herramienta como mi granito de arena para la comunidad. Me frustra bastante cómo
-              se usa LinkedIn hoy: fotos sin sentido, mensajes armados con IA solo para juntar likes y
-              contactos. Quise hacer algo distinto: útil de verdad, gratis, sin letra chica.
+              Armé esta herramienta como mi granito de arena para la comunidad. Quise hacer algo distinto:
+              útil de verdad, gratis, sin letra chica.
             </p>
             <p>
               Sé lo difícil que está el mercado laboral últimamente, en áreas Tech y Non-Tech por igual. Y
@@ -61,11 +60,13 @@ export default function NosotrosPage() {
               una década.
             </p>
             <p>
-              De ahí sumé el resto: optimizar tu CV y tu LinkedIn contra una búsqueda puntual, un plan de
-              carrera con IA para quien quiere dar un salto a otro rol, y un simulador de negociación para
-              cuando te llega una oferta. Todo con la misma idea: democratizar el acceso a herramientas
-              que hoy usan las empresas para reclutar, para que vos también sepas cómo funcionan y le
-              puedas sacar ventaja en tu próxima entrevista.
+              De ahí sumé el resto: optimizar tu CV y tu LinkedIn contra una búsqueda puntual, y un
+              simulador de negociación para cuando te llega una oferta. También un plan de carrera con IA
+              que te puede ayudar si no sabés bien para dónde apuntar o si querés dar un cambio de rumbo a
+              tu rol profesional — te da asesoramiento como un coach de empleabilidad, mostrándote
+              opciones y herramientas para empezar con ese rol que tanto soñás. Todo con la misma idea:
+              democratizar el acceso a herramientas que hoy usan las empresas para reclutar, para que vos
+              también sepas cómo funcionan y le puedas sacar ventaja en tu próxima entrevista.
             </p>
             <p>Es un regalo a la comunidad, ojalá te sirva.</p>
             <p>
