@@ -33,10 +33,12 @@ export default function NosotrosPage() {
 
         <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] text-slate-800 rounded-2xl p-8 shadow-xl shadow-purple-950/30 animate-fade-in-up space-y-6">
           <div className="flex flex-col items-center text-center gap-3">
-            {/* TODO: reemplazar por la foto real de Alexis (ver /public/alexis.jpg) */}
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-200 to-purple-200 flex items-center justify-center text-2xl font-semibold text-purple-700 border-4 border-white shadow-md overflow-hidden">
-              AS
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/alexis-avatar.jpg"
+              alt="Alexis Sarmiento"
+              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
+            />
             <div>
               <p className="font-semibold text-lg">Alexis Sarmiento</p>
               <p className="text-sm text-slate-500">Lic. en Relaciones del Trabajo · Founder de Freelo HR</p>
