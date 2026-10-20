@@ -60,9 +60,14 @@ export default function NegociacionPage() {
         const data = await res.json();
         const valido = !!data.valido;
         setEstadoKey(valido ? 'valida' : 'invalida');
-        if (valido) registrarEventoFunnel('negociacion', 'api_key_valida'); // 2do escalón
+        if (valido) {
+          registrarEventoFunnel('negociacion', 'api_key_valida'); // 2do escalón
+        } else {
+          registrarEventoFunnel('negociacion', 'api_key_invalida'); // intentó, pero no pasó
+        }
       } catch {
         setEstadoKey('invalida');
+        registrarEventoFunnel('negociacion', 'api_key_invalida');
       }
     }, 600);
     return () => clearTimeout(timeoutId);
@@ -185,7 +190,7 @@ export default function NegociacionPage() {
             💬 Negociá tu oferta
           </h1>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/inicio" className="text-slate-400 hover:text-white transition-colors">
               🏠 Inicio
             </Link>
             <Link href="/simulador" className="text-slate-400 hover:text-white transition-colors">

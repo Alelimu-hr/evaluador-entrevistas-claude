@@ -77,9 +77,14 @@ export default function LinkedinPage() {
         const data = await res.json();
         const valido = !!data.valido;
         setEstadoKey(valido ? 'valida' : 'invalida');
-        if (valido) registrarEventoFunnel('linkedin', 'api_key_valida'); // 2do escalón
+        if (valido) {
+          registrarEventoFunnel('linkedin', 'api_key_valida'); // 2do escalón
+        } else {
+          registrarEventoFunnel('linkedin', 'api_key_invalida'); // intentó, pero no pasó
+        }
       } catch {
         setEstadoKey('invalida');
+        registrarEventoFunnel('linkedin', 'api_key_invalida');
       }
     }, 600);
     return () => clearTimeout(timeoutId);
@@ -220,7 +225,7 @@ export default function LinkedinPage() {
             💼 Mejorá tu Perfil de LinkedIn
           </h1>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/inicio" className="text-slate-400 hover:text-white transition-colors">
               🏠 Inicio
             </Link>
             <Link href="/simulador" className="text-slate-400 hover:text-white transition-colors">

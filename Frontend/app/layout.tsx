@@ -9,8 +9,9 @@ const fraunces = Fraunces({
 })
 
 export const metadata = {
-  title: 'Simulador de Entrevistas',
-  description: 'Practicá entrevistas laborales con feedback de IA',
+  title: 'Asistente de Empleabilidad — Herramientas gratis con IA',
+  description:
+    'Practicá entrevistas, optimizá tu CV y tu LinkedIn, armá tu plan de carrera y preparate para negociar tu oferta. Gratis, con tu propia API Key de Gemini.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

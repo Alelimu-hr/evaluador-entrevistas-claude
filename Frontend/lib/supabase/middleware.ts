@@ -1,7 +1,13 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const RUTAS_PUBLICAS = ['/login'];
+// "/" (la landing pública de marketing) es pública, pero OJO: no puede ir en
+// una lista chequeada con startsWith, porque TODAS las rutas del sitio
+// empiezan con "/" — eso dejaría la app entera sin protección. Por eso va
+// aparte, comparado con match exacto. "/login" sí usa startsWith, por si en
+// el futuro hay subrutas tipo /login/reset-password.
+const RUTA_PUBLICA_EXACTA = '/';
+const RUTAS_PUBLICAS_PREFIJO = ['/login'];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -29,7 +35,9 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const esRutaPublica = RUTAS_PUBLICAS.some((r) => request.nextUrl.pathname.startsWith(r));
+  const esRutaPublica =
+    request.nextUrl.pathname === RUTA_PUBLICA_EXACTA ||
+    RUTAS_PUBLICAS_PREFIJO.some((r) => request.nextUrl.pathname.startsWith(r));
 
   if (!user && !esRutaPublica) {
     const url = request.nextUrl.clone();
@@ -39,7 +47,15 @@ export async function updateSession(request: NextRequest) {
 
   if (user && request.nextUrl.pathname.startsWith('/login')) {
     const url = request.nextUrl.clone();
-    url.pathname = '/';
+    url.pathname = '/inicio';
+    return NextResponse.redirect(url);
+  }
+
+  // Alguien ya logueado que entra a la landing pública ("/") no necesita
+  // ver el pitch de nuevo — lo mandamos directo al selector de herramientas.
+  if (user && request.nextUrl.pathname === RUTA_PUBLICA_EXACTA) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/inicio';
     return NextResponse.redirect(url);
   }
 

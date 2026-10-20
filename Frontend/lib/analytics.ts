@@ -2,17 +2,27 @@ import { createClient } from '@/lib/supabase/client';
 
 export type HerramientaFunnel = 'entrevista' | 'linkedin' | 'cv' | 'plan_carrera' | 'negociacion';
 
-// Los 4 escalones del embudo, iguales para las cinco herramientas, para poder
+// Los escalones del embudo, iguales para las cinco herramientas, para poder
 // comparar peras con peras en una sola query de SQL. "plan_carrera" es la capa
 // de IA personalizada de la Guía de Salida Laboral ("cómo entro a este rol") —
 // a diferencia de navegar la guía en sí (que es puro contenido estático y no
 // se trackea, ver Frontend/app/guia-carrera/page.tsx), esto SÍ usa IA y API
 // Key, así que entra en el mismo modelo de embudo que las otras:
 // 1. formulario_visto     -> entró logueado a la pantalla inicial
-// 2. api_key_valida       -> pegó una API Key y el backend la validó como correcta
-// 3. envio_formulario     -> completó el resto del formulario y le dio al botón
-// 4. completado_exito     -> el backend respondió OK y vio el resultado
-export type PasoFunnel = 'formulario_visto' | 'api_key_valida' | 'envio_formulario' | 'completado_exito';
+// 2. api_key_invalida     -> pegó algo en el campo de API Key pero el backend
+//                            la rechazó (o falló la validación por conexión).
+//                            Sirve para distinguir "ni intentó poner una key"
+//                            de "la intentó poner y se le complicó" dentro de
+//                            la caída que hay en este escalón del embudo.
+// 3. api_key_valida       -> pegó una API Key y el backend la validó como correcta
+// 4. envio_formulario     -> completó el resto del formulario y le dio al botón
+// 5. completado_exito     -> el backend respondió OK y vio el resultado
+export type PasoFunnel =
+  | 'formulario_visto'
+  | 'api_key_invalida'
+  | 'api_key_valida'
+  | 'envio_formulario'
+  | 'completado_exito';
 
 // Registra un paso del embudo de uso, para poder ver en qué escalón se cae la
 // gente entre "se inscribió" y "completó una prueba" (hoy solo se ve el
