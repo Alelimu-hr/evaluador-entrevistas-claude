@@ -31,6 +31,9 @@ export const metadata = {
     description: DESCRIPCION,
     images: ['/og-image.png'],
   },
+  verification: {
+    google: 'MTNyYmGKXNxXjJQGTTe9ev7CBNvSHG66c4snvvOEtCQ',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
