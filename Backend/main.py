@@ -178,8 +178,13 @@ JSON_CONFIG_CV = types.GenerateContentConfig(
     temperature=0.1,
 )
 
-# Mismo criterio que las dos de arriba.
+# Mismo criterio que las de arriba.
 JSON_CONFIG_PLAN_CARRERA = types.GenerateContentConfig(
+    temperature=0.1,
+)
+
+# Mismo criterio que las de arriba.
+JSON_CONFIG_NEGOCIACION = types.GenerateContentConfig(
     temperature=0.1,
 )
 
@@ -1533,6 +1538,16 @@ async def plan_transicion_carrera(
     cada persona; hablá en fases, no en fechas. No le inventes a la persona
     experiencia, logros o proyectos que no mencionó.
 
+    REGLA ANTI-NARRATIVA INVENTADA: no le atribuyas a la persona motivos,
+    emociones o circunstancias personales que no escribió explícitamente en
+    su situación actual (ej. "dada tu desmotivación actual", "estás
+    agotado/a de tu rol actual", "no te sentís realizado/a") — aunque suene
+    empático, es inventar algo sobre su vida privada que no te contó. Si no
+    dijo por qué quiere este cambio, no lo expliques ni lo asumas: andá
+    directo al diagnóstico de la brecha entre su situación real (la que sí
+    describió) y el rol objetivo, sin narrarle una motivación que no es tuya
+    para inventar.
+
     DIRECTIVAS DE ESTILO PARA EL INFORME:
     - Escribilo 100% en idioma {idioma}, en Markdown.
     - Tono directo, cálido y concreto — como un consultor de carrera real
@@ -1652,11 +1667,220 @@ async def plan_transicion_carrera(
     return data
 
 
+@app.post("/api/plan-negociacion")
+async def plan_negociacion(
+    x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
+    oferta_recibida: str = Form(...),
+    situacion_actual: str = Form(...),
+    prioridades: str = Form(None),
+    idioma: str = Form("Español"),
+):
+    """Da un plan de negociación salarial de una sola pasada (sin ida y
+    vuelta interactivo, a diferencia del simulador de entrevistas) — Ale
+    eligió esta versión más simple y rápida de construir en vez de un
+    roleplay turno a turno. Reutiliza el mismo patrón de las otras
+    herramientas: un llamado a Gemini, informe partido en campos de
+    markdown independientes."""
+    client = get_client(x_gemini_api_key)
+
+    bloque_prioridades = (
+        f"\n    Qué le importa a la persona además del sueldo: {prioridades.strip()}\n"
+        if prioridades and prioridades.strip()
+        else "\n    La persona no indicó prioridades más allá del sueldo — no asumas ninguna, enfocate en la compensación.\n"
+    )
+
+    prompt = f"""
+    Actuá como un consultor de carrera experto en negociación salarial,
+    asesorando a alguien que recibió una oferta de trabajo (o está por pedir
+    un aumento) y quiere negociar mejor antes de responder.
+
+    Oferta recibida (pegada por la persona, puede incluir sueldo, beneficios,
+    o estar incompleta):
+    ---
+    {oferta_recibida.strip()}
+    ---
+
+    Situación actual de la persona (sueldo actual o situación previa, años de
+    experiencia, y cualquier otra oferta o alternativa real que tenga — esto
+    es su principal poder de negociación):
+    ---
+    {situacion_actual.strip()}
+    ---
+    {bloque_prioridades}
+
+    REGLA ANTI-FABRICACIÓN (muy importante, es la más importante de esta
+    herramienta): NUNCA inventes una cifra, rango salarial o porcentaje de
+    mercado que no te haya dado la persona — no tenés datos reales y
+    actualizados de sueldos por rol/empresa/región, e inventar un número
+    suena autoritativo pero puede estar completamente mal y hacerle perder
+    credibilidad en la negociación real. Si hace falta un número concreto en
+    algún punto (ej. "pedí un X% más"), usá un placeholder explícito como
+    "[definí tu número objetivo]" en vez de inventarlo — nunca falta, nunca
+    es opcional.
+
+    REGLA ANTI-DESHONESTIDAD (igual de importante): nunca sugieras que la
+    persona mienta — ni sobre tener otras ofertas que no tiene, ni sobre su
+    experiencia, ni sobre nada. Si en "Situación actual" no mencionó otras
+    ofertas reales, NO le sugieras decir que las tiene. Todo el plan tiene
+    que funcionar siendo 100% honesto sobre su situación real.
+
+    REGLA ANTI-NARRATIVA INVENTADA: no le atribuyas a la persona motivos,
+    emociones o circunstancias personales que no escribió explícitamente
+    (ej. "dado lo desgastante que fue tu año", "sabiendo lo mal que la
+    pasaste en tu trabajo actual") — aunque suene empático, es inventar algo
+    de su vida privada que no te contó. Si no lo dijo, no lo asumas.
+
+    DIRECTIVAS DE ESTILO PARA EL INFORME:
+    - Escribilo 100% en idioma {idioma}, en Markdown.
+    - Tono directo y práctico, como un consultor real preparando a alguien
+      para una conversación que va a tener pronto — no genérico.
+    - Usá EXACTAMENTE esta estructura y estos títulos (podés ajustar el
+      contenido, no el formato ni los emojis).
+    - MUY IMPORTANTE, formato Markdown real: cada título numerado va
+      precedido por "## " en su propia línea, con una línea en blanco antes
+      y después. Para listas usá SIEMPRE guion "- ", nunca numeración "1. 2.".
+    - MUY IMPORTANTE: el informe NO va en un solo campo, lo partimos en 6
+      campos de markdown independientes (ver el JSON de abajo) — mismo
+      motivo que en las otras herramientas: el frontend ubica cada sección
+      sin adivinar dónde corta el texto. Cada campo tiene que ser markdown
+      válido y autocontenido, de forma que concatenados en orden con una
+      línea en blanco en el medio formen el informe completo.
+
+    CAMPO "intro_markdown" — contiene:
+
+    ## 💬 Tu plan de negociación
+
+    (un párrafo de apertura directo con el veredicto general sobre esta
+    oferta/situación)
+
+    ## 1. 🔍 Tu posición negociadora
+
+    (un párrafo justificando el PUNTAJE_POSICION que vas a poner en el JSON
+    — qué tan fuerte o débil es su poder de negociación hoy, en base a lo
+    que escribió, siendo honesto si es una posición débil)
+
+    CAMPO "analisis_markdown" — contiene:
+
+    ## 2. ⚖️ Qué jugás a favor y qué jugás en contra
+
+    ### ✅ A tu favor
+
+    (con guion "- ", elementos reales de su situación que fortalecen su
+    negociación)
+
+    ### 🔲 En contra o a tener en cuenta
+
+    (con guion "- ", elementos reales que debilitan su posición o riesgos a
+    manejar con cuidado)
+
+    CAMPO "argumentos_markdown" — contiene:
+
+    ## 3. 🎯 Qué pedir y por qué
+
+    (más allá del número de sueldo en sí —que la persona tiene que definir
+    ella misma, ver la regla anti-fabricación—, qué OTRAS cosas concretas
+    puede pedir según lo que importa según "prioridades" si las dio: bono de
+    firma, días extra de vacaciones, home office, título, fecha de revisión
+    salarial a los 6 meses, etc. Con guion "- ", cada pedido con una breve
+    justificación de por qué es razonable pedirlo en base a su situación)
+
+    CAMPO "guion_markdown" — contiene:
+
+    ## 4. 💬 Frases para usar
+
+    (3-4 frases o mini-guiones ya redactados, en primera persona, listos
+    para adaptar y decir en la conversación real: cómo abrir el pedido, cómo
+    contrapropuestas, cómo pedir tiempo para pensar sin sonar indeciso/a)
+
+    CAMPO "objeciones_markdown" — contiene:
+
+    ## 5. 🛡️ Cómo responder a las objeciones más comunes
+
+    (3-4 objeciones típicas que un reclutador/manager puede poner —ej. "no
+    tenemos presupuesto para eso", "esta es nuestra oferta final", "todos
+    arrancan en este rango"— cada una como "**Objeción:** ..." seguida de
+    "**Cómo responder:** ..." con una respuesta concreta y honesta)
+
+    CAMPO "cierre_markdown" — contiene:
+
+    ## 6. 🚀 3 cosas para definir antes de responder
+
+    (3 acciones como ítems con guion "- ", concretas, para que la persona
+    resuelva ANTES de hablar con la empresa — ej. definir su número mínimo
+    aceptable, confirmar si una alternativa que mencionó es real y en pie,
+    etc. — NO uses numeración acá)
+
+    Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más
+    (sin bloques de código, sin texto fuera del JSON):
+    {{
+      "puntajes": {{
+        "posicion": numero_del_1_al_10
+      }},
+      "intro_markdown": "## 💬 Tu plan de negociación\\n\\n...\\n\\n## 1. 🔍 Tu posición negociadora\\n\\n...",
+      "analisis_markdown": "## 2. ⚖️ Qué jugás a favor y qué jugás en contra\\n\\n...",
+      "argumentos_markdown": "## 3. 🎯 Qué pedir y por qué\\n\\n...",
+      "guion_markdown": "## 4. 💬 Frases para usar\\n\\n...",
+      "objeciones_markdown": "## 5. 🛡️ Cómo responder a las objeciones más comunes\\n\\n...",
+      "cierre_markdown": "## 6. 🚀 3 cosas para definir antes de responder\\n\\n..."
+    }}
+    """
+
+    texto, modelo_usado = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG_NEGOCIACION)
+    data = extraer_json_seguro(texto)
+    data.setdefault("puntajes", {})
+    for campo in (
+        "intro_markdown",
+        "analisis_markdown",
+        "argumentos_markdown",
+        "guion_markdown",
+        "objeciones_markdown",
+        "cierre_markdown",
+    ):
+        data.setdefault(campo, "")
+
+    data["modelo_usado"] = modelo_usado
+    data["informe_markdown"] = "\n\n".join(
+        parte
+        for parte in (
+            data["intro_markdown"],
+            data["analisis_markdown"],
+            data["argumentos_markdown"],
+            data["guion_markdown"],
+            data["objeciones_markdown"],
+            data["cierre_markdown"],
+        )
+        if parte
+    ).strip()
+    return data
+
+
+# Rango amplio de emojis Unicode — ReportLab con las fuentes base (Helvetica,
+# las que usamos acá) no tiene esos glifos y los dibuja como un cuadrado
+# "tofu" (■), así que los sacamos del texto que va al PDF. Los emojis se
+# siguen viendo perfecto en pantalla (ahí los renderiza el navegador) — esto
+# es solo para la descarga. Ale lo encontró mirando el PDF de un plan de
+# carrera: todos los "■" eran emojis que no se pudieron dibujar.
+_PATRON_EMOJI = re.compile(
+    "["
+    "\U0001F300-\U0001FAFF"  # pictografías, emoticones, símbolos, transporte, etc.
+    "\U00002600-\U000027BF"  # símbolos misceláneos y dingbats (✅❌⚖️🔑✨ etc.)
+    "\U0001F1E6-\U0001F1FF"  # banderas (pares de letras regionales)
+    "\U00002190-\U000021FF"  # flechas
+    "\U00002B00-\U00002BFF"  # símbolos y flechas varios
+    "\U0000FE0F"  # variation selector (modificador de presentación emoji)
+    "\U0000200D"  # zero-width joiner (emojis compuestos, ej. 🧑‍💼)
+    "]+",
+    flags=re.UNICODE,
+)
+
+
 def _escapar_para_reportlab(texto: str) -> str:
     return texto.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def _inline_markdown_a_reportlab(texto: str) -> str:
+    texto = _PATRON_EMOJI.sub("", texto)
+    texto = re.sub(r" {2,}", " ", texto).strip()  # colapsa el espacio doble que deja el emoji sacado
     texto = _escapar_para_reportlab(texto)
     texto = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", texto)
     return texto

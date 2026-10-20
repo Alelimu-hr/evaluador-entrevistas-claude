@@ -229,19 +229,22 @@ export default function GuiaCarreraPage() {
             <Link href="/cv" className="text-slate-400 hover:text-white transition-colors">
               📄 CV
             </Link>
+            <Link href="/negociacion" className="text-slate-400 hover:text-white transition-colors">
+              💬 Negociación
+            </Link>
           </nav>
         </header>
 
-        {/* Selector de las 4 herramientas */}
+        {/* Selector de las 5 herramientas */}
         {!area && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 animate-fade-in-up">
             <div className="relative overflow-hidden text-left p-4 rounded-2xl border border-transparent bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-lg shadow-purple-500/30">
               <span className="absolute top-3 right-3 text-[10px] font-semibold uppercase tracking-wide text-white/70">
                 Estás acá
               </span>
               <p className="text-2xl">🧭</p>
               <p className="font-semibold text-white text-sm mt-1.5">Guía de Salida Laboral</p>
-              <p className="text-xs text-white/80 mt-0.5">Explorá áreas y roles para saber hacia dónde apuntar.</p>
+              <p className="text-xs text-white/80 mt-0.5">Explorá 44 roles en 9 áreas y armá tu plan de carrera con IA para entrar al que te interesa.</p>
             </div>
             <Link
               href="/cv"
@@ -270,6 +273,14 @@ export default function GuiaCarreraPage() {
               <p className="text-2xl">🎙️</p>
               <p className="font-semibold text-slate-800 text-sm mt-1.5">Practicá tu entrevista</p>
               <p className="text-xs text-slate-500 mt-0.5">Simulá una entrevista real y recibí feedback con IA.</p>
+            </Link>
+            <Link
+              href="/negociacion"
+              className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
+            >
+              <p className="text-2xl">💬</p>
+              <p className="font-semibold text-slate-800 text-sm mt-1.5">Negociá tu oferta</p>
+              <p className="text-xs text-slate-500 mt-0.5">Plan concreto para negociar sueldo y condiciones.</p>
             </Link>
           </div>
         )}

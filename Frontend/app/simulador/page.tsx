@@ -554,14 +554,14 @@ export default function Home() {
         </header>
 
         {paso === 'form' && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 animate-fade-in-up">
             <Link
               href="/guia-carrera"
               className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
             >
               <p className="text-2xl">🧭</p>
               <p className="font-semibold text-slate-800 text-sm mt-1.5">Guía de Salida Laboral</p>
-              <p className="text-xs text-slate-500 mt-0.5">Explorá áreas y roles para saber hacia dónde apuntar.</p>
+              <p className="text-xs text-slate-500 mt-0.5">Explorá 44 roles en 9 áreas y armá tu plan de carrera con IA para entrar al que te interesa.</p>
             </Link>
             <Link
               href="/cv"
@@ -591,6 +591,14 @@ export default function Home() {
               <p className="font-semibold text-white text-sm mt-1.5">Practicá tu entrevista</p>
               <p className="text-xs text-white/80 mt-0.5">Simulá una entrevista real y recibí feedback con IA.</p>
             </div>
+            <Link
+              href="/negociacion"
+              className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
+            >
+              <p className="text-2xl">💬</p>
+              <p className="font-semibold text-slate-800 text-sm mt-1.5">Negociá tu oferta</p>
+              <p className="text-xs text-slate-500 mt-0.5">Plan concreto para negociar sueldo y condiciones.</p>
+            </Link>
           </div>
         )}
 
