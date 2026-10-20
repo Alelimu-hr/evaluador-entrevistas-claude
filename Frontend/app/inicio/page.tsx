@@ -54,7 +54,8 @@ export default function InicioPage() {
             ¿Con qué querés avanzar hoy?
           </h2>
           <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
-            Elegí una herramienta para empezar. Todas son gratis y usan tu propia API Key de Gemini.
+            Elegí una herramienta para empezar. Son gratis porque usás tu propia API Key de Gemini, que es
+            la que te conecta con el modelo de IA.
           </p>
         </div>
 

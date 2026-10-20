@@ -93,7 +93,8 @@ export default function LandingPage() {
             para negociar tu oferta — con feedback de IA, paso a paso.
           </p>
           <p className="text-slate-400 text-sm mt-3 max-w-xl mx-auto">
-            100% gratis, para siempre: usás tu propia API Key de Gemini (también gratis) y nunca la guardamos.
+            100% gratis, para siempre: funciona con tu propia API Key de Gemini (también gratis), que es la
+            que te conecta directo con el modelo de IA — por eso no tiene costo para vos, y nunca la guardamos.
           </p>
           <Link
             href="/login"
