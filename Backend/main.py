@@ -493,7 +493,7 @@ async def validar_key(x_gemini_api_key: str = Header(None, alias="x-gemini-api-k
 async def generar_pregunta(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
     rol: str = Form(...),
-    seniority: str = Form("Executive"),
+    seniority: str = Form(""),
     enfoque: str = Form("Liderazgo y Estrategia"),
     cantidad_preguntas: str = Form("3"),
     idioma: str = Form("Español"),
@@ -526,12 +526,17 @@ async def generar_pregunta(
     reserva_extra = 2
     total_a_generar = cantidad_int + reserva_extra
 
+    # El seniority es opcional (algunos roles — líder de un área, CFO, etc. —
+    # no siempre tienen un nivel claro, o la JD no lo especifica). Si no se
+    # eligió ninguno, no lo mencionamos y dejamos que Gemini calibre la
+    # dificultad con el rol y la JD, en vez de forzar un nivel arbitrario.
+    linea_seniority = f"Seniority: {seniority.strip()}\n    " if seniority and seniority.strip() else ""
+
     prompt = f"""
     Actúa como un reclutador exigente.
     Genera exactamente {total_a_generar} preguntas de entrevista en idioma {idioma}.
     Rol objetivo: {rol}
-    Seniority: {seniority}
-    Enfoque: {enfoque}
+    {linea_seniority}Enfoque: {enfoque}
     JD: {jd if jd else 'No provista'}
     CV: {cv_texto if cv_texto else 'No provisto'}
 
@@ -646,7 +651,7 @@ async def evaluar_respuesta(
 async def informe_final(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
     rol: str = Form(...),
-    seniority: str = Form("Executive"),
+    seniority: str = Form(""),
     idioma: str = Form("Español"),
     jd: str = Form(None),
     preguntas_meta: str = Form(...),
@@ -667,9 +672,14 @@ async def informe_final(
             detail=f"La cantidad de preguntas ({len(meta)}) no coincide con la de audios ({len(audios)}).",
         )
 
+    # Igual que en /api/generar-pregunta: seniority es opcional. Si no se
+    # especificó, no lo mencionamos en el título (ej. un CFO no necesita que
+    # le agreguemos un nivel al lado del cargo).
+    clausula_seniority = f" con nivel '{seniority.strip()}'" if seniority and seniority.strip() else ""
+
     contents = [f"""
     Sos un Reclutador Executive / Headhunter implacable pero constructivo, evaluando
-    una simulación de entrevista para el puesto '{rol}' con nivel '{seniority}'.
+    una simulación de entrevista para el puesto '{rol}'{clausula_seniority}.
     Job Description: {jd if jd else 'No provista'}.
 
     A continuación vas a escuchar, pregunta por pregunta, los audios reales con las

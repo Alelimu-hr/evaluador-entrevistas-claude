@@ -150,6 +150,12 @@ export const AREAS_CARRERA: AreaCarrera[] = [
           'Lleva los modelos que arma un Data Scientist y los pone a funcionar en producción, a escala y de forma confiable. Es el puente entre Data Science y Desarrollo/Infraestructura.\n\nEs uno de los roles más difíciles de conseguir como primer trabajo en Data: casi siempre se llega acá después de haber sido Data Scientist o Desarrollador Backend, porque exige manejar bien tanto el modelado como la puesta en producción de ese modelo. Si te interesa este camino a largo plazo, el orden más realista es primero afianzarte en Python y alguno de los dos roles de origen, y recién ahí especializarte.',
         herramientas: 'Python, TensorFlow/PyTorch, Docker, Kubernetes, plataformas de ML en la nube (SageMaker, Vertex AI).',
       },
+      {
+        nombre: 'AI Engineer',
+        descripcion:
+          'Construye productos y funcionalidades usando modelos de IA ya entrenados (vía APIs de proveedores como OpenAI, Gemini o Anthropic): arma los prompts, conecta la IA con datos propios (RAG), diseña agentes que ejecutan tareas, y se asegura de que las respuestas sean confiables y el costo esté controlado. A diferencia del ML Engineer, no entrena modelos desde cero: integra y hace funcionar modelos que ya existen dentro de un producto real.\n\nEs uno de los roles más nuevos y con demanda más creciente del mercado, y una puerta de entrada relativamente accesible a IA para quien ya programa: no hace falta una maestría en machine learning, alcanza con buen manejo de Backend (especialmente Python) y entender bien cómo funcionan los modelos de lenguaje. Mucha gente llega acá desde Desarrollo Backend, sumando conocimientos de IA generativa. Si además te interesa el lado más matemático de entrenar modelos propios, el crecimiento natural es hacia ML Engineer o Data Scientist.',
+        herramientas: 'Python, APIs de modelos (OpenAI, Gemini, Claude/Anthropic), frameworks de orquestación (LangChain, LlamaIndex), bases de datos vectoriales (Pinecone, Chroma), Git.',
+      },
     ],
   },
   {
@@ -373,6 +379,37 @@ export const AREAS_CARRERA: AreaCarrera[] = [
         nombre: 'Mejora de Procesos / Calidad (Continuous Improvement)',
         descripcion: 'Aplica metodologías (Lean, Six Sigma, entre otras) para identificar y eliminar ineficiencias en procesos ya existentes de la empresa, en cualquier área.\n\nNo suele ser un primer trabajo: se necesita primero conocer bien cómo funciona una operación (de cualquier área) para después poder identificar dónde mejorarla. Certificaciones en metodologías como Lean o Six Sigma ayudan mucho a formalizar ese conocimiento y a conseguir el salto a este rol.',
         herramientas: 'Herramientas de mapeo de procesos (Visio, Lucidchart), metodologías Lean/Six Sigma.',
+      },
+    ],
+  },
+  {
+    slug: 'educacion',
+    nombre: 'Educación',
+    emoji: '🎓',
+    roles: [
+      {
+        nombre: 'Contenidista / Diseñador Instruccional',
+        descripcion:
+          'Diseña y produce el contenido educativo en sí: guiones de clases, materiales de estudio, ejercicios y evaluaciones, aplicando principios de diseño instruccional para que el contenido realmente enseñe (no solo informe). Trabaja en conjunto con el área Académica para asegurar que el contenido sea correcto y esté actualizado.\n\nEs una puerta de entrada frecuente a ed-tech para gente que viene del mundo docente o de comunicación/redacción, sin necesidad de experiencia previa en tecnología. Ayuda mucho haber dado clases o escrito contenido educativo en cualquier formato, aunque haya sido de forma informal. Desde acá se suele crecer hacia Líder Académico (si el interés es más pedagógico) o hacia Producto (si el interés es más de diseño de la experiencia de aprendizaje en general).',
+        herramientas: 'Herramientas de autor de e-learning (Articulate, Canva, Genially), procesadores de texto/presentaciones, plataformas LMS para publicar el contenido.',
+      },
+      {
+        nombre: 'Líder Académico / Coordinador Pedagógico',
+        descripcion:
+          'Define los lineamientos pedagógicos de los programas: qué se enseña, en qué orden y con qué metodología, y se asegura de que el contenido y los tutores/docentes cumplan con ese estándar de calidad educativa. Suele venir con formación docente o en ciencias de la educación.\n\nCasi nunca es el primer rol de alguien en ed-tech: se llega acá con experiencia real previa dando clases o coordinando equipos docentes, ya sea en educación tradicional o en otra ed-tech. Si te interesa este camino pero estás arrancando, Contenidista o Tutor son los pasos previos más naturales para sumar esa experiencia primero.',
+        herramientas: 'Plataformas LMS, herramientas de seguimiento de indicadores académicos (deserción, aprobación), Excel/Google Sheets.',
+      },
+      {
+        nombre: 'Tutor / Docente Online',
+        descripcion:
+          'Acompaña a los estudiantes durante el curso: responde dudas, corrige entregas, da feedback y motiva a que no abandonen el proceso. Puede ser en vivo (clases sincrónicas) o asincrónico (foros, mensajes, corrección de tareas).\n\nEs la puerta de entrada más accesible a toda el área de Educación: muchas ed-tech contratan tutores con dedicación parcial y sin pedir experiencia previa en el rubro, solo dominio del tema que se enseña y buena comunicación. Es un buen punto de partida si te gusta enseñar pero todavía no tenés el perfil para roles de diseño de contenido o coordinación.',
+        herramientas: 'Plataformas LMS (Moodle, Canvas o propias de cada ed-tech), videollamada (Zoom, Google Meet), foros/mensajería interna.',
+      },
+      {
+        nombre: 'Coordinador de Programas Educativos',
+        descripcion:
+          'Gestiona la logística operativa de que un programa o curso suceda: calendarios, inscripciones, asignación de tutores/docentes a cada grupo, y comunicación con los estudiantes sobre fechas y requisitos. Es un rol más operativo que pedagógico.\n\nEs accesible para quien viene de Operaciones o Atención al Cliente en cualquier industria y quiere sumarse a ed-tech, no hace falta background docente. La organización, el manejo de varias tareas en simultáneo y la buena comunicación pesan más acá que el conocimiento pedagógico en sí.',
+        herramientas: 'LMS, CRM o planillas de seguimiento de estudiantes, herramientas de comunicación masiva (email marketing, WhatsApp Business).',
       },
     ],
   },

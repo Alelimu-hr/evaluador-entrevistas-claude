@@ -137,7 +137,11 @@ export default function Home() {
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
   const [rol, setRol] = useState('');
-  const [seniority, setSeniority] = useState('Semi-Senior');
+  // Opcional: queda vacío por defecto porque hay roles (líder de un área,
+  // CFO, etc.) donde no siempre tiene sentido elegir un nivel, o la JD no lo
+  // deja claro. Si queda vacío, el backend no lo incluye en el título ni en
+  // el prompt — ver Backend/main.py.
+  const [seniority, setSeniority] = useState('');
   const [enfoque, setEnfoque] = useState('Mixta (Técnica + Conductual)');
   const [idioma, setIdioma] = useState('Español');
   const [cantidad, setCantidad] = useState(3);
@@ -717,16 +721,18 @@ export default function Home() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-800 mb-1">Seniority</label>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">
+                    Seniority <span className="font-normal text-slate-400">(opcional)</span>
+                  </label>
                   <select
                     value={seniority}
                     onChange={(e) => setSeniority(e.target.value)}
                     className="w-full bg-white border border-purple-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
                   >
+                    <option value="">Sin especificar</option>
                     <option value="Junior">Junior</option>
                     <option value="Semi-Senior">Semi-Senior</option>
                     <option value="Senior">Senior</option>
-                    <option value="Lead / Tech Lead">Lead / Tech Lead</option>
                   </select>
                 </div>
               </div>
