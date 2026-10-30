@@ -829,6 +829,7 @@ export default function Home() {
 
               <div>
                 <label className="block text-sm font-semibold text-slate-800 mb-1">Cantidad de Preguntas</label>
+                <p className="text-xs text-slate-500 mb-1.5">Elegí cuántas preguntas te gustaría que te haga.</p>
                 <input
                   type="number"
                   min="1"
