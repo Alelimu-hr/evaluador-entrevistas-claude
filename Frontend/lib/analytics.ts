@@ -53,3 +53,29 @@ export async function registrarEventoFunnel(herramienta: HerramientaFunnel, paso
     console.error('No se pudo registrar el evento de funnel:', err);
   }
 }
+
+// Guarda si un informe le sirvió o no a quien lo recibió (botón 👍/👎 al
+// final de cada herramienta, ver components/FeedbackInforme.tsx y la tabla
+// feedback_informe en sql_feedback_informe.sql). Esta es la forma real de
+// "mejorar con el uso" en esta arquitectura: la API de Gemini no aprende
+// sola entre llamadas (no hay fine-tuning automático en BYOK), así que la
+// mejora pasa por revisar periódicamente los casos con 👎 y ajustar el
+// prompt de esa herramienta a mano. Mismo criterio que el resto: nunca
+// bloquea ni rompe la UI si falla.
+export async function registrarFeedbackInforme(herramienta: HerramientaFunnel, util: boolean) {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase.from('feedback_informe').insert({
+      user_id: user.id,
+      herramienta,
+      util,
+    });
+  } catch (err) {
+    console.error('No se pudo registrar el feedback del informe:', err);
+  }
+}

@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { createClient } from '@/lib/supabase/client';
 import { registrarEventoFunnel } from '@/lib/analytics';
 import { Spinner } from '@/components/Spinner';
+import { FeedbackInforme } from '@/components/FeedbackInforme';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -524,6 +525,8 @@ export default function CvPage() {
                 </button>
               </div>
             )}
+
+            <FeedbackInforme herramienta="cv" />
 
             <div className="flex gap-3">
               <button

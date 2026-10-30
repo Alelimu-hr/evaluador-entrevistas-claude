@@ -85,32 +85,32 @@ export const AREAS_CARRERA: AreaCarrera[] = [
       {
         nombre: 'Desarrollo (Dev)',
         descripcion:
-          'Construye el software en sí. **Frontend** arma lo que ve y usa la persona (la pantalla de una app o sitio web). **Backend** arma la lógica que corre "atrás" — qué pasa cuando apretás un botón, cómo se guardan los datos. **Full Stack** hace ambas cosas. **Mobile** se especializa en apps para celular (iOS/Android). Es el área con más roles abiertos del mercado tech en general.',
+          'Construye el software en sí. **Frontend** arma lo que ve y usa la persona (la pantalla de una app o sitio web). **Backend** arma la lógica que corre "atrás" — qué pasa cuando apretás un botón, cómo se guardan los datos. **Full Stack** hace ambas cosas. **Mobile** se especializa en apps para celular (iOS/Android). Es el área con más roles abiertos del mercado tech en general.\n\nEs el área con más demanda sostenida del mercado tech, y también la que más caminos de entrada ofrece: bootcamps, carreras tradicionales, o autodidactas con portfolio propio en GitHub. Para alguien que recién arranca, Frontend suele ser el ingreso más rápido (se ven resultados visuales enseguida, lo que ayuda a mantener la motivación); Backend pide un poco más de lógica y estructuras de datos antes de sentirte productivo. No hace falta saber programar en varios lenguajes para entrar, alcanza con dominar bien uno y entender los fundamentos.',
         herramientas:
           'Depende de la especialización — Frontend: JavaScript/TypeScript, React; Backend: Python, Java, Node.js, SQL; Mobile: Swift/Kotlin o frameworks como React Native/Flutter. Git es transversal a todos.',
       },
       {
         nombre: 'Infraestructura / DevOps / SRE',
         descripcion:
-          'Mantiene los sistemas corriendo y disponibles. Automatiza cómo se despliega el software a producción, gestiona los servidores/la nube (AWS, Azure, GCP) y es quien responde cuando algo se cae a las 3 de la mañana. SRE (Site Reliability Engineering) es una variante más enfocada en confiabilidad y métricas de uptime.',
+          'Mantiene los sistemas corriendo y disponibles. Automatiza cómo se despliega el software a producción, gestiona los servidores/la nube (AWS, Azure, GCP) y es quien responde cuando algo se cae a las 3 de la mañana. SRE (Site Reliability Engineering) es una variante más enfocada en confiabilidad y métricas de uptime.\n\nRara vez es el primer rol de alguien en IT: la mayoría llega acá después de haber pasado por Desarrollo o Soporte Técnico, entendiendo primero cómo funciona una aplicación antes de encargarse de dónde y cómo corre. Es un área con pocos perfiles senior disponibles en el mercado, así que certificaciones de cloud (AWS, Azure) ayudan mucho a acortar ese camino si venís de otro lado dentro de IT.',
         herramientas: 'AWS / Azure / GCP, Docker, Kubernetes, Terraform, CI/CD (GitHub Actions, Jenkins), Linux, scripting en Bash/Python.',
       },
       {
         nombre: 'Seguridad (Ciberseguridad)',
         descripcion:
-          'Protege sistemas y datos de ataques. Incluye desde auditar vulnerabilidades (pentesting) hasta diseñar las políticas de acceso y respuesta ante incidentes. Es un área con alta demanda y relativamente pocos perfiles formados, comparado con Desarrollo.',
+          'Protege sistemas y datos de ataques. Incluye desde auditar vulnerabilidades (pentesting) hasta diseñar las políticas de acceso y respuesta ante incidentes. Es un área con alta demanda y relativamente pocos perfiles formados, comparado con Desarrollo.\n\nSe entra desde varios lugares distintos: hay quien arranca directamente estudiando ciberseguridad, y hay quien llega después de haber trabajado en Desarrollo o Infraestructura y se especializa. Las certificaciones (CompTIA Security+, CEH, OSCP según el nivel) pesan bastante acá, más que en otras áreas de IT, porque son una forma rápida de demostrar conocimiento concreto sin depender solo de la experiencia laboral previa.',
         herramientas: 'Nmap, Burp Suite, Metasploit, Wireshark, plataformas SIEM (Splunk), marcos de referencia como ISO 27001 o NIST.',
       },
       {
         nombre: 'QA / Testing',
         descripcion:
-          'Prueba el software antes de que llegue a la gente, buscando errores. Puede ser manual (probar a mano distintos flujos) o automatizado (escribir código que prueba el código). Es una puerta de entrada frecuente para gente sin background técnico profundo que quiere sumarse a IT.',
+          'Prueba el software antes de que llegue a la gente, buscando errores. Puede ser manual (probar a mano distintos flujos) o automatizado (escribir código que prueba el código). Es una puerta de entrada frecuente para gente sin background técnico profundo que quiere sumarse a IT.\n\nEs probablemente la puerta de entrada más accesible a todo IT: muchas posiciones de QA manual no piden experiencia previa en programación, solo atención al detalle y capacidad de pensar "cómo rompería esto". Desde ahí, el camino natural para crecer en sueldo y en demanda es ir sumando QA automatizado (escribir código que testea código), que abre bastante más mercado que quedarse solo en lo manual.',
         herramientas: 'Selenium, Cypress, Postman, Jira/Azure DevOps para gestión de bugs.',
       },
       {
         nombre: 'Soporte Técnico / Helpdesk',
         descripcion:
-          'Resuelve problemas técnicos del día a día de otros empleados o de clientes externos. Suele ser el primer escalón de IT en muchas empresas y una puerta de entrada común para quien recién arranca en tecnología sin experiencia previa.',
+          'Resuelve problemas técnicos del día a día de otros empleados o de clientes externos. Suele ser el primer escalón de IT en muchas empresas y una puerta de entrada común para quien recién arranca en tecnología sin experiencia previa.\n\nEs, junto con QA, de las entradas más bajas en requisitos formales a todo el mundo IT: muchas empresas solo piden buena comunicación y ganas de resolver problemas, el conocimiento técnico específico se termina de aprender en el puesto. Es un buen punto de partida si todavía no tenés certezas de hacia dónde especializarte, porque desde ahí se ve de cerca cómo funcionan varias áreas de IT antes de elegir una.',
         herramientas: 'Sistemas de ticketing (Zendesk, Freshdesk, ServiceNow), Active Directory, herramientas de acceso remoto.',
       },
     ],
@@ -123,31 +123,31 @@ export const AREAS_CARRERA: AreaCarrera[] = [
       {
         nombre: 'Data Analyst',
         descripcion:
-          'Analiza datos que ya existen para responder preguntas concretas de negocio: "¿por qué bajaron las ventas en marzo?", "¿qué canal trae mejores clientes?".',
+          'Analiza datos que ya existen para responder preguntas concretas de negocio: "¿por qué bajaron las ventas en marzo?", "¿qué canal trae mejores clientes?".\n\nEs de las puertas de entrada más accesibles al mundo de Data: muchas empresas no piden un título específico, sino manejo de Excel/SQL y capacidad de contar una historia clara con los números. Si venís de otra área y sabés armar reportes o te gusta buscar patrones en información, es un buen primer paso. De acá se suele crecer hacia Data Scientist (sumando estadística y programación) o hacia BI Analyst (profundizando en dashboards).',
         herramientas: 'SQL, Excel/Google Sheets, Power BI, Tableau o Looker, a veces Python (pandas) para análisis más complejos.',
       },
       {
         nombre: 'Data Scientist',
         descripcion:
-          'Va un paso más allá del análisis descriptivo: construye modelos estadísticos y predictivos (¿qué cliente es más probable que se dé de baja?). Requiere más formación matemática/estadística y programación que Data Analyst.',
+          'Va un paso más allá del análisis descriptivo: construye modelos estadísticos y predictivos (¿qué cliente es más probable que se dé de baja?). Requiere más formación matemática/estadística y programación que Data Analyst.\n\nNo suele ser el primer rol de alguien que recién entra a Data: la mayoría llega acá después de pasar por Analyst, o viniendo de carreras con base matemática fuerte (ingeniería, estadística, física). Si te interesa este rol pero no tenés esa base, el camino más realista es primero sumar SQL y Python como Analyst, y recién después dar el salto. Es uno de los roles donde más pesa el portfolio propio (proyectos reales, no solo cursos) a la hora de conseguir la primera oportunidad.',
         herramientas: 'Python, R, SQL, Jupyter Notebooks, librerías como scikit-learn, a veces frameworks de deep learning (TensorFlow, PyTorch).',
       },
       {
         nombre: 'Data Engineer',
         descripcion:
-          'Construye y mantiene los "caños" (pipelines) que mueven y ordenan los datos desde donde se generan hasta donde los usan Analysts y Scientists. Es un rol más cercano a Desarrollo que a análisis puro.',
+          'Construye y mantiene los "caños" (pipelines) que mueven y ordenan los datos desde donde se generan hasta donde los usan Analysts y Scientists. Es un rol más cercano a Desarrollo que a análisis puro.\n\nEs un rol que pide una base más sólida de programación que Data Analyst, por eso muchas veces quienes llegan acá vienen de Desarrollo Backend y se especializan en datos, más que de un camino puramente analítico. Si te gusta más construir sistemas que interpretar resultados, puede ser un mejor fit que Data Scientist o Analyst, aunque el conocimiento de SQL sigue siendo la base común a los tres roles.',
         herramientas: 'Python, SQL, bases de datos (PostgreSQL, bases NoSQL), orquestación de pipelines (Airflow, dbt), plataformas cloud (AWS/GCP), a veces Spark.',
       },
       {
         nombre: 'BI Analyst (Business Intelligence)',
         descripcion:
-          'Muy parecido a Data Analyst, con foco específico en reporting y dashboards para que el negocio tome decisiones — suele ser el rol que entrega la "foto" ejecutiva de cómo viene andando la empresa.',
+          'Muy parecido a Data Analyst, con foco específico en reporting y dashboards para que el negocio tome decisiones — suele ser el rol que entrega la "foto" ejecutiva de cómo viene andando la empresa.\n\nComparte casi toda la base técnica con Data Analyst (SQL, dashboards), así que suelen ser roles intercambiables en empresas chicas donde no hay una separación formal entre ambos. La diferencia real aparece en empresas grandes: ahí BI Analyst está más atado a reporting recurrente para el negocio, mientras Data Analyst suele tener más margen para investigar preguntas puntuales y ad hoc.',
         herramientas: 'SQL, Power BI, Tableau o Looker, Excel.',
       },
       {
         nombre: 'ML Engineer (Machine Learning Engineer)',
         descripcion:
-          'Lleva los modelos que arma un Data Scientist y los pone a funcionar en producción, a escala y de forma confiable. Es el puente entre Data Science y Desarrollo/Infraestructura.',
+          'Lleva los modelos que arma un Data Scientist y los pone a funcionar en producción, a escala y de forma confiable. Es el puente entre Data Science y Desarrollo/Infraestructura.\n\nEs uno de los roles más difíciles de conseguir como primer trabajo en Data: casi siempre se llega acá después de haber sido Data Scientist o Desarrollador Backend, porque exige manejar bien tanto el modelado como la puesta en producción de ese modelo. Si te interesa este camino a largo plazo, el orden más realista es primero afianzarte en Python y alguno de los dos roles de origen, y recién ahí especializarte.',
         herramientas: 'Python, TensorFlow/PyTorch, Docker, Kubernetes, plataformas de ML en la nube (SageMaker, Vertex AI).',
       },
     ],
@@ -160,31 +160,31 @@ export const AREAS_CARRERA: AreaCarrera[] = [
       {
         nombre: 'Product Manager (PM)',
         descripcion:
-          'Define QUÉ construir y POR QUÉ, priorizando según impacto de negocio y necesidad real de los usuarios. No programa ni diseña — coordina entre Desarrollo, Diseño y el negocio.',
+          'Define QUÉ construir y POR QUÉ, priorizando según impacto de negocio y necesidad real de los usuarios. No programa ni diseña — coordina entre Desarrollo, Diseño y el negocio.\n\nCasi nunca es un primer trabajo: la mayoría de quienes son PM hoy vienen de haber trabajado antes en Desarrollo, Diseño, Data o incluso Ventas, y usan ese conocimiento de un área específica como punto de apoyo para coordinar el resto. Si te interesa este rol a futuro pero estás empezando tu carrera, lo más realista es primero volverte muy bueno en alguna disciplina puntual (la que sea) y recién después dar el salto a Producto.',
         herramientas: 'Jira, Notion/Confluence, analytics de producto (Amplitude, Mixpanel), Figma (para revisar, no para diseñar).',
       },
       {
         nombre: 'Product Owner (PO)',
         descripcion:
-          'Similar a PM, pero más operativo/táctico: suele trabajar codo a codo con el equipo de desarrollo día a día, gestionando el backlog (típicamente dentro de metodologías ágiles tipo Scrum). En empresas chicas, PM y PO suelen ser la misma persona.',
+          'Similar a PM, pero más operativo/táctico: suele trabajar codo a codo con el equipo de desarrollo día a día, gestionando el backlog (típicamente dentro de metodologías ágiles tipo Scrum). En empresas chicas, PM y PO suelen ser la misma persona.\n\nEn la práctica, suele ser más accesible que Product Manager como primera posición dentro de Producto, porque el foco está puesto en la ejecución día a día con el equipo de desarrollo más que en la estrategia de negocio. Conocer metodologías ágiles (Scrum en particular) ayuda mucho a entrar, incluso sin experiencia previa formal en Producto.',
         herramientas: 'Jira, Trello, Confluence.',
       },
       {
         nombre: 'Product Analyst',
         descripcion:
-          'Analiza datos de uso del producto (qué funciones usa la gente, dónde abandona un flujo) para informar las decisiones de Producto. Es el "Data Analyst" especializado en producto.',
+          'Analiza datos de uso del producto (qué funciones usa la gente, dónde abandona un flujo) para informar las decisiones de Producto. Es el "Data Analyst" especializado en producto.\n\nEs una de las puertas de entrada más directas a Producto para quien viene del mundo de Data: si ya sabés SQL y trabajar con métricas, el salto a analizar específicamente comportamiento de producto (en vez de ventas o finanzas, por ejemplo) no pide aprender herramientas completamente nuevas, sino reorientar el enfoque de análisis.',
         herramientas: 'SQL, Amplitude o Mixpanel, Excel/Google Sheets.',
       },
       {
         nombre: 'UX Researcher',
         descripcion:
-          'Investiga de primera mano las necesidades y el comportamiento real de los usuarios: entrevistas, tests de usabilidad, encuestas. Alimenta tanto a Producto como a Diseño.',
+          'Investiga de primera mano las necesidades y el comportamiento real de los usuarios: entrevistas, tests de usabilidad, encuestas. Alimenta tanto a Producto como a Diseño.\n\nPide habilidades bastante distintas a UX/UI Designer, aunque a veces se las confunde: acá importa más saber diseñar y moderar una entrevista o un test de usabilidad que saber diseñar visualmente. Viene bien tanto de carreras de diseño como de psicología o sociología, siempre que sumes herramientas concretas de investigación de usuarios.',
         herramientas: 'Testeo remoto (UserTesting, Maze), encuestas (Typeform), Figma.',
       },
       {
         nombre: 'UX/UI Designer',
         descripcion:
-          'Diseña la experiencia (UX: el flujo, cómo se siente de usar) y la interfaz (UI: cómo se ve) de un producto digital. *Nota: en muchas empresas este rol reporta a Marketing en vez de a Producto — depende de la estructura de cada compañía, no hay una regla única.*',
+          'Diseña la experiencia (UX: el flujo, cómo se siente de usar) y la interfaz (UI: cómo se ve) de un producto digital. *Nota: en muchas empresas este rol reporta a Marketing en vez de a Producto — depende de la estructura de cada compañía, no hay una regla única.*\n\nEs uno de los roles donde más pesa el portfolio a la hora de conseguir la primera oportunidad, mucho más que el título que tengas. Figma es prácticamente un estándar no negociable: dominarlo bien, junto con 2 o 3 proyectos de caso mostrando tu proceso (no solo el resultado final), suele abrir más puertas que una certificación.',
         herramientas: 'Figma (el estándar hoy), Adobe XD, Sketch.',
       },
     ],
@@ -196,27 +196,27 @@ export const AREAS_CARRERA: AreaCarrera[] = [
     roles: [
       {
         nombre: 'Dirección de Arte',
-        descripcion: 'Define la identidad visual de las piezas de marca — el "cómo se ve y se siente" todo lo que publica la empresa. Suele liderar a Diseñadores Gráficos.',
+        descripcion: 'Define la identidad visual de las piezas de marca — el "cómo se ve y se siente" todo lo que publica la empresa. Suele liderar a Diseñadores Gráficos.\n\nCasi nunca es un primer puesto: se llega acá después de varios años como Diseñador/a Gráfico/a, construyendo tanto el ojo para la identidad visual como la capacidad de dirigir el trabajo de otros diseñadores. Un portfolio sólido y variado importa más que cualquier otra credencial para dar este salto.',
         herramientas: 'Adobe Creative Suite (Photoshop, Illustrator), Figma.',
       },
       {
         nombre: 'Performance Marketing',
-        descripcion: 'Gestiona pauta paga (ads en Google, Meta, LinkedIn, etc.) optimizada por métricas concretas de conversión y retorno de inversión. Es de los roles de Marketing más orientados a números.',
+        descripcion: 'Gestiona pauta paga (ads en Google, Meta, LinkedIn, etc.) optimizada por métricas concretas de conversión y retorno de inversión. Es de los roles de Marketing más orientados a números.\n\nEs de los roles de Marketing más fáciles de entrar sin un título específico en la materia, porque el conocimiento se valida con resultados medibles (campañas, métricas, ROI) más que con un diploma. Certificaciones gratuitas de Google Ads o Meta Blueprint son un punto de entrada común y bien visto incluso sin experiencia previa.',
         herramientas: 'Google Ads, Meta Ads Manager, Google Analytics, herramientas de atribución/tracking.',
       },
       {
         nombre: 'Diseñador Gráfico',
-        descripcion: 'Crea las piezas visuales concretas: posteos de redes, campañas, branding. Trabaja frecuentemente bajo la dirección de un/a Director/a de Arte.',
+        descripcion: 'Crea las piezas visuales concretas: posteos de redes, campañas, branding. Trabaja frecuentemente bajo la dirección de un/a Director/a de Arte.\n\nAl igual que UX/UI Designer, acá el portfolio pesa mucho más que el título formal. Es un buen punto de partida dentro de Marketing si te interesa después crecer hacia Dirección de Arte, aunque también es un camino de carrera válido y completo en sí mismo sin necesidad de ese siguiente escalón.',
         herramientas: 'Adobe Photoshop/Illustrator, Canva, Figma.',
       },
       {
         nombre: 'Marketing Digital / Growth',
-        descripcion: 'Rol más generalista, a cargo de la estrategia general de canales digitales y del crecimiento (adquisición de usuarios/clientes), combinando varios canales.',
+        descripcion: 'Rol más generalista, a cargo de la estrategia general de canales digitales y del crecimiento (adquisición de usuarios/clientes), combinando varios canales.\n\nEs un rol bastante generalista, así que suele ser más accesible para quien viene de otras áreas de Marketing (Performance, Contenido) y quiere ampliar su manejo de canales, que para alguien completamente nuevo en Marketing. Conviene primero especializarte en un canal (ads, SEO, email) antes de apuntar a este rol más amplio.',
         herramientas: 'Google Analytics, HubSpot, SEO (SEMrush, Ahrefs), email marketing (Mailchimp).',
       },
       {
         nombre: 'Content / Community Manager',
-        descripcion: 'Genera contenido (posteos, newsletters, copys) y gestiona la comunidad de la marca en redes sociales — responde comentarios, modera, construye relación con la audiencia.',
+        descripcion: 'Genera contenido (posteos, newsletters, copys) y gestiona la comunidad de la marca en redes sociales — responde comentarios, modera, construye relación con la audiencia.\n\nEs de las entradas más accesibles a Marketing: muchas empresas valoran más la capacidad de escribir bien y entender una comunidad que la experiencia previa formal. Es también un buen punto de partida si después te interesa especializarte en Marketing Digital o en Employer Branding (del lado de RRHH), porque las habilidades de contenido se trasladan bastante bien entre esas dos áreas.',
         herramientas: 'Canva, herramientas de programación de posteos (Hootsuite, Buffer, Metricool).',
       },
     ],
@@ -228,32 +228,32 @@ export const AREAS_CARRERA: AreaCarrera[] = [
     roles: [
       {
         nombre: 'Selección / Talent Acquisition',
-        descripcion: 'Busca y evalúa candidatos para cubrir posiciones abiertas: publica avisos, hace entrevistas, coordina el proceso hasta la contratación.',
+        descripcion: 'Busca y evalúa candidatos para cubrir posiciones abiertas: publica avisos, hace entrevistas, coordina el proceso hasta la contratación.\n\nEs la puerta de entrada más común a RRHH: muchas empresas contratan perfiles junior para este rol específicamente, y desde ahí se construye el conocimiento del resto del área. Si recién arrancás en RRHH y no sabés bien hacia dónde especializarte, empezar acá te da visibilidad de cómo funciona toda la organización, lo cual ayuda a elegir después.',
         herramientas: 'LinkedIn Recruiter, ATS (Greenhouse, Lever o similares), plataformas de assessment/evaluación.',
       },
       {
         nombre: 'Capacitación / L&D (Learning & Development)',
-        descripcion: 'Diseña y dicta programas de formación interna — desde onboarding hasta programas de liderazgo o habilidades técnicas específicas.',
+        descripcion: 'Diseña y dicta programas de formación interna — desde onboarding hasta programas de liderazgo o habilidades técnicas específicas.\n\nSe llega acá tanto desde Selección (entendiendo primero qué perfiles necesita la empresa) como desde carreras de educación o psicología, aportando la mirada pedagógica. Pesa bastante tener experiencia armando y dictando contenido, no solo diseñándolo en teoría.',
         herramientas: 'Plataformas LMS (gestión de capacitación), herramientas de diseño instruccional, encuestas de clima/feedback.',
       },
       {
         nombre: 'Compensaciones y Beneficios (C&B)',
-        descripcion: 'Define estructuras salariales, bandas de compensación y paquetes de beneficios, buscando que sean competitivos en el mercado y equitativos puertas adentro.',
+        descripcion: 'Define estructuras salariales, bandas de compensación y paquetes de beneficios, buscando que sean competitivos en el mercado y equitativos puertas adentro.\n\nEs uno de los roles más técnicos y analíticos de RRHH, por eso quienes llegan acá suelen tener buen manejo de Excel y sentirse cómodos trabajando con números más que la media del área. No es habitual que sea un primer puesto: generalmente se construye después de un tiempo en roles más generalistas de RRHH.',
         herramientas: 'Excel avanzado, encuestas/benchmarks salariales de mercado, HRIS.',
       },
       {
         nombre: 'HRBP (HR Business Partner)',
-        descripcion: 'Asesora estratégicamente a los líderes de un área de negocio en todo lo relacionado a personas — no es operativo, es un rol de consultoría interna cercana al negocio.',
+        descripcion: 'Asesora estratégicamente a los líderes de un área de negocio en todo lo relacionado a personas — no es operativo, es un rol de consultoría interna cercana al negocio.\n\nCasi nunca es un primer trabajo: para asesorar estratégicamente a un líder de negocio hace falta primero haber pasado por la operación de RRHH (Selección, People Ops, o similar) y entender cómo funciona realmente una empresa por dentro. Es de los roles de RRHH con mejor proyección salarial a mediano plazo.',
         herramientas: 'HRIS, encuestas de engagement/clima, Excel.',
       },
       {
         nombre: 'People Operations',
-        descripcion: 'Gestión operativa del ciclo de vida completo del empleado: onboarding, administración de legajos, procesos internos. Es el motor operativo detrás de todo lo que decide HRBP/C&B.',
+        descripcion: 'Gestión operativa del ciclo de vida completo del empleado: onboarding, administración de legajos, procesos internos. Es el motor operativo detrás de todo lo que decide HRBP/C&B.\n\nEs un buen punto de entrada a RRHH si te interesa más la parte operativa y de procesos que la de relación directa con candidatos. Suele requerir buen manejo de sistemas (HRIS) y atención al detalle, ya que errores acá (legajos, altas, bajas) tienen impacto administrativo y legal directo.',
         herramientas: 'HRIS (Workday, SAP SuccessFactors, BambooHR o similares), Excel.',
       },
       {
         nombre: 'Employer Branding',
-        descripcion: 'Construye y comunica la marca empleadora de la empresa — por qué alguien debería querer trabajar ahí — tanto hacia afuera (atraer candidatos) como hacia adentro (retener).',
+        descripcion: 'Construye y comunica la marca empleadora de la empresa — por qué alguien debería querer trabajar ahí — tanto hacia afuera (atraer candidatos) como hacia adentro (retener).\n\nEs un rol relativamente nuevo dentro de RRHH, en la intersección con Marketing, así que no hay un único camino de entrada establecido: se llega tanto desde RRHH (sumando herramientas de comunicación) como desde Marketing o Comunicación (sumando conocimiento de RRHH). Conocer bien las dos áreas es lo que te hace fuerte acá.',
         herramientas: 'LinkedIn, Canva, herramientas de gestión de redes sociales.',
       },
     ],
@@ -265,27 +265,27 @@ export const AREAS_CARRERA: AreaCarrera[] = [
     roles: [
       {
         nombre: 'Analista Financiero (FP&A)',
-        descripcion: 'Arma proyecciones financieras, presupuestos y análisis de rentabilidad para ayudar a la empresa a tomar decisiones de negocio informadas.',
+        descripcion: 'Arma proyecciones financieras, presupuestos y análisis de rentabilidad para ayudar a la empresa a tomar decisiones de negocio informadas.\n\nEs de las puertas de entrada más comunes a Finanzas corporativas para quien viene de carreras como Administración de Empresas, Economía o Contador Público. El dominio de Excel avanzado es prácticamente no negociable, y es habitual que de acá se crezca hacia Controller con los años.',
         herramientas: 'Excel avanzado, Power BI, ERP (SAP u otros), herramientas de modelado financiero.',
       },
       {
         nombre: 'Contador/a',
-        descripcion: 'Registra y controla las operaciones contables de la empresa, asegurando cumplimiento con normativa fiscal e impositiva. Suele requerir matrícula profesional.',
+        descripcion: 'Registra y controla las operaciones contables de la empresa, asegurando cumplimiento con normativa fiscal e impositiva. Suele requerir matrícula profesional.\n\nA diferencia de otros roles de esta lista, acá sí hace falta matrícula profesional en la mayoría de los casos, así que el camino de entrada está más definido por la formación universitaria que por el portfolio o la experiencia autodidacta. Es una base sólida desde la que después se puede migrar hacia roles más estratégicos como Controller o FP&A.',
         herramientas: 'Sistemas contables (Tango, SAP, Xubio u otros según el mercado), Excel.',
       },
       {
         nombre: 'Tesorería',
-        descripcion: 'Gestiona el flujo de caja de la empresa — cuánta plata entra, cuánta sale, cuándo — y las relaciones con bancos e inversiones de corto plazo.',
+        descripcion: 'Gestiona el flujo de caja de la empresa — cuánta plata entra, cuánta sale, cuándo — y las relaciones con bancos e inversiones de corto plazo.\n\nSuele requerir haber pasado antes por roles más generales de Finanzas o Administración, porque implica mucha responsabilidad sobre el flujo de caja real de la empresa desde el primer día. No es habitual que sea el primer trabajo de alguien recién recibido.',
         herramientas: 'Excel, sistemas bancarios/ERP, herramientas de proyección de flujo de caja.',
       },
       {
         nombre: 'Analista de Costos',
-        descripcion: 'Analiza y controla los costos de producción/operación de la empresa, buscando eficiencias e identificando dónde se está gastando de más.',
+        descripcion: 'Analiza y controla los costos de producción/operación de la empresa, buscando eficiencias e identificando dónde se está gastando de más.\n\nEs un buen punto de entrada a Finanzas para quien le interesa más el lado operativo del negocio (producción, logística) que el puramente contable o financiero. Conocer bien el proceso productivo de la empresa es tan importante acá como el manejo de Excel.',
         herramientas: 'Excel avanzado, ERP, Power BI.',
       },
       {
         nombre: 'Controller',
-        descripcion: 'Rol de supervisión financiera integral — suele combinar control de gestión, reporting financiero y asegurar que los números de la empresa sean confiables y estén bajo control.',
+        descripcion: 'Rol de supervisión financiera integral — suele combinar control de gestión, reporting financiero y asegurar que los números de la empresa sean confiables y estén bajo control.\n\nEs un rol de mediana a alta seniority, al que casi siempre se llega después de varios años combinando experiencia en Contabilidad, FP&A o Auditoría. No conviene apuntar a esto como primer trabajo; sí como un objetivo de mediano plazo dentro de Finanzas.',
         herramientas: 'ERP (SAP u otros), Excel avanzado, herramientas de reporting (Power BI).',
       },
     ],
@@ -297,27 +297,27 @@ export const AREAS_CARRERA: AreaCarrera[] = [
     roles: [
       {
         nombre: 'Ejecutivo/a de Ventas',
-        descripcion: 'Gestiona el proceso de venta de principio a fin con clientes — desde el primer contacto hasta el cierre.',
+        descripcion: 'Gestiona el proceso de venta de principio a fin con clientes — desde el primer contacto hasta el cierre.\n\nEs un área donde la actitud y la capacidad de comunicación suelen pesar más que el título universitario a la hora de conseguir el primer puesto. Muchas empresas forman internamente a quien entra con poca experiencia, así que es un camino accesible si te sentís cómodo/a hablando con gente y no te asusta el rechazo (parte inevitable del rubro).',
         herramientas: 'CRM (Salesforce, HubSpot u otros), LinkedIn Sales Navigator.',
       },
       {
         nombre: 'Account Manager',
-        descripcion: 'Gestiona la relación con cuentas ya existentes (clientes activos), buscando retenerlos y hacer crecer esa relación comercial en el tiempo.',
+        descripcion: 'Gestiona la relación con cuentas ya existentes (clientes activos), buscando retenerlos y hacer crecer esa relación comercial en el tiempo.\n\nGeneralmente no es el primer rol dentro de Comercial: se llega acá después de haber demostrado buenos resultados cerrando ventas nuevas, y el foco cambia de "conseguir clientes" a "cuidar y hacer crecer" los que ya existen. Pide más paciencia y visión de largo plazo que Ejecutivo de Ventas puro.',
         herramientas: 'CRM, Excel.',
       },
       {
         nombre: 'Key Account Manager (KAM)',
-        descripcion: 'Como Account Manager, pero especializado en las cuentas más grandes/estratégicas de la empresa.',
+        descripcion: 'Como Account Manager, pero especializado en las cuentas más grandes/estratégicas de la empresa.\n\nEs un escalón más dentro de Account Management, reservado para quien ya demostró que sabe manejar relaciones comerciales complejas. No es una entrada típica al área comercial, sino un objetivo de mediano plazo.',
         herramientas: 'CRM, herramientas de reporting ejecutivo.',
       },
       {
         nombre: 'SDR / BDR (Sales/Business Development Representative)',
-        descripcion: 'Rol de ventas B2B enfocado en la primera etapa: generar y calificar leads (contactos potenciales) antes de pasárselos a un Ejecutivo de Ventas que cierra el trato. Puerta de entrada muy común al mundo comercial.',
+        descripcion: 'Rol de ventas B2B enfocado en la primera etapa: generar y calificar leads (contactos potenciales) antes de pasárselos a un Ejecutivo de Ventas que cierra el trato. Puerta de entrada muy común al mundo comercial.\n\nEs probablemente la puerta de entrada más común a Ventas B2B, sobre todo en empresas de tecnología/SaaS: el trabajo es más repetitivo y medible que el de un Ejecutivo de Ventas, lo cual lo hace más accesible para alguien sin experiencia comercial previa. De acá se suele promocionar a Ejecutivo de Ventas en relativamente poco tiempo si los números acompañan.',
         herramientas: 'CRM, LinkedIn Sales Navigator, prospección/outreach (Apollo, Outreach).',
       },
       {
         nombre: 'Customer Success',
-        descripcion: 'Acompaña al cliente DESPUÉS de la venta para asegurarse de que use bien el producto/servicio y vea valor real — el objetivo es que renueve y no se vaya (reducir el "churn").',
+        descripcion: 'Acompaña al cliente DESPUÉS de la venta para asegurarse de que use bien el producto/servicio y vea valor real — el objetivo es que renueve y no se vaya (reducir el "churn").\n\nPide un perfil distinto al de Ventas tradicional: importa más la capacidad de entender el problema del cliente y ayudarlo a resolverlo con el producto, que la de cerrar un trato. Es un buen camino de entrada a Comercial para quien viene de Soporte Técnico o de áreas de atención al cliente y quiere sumar un componente más estratégico a su rol.',
         herramientas: 'CRM, plataformas de customer success (Gainsight, Intercom o similares).',
       },
     ],
@@ -329,22 +329,22 @@ export const AREAS_CARRERA: AreaCarrera[] = [
     roles: [
       {
         nombre: 'Abogado/a Corporativo/a',
-        descripcion: 'Asesora legalmente a la empresa en sus operaciones del día a día: contratos, relaciones laborales, estructura societaria, entre otros.',
+        descripcion: 'Asesora legalmente a la empresa en sus operaciones del día a día: contratos, relaciones laborales, estructura societaria, entre otros.\n\nComo con Contador/a, acá la matrícula profesional es un requisito excluyente, así que el camino de entrada pasa necesariamente por la carrera universitaria y la habilitación correspondiente. Dentro de esa base, especializarte en un área del derecho relevante para empresas (laboral, societario, contractual) ayuda a diferenciarte.',
         herramientas: 'Herramientas de gestión documental, bases de jurisprudencia/legislación.',
       },
       {
         nombre: 'Compliance',
-        descripcion: 'Se asegura de que la empresa cumpla con regulaciones externas (normativa del sector, leyes de protección de datos, etc.) y con sus propias políticas internas.',
+        descripcion: 'Se asegura de que la empresa cumpla con regulaciones externas (normativa del sector, leyes de protección de datos, etc.) y con sus propias políticas internas.\n\nSe llega tanto desde Legales (abogados que se especializan) como desde Auditoría o Riesgo, dependiendo de si el foco de la empresa es más normativo o más operativo. Es un área en crecimiento, particularmente en sectores regulados como finanzas o salud.',
         herramientas: 'Software de gestión de riesgos/compliance, Excel.',
       },
       {
         nombre: 'Legal Tech',
-        descripcion: 'Rol más nuevo, en la intersección de Legales y Tecnología — implementa herramientas que automatizan o agilizan procesos legales (gestión de contratos, firma digital, etc.).',
+        descripcion: 'Rol más nuevo, en la intersección de Legales y Tecnología — implementa herramientas que automatizan o agilizan procesos legales (gestión de contratos, firma digital, etc.).\n\nEs un rol nuevo y todavía poco estandarizado, lo que significa que no hay un único camino de entrada correcto: tanto abogados con interés en tecnología como perfiles tech con interés en procesos legales pueden encontrar su lugar acá. Es un buen nicho si te gusta la intersección entre ambos mundos y no te cierra ninguno de los dos caminos.',
         herramientas: 'Herramientas de automatización/gestión de contratos (DocuSign, Ironclad o similares).',
       },
       {
         nombre: 'Paralegal',
-        descripcion: 'Asiste a los abogados en tareas de soporte: investigación, preparación de documentos, organización de expedientes — sin estar habilitado/a para ejercer como abogado/a.',
+        descripcion: 'Asiste a los abogados en tareas de soporte: investigación, preparación de documentos, organización de expedientes — sin estar habilitado/a para ejercer como abogado/a.\n\nEs una puerta de entrada accesible al mundo legal para quien todavía no completó la carrera de abogacía o no quiere ejercer como abogado/a pero le interesa el área. Da experiencia real del día a día de un estudio o departamento legal, útil incluso si después decidís completar la carrera.',
         herramientas: 'Herramientas de gestión documental, Excel, bases de jurisprudencia.',
       },
     ],
@@ -356,22 +356,22 @@ export const AREAS_CARRERA: AreaCarrera[] = [
     roles: [
       {
         nombre: 'Operaciones de Contact Center / Atención al Cliente',
-        descripcion: 'Gestiona equipos y métricas de atención al cliente — tiempos de respuesta, satisfacción (NPS), eficiencia operativa de un call/contact center.',
+        descripcion: 'Gestiona equipos y métricas de atención al cliente — tiempos de respuesta, satisfacción (NPS), eficiencia operativa de un call/contact center.\n\nEs un rol de gestión al que generalmente se llega después de haber trabajado directamente en atención al cliente, entendiendo primero la operación desde adentro antes de liderarla. El manejo de métricas (tiempos de respuesta, NPS) es tan importante acá como las habilidades de liderazgo de equipos.',
         herramientas: 'Software de call center (Genesys, Zendesk, Aircall o similares), dashboards de métricas.',
       },
       {
         nombre: 'Operaciones Fintech / Producto Financiero',
-        descripcion: 'Gestiona procesos operativos específicos de productos financieros: conciliaciones, prevención de fraude, onboarding de usuarios, cumplimiento operativo del día a día.',
+        descripcion: 'Gestiona procesos operativos específicos de productos financieros: conciliaciones, prevención de fraude, onboarding de usuarios, cumplimiento operativo del día a día.\n\nEs un área relativamente nueva y en crecimiento, así que se nutre tanto de gente con background en Finanzas tradicional como de perfiles más operativos/tech que se suman por el lado de producto. Conocer de cerca regulación financiera es un plus importante, sobre todo en roles de prevención de fraude o cumplimiento operativo.',
         herramientas: 'Herramientas de conciliación, dashboards de monitoreo de fraude, SQL básico en algunos casos.',
       },
       {
         nombre: 'Supply Chain / Logística',
-        descripcion: 'Gestiona la cadena de abastecimiento: desde la compra de insumos hasta que el producto llega a destino, optimizando tiempos y costos.',
+        descripcion: 'Gestiona la cadena de abastecimiento: desde la compra de insumos hasta que el producto llega a destino, optimizando tiempos y costos.\n\nPide conocimiento concreto de cómo funciona la cadena de abastecimiento de punta a punta, así que es habitual que se llegue acá desde carreras de Ingeniería Industrial o Administración con orientación en operaciones. El manejo de ERP es prácticamente estándar en toda la industria.',
         herramientas: 'ERP (SAP u otros), sistemas de gestión de almacenes (WMS), Excel.',
       },
       {
         nombre: 'Mejora de Procesos / Calidad (Continuous Improvement)',
-        descripcion: 'Aplica metodologías (Lean, Six Sigma, entre otras) para identificar y eliminar ineficiencias en procesos ya existentes de la empresa, en cualquier área.',
+        descripcion: 'Aplica metodologías (Lean, Six Sigma, entre otras) para identificar y eliminar ineficiencias en procesos ya existentes de la empresa, en cualquier área.\n\nNo suele ser un primer trabajo: se necesita primero conocer bien cómo funciona una operación (de cualquier área) para después poder identificar dónde mejorarla. Certificaciones en metodologías como Lean o Six Sigma ayudan mucho a formalizar ese conocimiento y a conseguir el salto a este rol.',
         herramientas: 'Herramientas de mapeo de procesos (Visio, Lucidchart), metodologías Lean/Six Sigma.',
       },
     ],

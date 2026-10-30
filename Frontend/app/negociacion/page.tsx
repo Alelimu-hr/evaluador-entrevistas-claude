@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 import { createClient } from '@/lib/supabase/client';
 import { registrarEventoFunnel } from '@/lib/analytics';
 import { Spinner } from '@/components/Spinner';
+import { FeedbackInforme } from '@/components/FeedbackInforme';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -430,6 +431,8 @@ export default function NegociacionPage() {
                 <ReactMarkdown>{cierreMarkdown}</ReactMarkdown>
               </div>
             </div>
+
+            <FeedbackInforme herramienta="negociacion" />
 
             <div className="flex gap-3">
               <button
