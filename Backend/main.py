@@ -43,6 +43,37 @@ FFMPEG_PATH = imageio_ffmpeg.get_ffmpeg_exe()
 _pdf_executor = ThreadPoolExecutor(max_workers=4)
 PDF_TIMEOUT_SEGUNDOS = 15
 
+# Cuántas entrevistas tuvo la persona en su vida (NO el seniority del
+# puesto): lo elige en el formulario del simulador y se usa para calibrar
+# tanto la dificultad de las preguntas como el tono del feedback final, para
+# que no sea igual de duro con alguien que nunca se entrevistó que con
+# alguien con mucho rodaje. Si llega un valor que no está acá (o vacío), se
+# usa el de "1 a 5" como punto medio razonable.
+NIVELES_EXPERIENCIA = {
+    "Ninguna": (
+        "Es la primera entrevista de su vida. Sé especialmente contenedor: "
+        "preguntas claras, sin trampas ni ambigüedad innecesaria, y en el "
+        "feedback priorizá la contención y el ánimo por sobre la exigencia "
+        "técnica, aunque sigas siendo honesto."
+    ),
+    "1 a 5": (
+        "Tiene poca experiencia entrevistándose (entre 1 y 5 entrevistas en "
+        "su vida). Mantené un tono ameno y alentador, pero ya podés dar "
+        "feedback concreto y señalar con claridad qué mejorar."
+    ),
+    "6 a 15": (
+        "Tiene experiencia moderada entrevistándose (entre 6 y 15 "
+        "entrevistas en su vida). Podés ser moderadamente crítico: exigile "
+        "precisión y profundidad en las respuestas, sin golpes de más."
+    ),
+    "Más de 15": (
+        "Tiene mucha experiencia entrevistándose (más de 15 entrevistas en "
+        "su vida). Podés ser exigente y directo al evaluar técnicamente, "
+        "como un headhunter real evaluando a alguien con rodaje."
+    ),
+}
+NIVEL_EXPERIENCIA_DEFAULT = NIVELES_EXPERIENCIA["1 a 5"]
+
 app = FastAPI(title="Evaluador de Entrevistas API")
 
 app.add_middleware(
@@ -494,6 +525,7 @@ async def generar_pregunta(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
     rol: str = Form(...),
     seniority: str = Form(""),
+    experiencia_entrevistas: str = Form(""),
     enfoque: str = Form("Liderazgo y Estrategia"),
     cantidad_preguntas: str = Form("3"),
     idioma: str = Form("Español"),
@@ -531,6 +563,7 @@ async def generar_pregunta(
     # eligió ninguno, no lo mencionamos y dejamos que Gemini calibre la
     # dificultad con el rol y la JD, en vez de forzar un nivel arbitrario.
     linea_seniority = f"Seniority: {seniority.strip()}\n    " if seniority and seniority.strip() else ""
+    nivel_experiencia = NIVELES_EXPERIENCIA.get(experiencia_entrevistas, NIVEL_EXPERIENCIA_DEFAULT)
 
     prompt = f"""
     Actúa como un reclutador exigente.
@@ -539,6 +572,9 @@ async def generar_pregunta(
     {linea_seniority}Enfoque: {enfoque}
     JD: {jd if jd else 'No provista'}
     CV: {cv_texto if cv_texto else 'No provisto'}
+
+    Experiencia previa de la persona entrevistándose (ajustá la dificultad
+    y el estilo de las preguntas en base a esto): {nivel_experiencia}
 
     Las primeras {cantidad_int} preguntas son las que se van a usar en la
     entrevista. Las últimas {reserva_extra} son preguntas "de repuesto":
@@ -652,6 +688,7 @@ async def informe_final(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
     rol: str = Form(...),
     seniority: str = Form(""),
+    experiencia_entrevistas: str = Form(""),
     idioma: str = Form("Español"),
     jd: str = Form(None),
     preguntas_meta: str = Form(...),
@@ -676,11 +713,15 @@ async def informe_final(
     # especificó, no lo mencionamos en el título (ej. un CFO no necesita que
     # le agreguemos un nivel al lado del cargo).
     clausula_seniority = f" con nivel '{seniority.strip()}'" if seniority and seniority.strip() else ""
+    nivel_experiencia = NIVELES_EXPERIENCIA.get(experiencia_entrevistas, NIVEL_EXPERIENCIA_DEFAULT)
 
     contents = [f"""
-    Sos un Reclutador Executive / Headhunter implacable pero constructivo, evaluando
-    una simulación de entrevista para el puesto '{rol}'{clausula_seniority}.
+    Sos un Reclutador Executive / Headhunter con mucha calle, evaluando una
+    simulación de entrevista para el puesto '{rol}'{clausula_seniority}.
     Job Description: {jd if jd else 'No provista'}.
+
+    Experiencia previa de la persona entrevistándose (usala para calibrar tu
+    nivel de exigencia en el informe, ver más abajo): {nivel_experiencia}
 
     A continuación vas a escuchar, pregunta por pregunta, los audios reales con las
     respuestas del candidato (te indico también la duración y el ritmo de habla medidos
@@ -690,9 +731,18 @@ async def informe_final(
 
     DIRECTIVAS DE ESTILO PARA EL INFORME (campo "informe_markdown"):
     - Escribilo 100% en idioma {idioma}, en Markdown.
-    - Tono directo, exigente y sin rodeos de un headhunter ejecutivo real — si la
-      entrevista fue mala, decilo sin filtros (pero seguí siendo constructivo, con
-      consejos accionables). Si estuvo bien, reconocelo con el mismo nivel de exigencia.
+    - Usá SIEMPRE la técnica del sándwich, sin importar el nivel de exigencia que
+      te toque aplicar: arrancá reconociendo algo concreto que estuvo bien,
+      después marcá los puntos débiles con total honestidad y ejemplos
+      concretos (sin suavizarlos ni esconderlos), y cerrá con un mensaje que
+      motive a seguir mejorando. Nunca un párrafo que sea solo crítica dura de
+      punta a punta — el objetivo es que la persona se vaya con ganas de
+      mejorar, no devastada, incluso cuando la entrevista haya sido floja.
+    - Calibrá qué tan exigente sos (tanto en las notas como en el texto) según
+      la experiencia previa de la persona entrevistándose, indicada arriba:
+      con alguien que nunca se entrevistó, priorizá la contención por sobre
+      la dureza técnica; con alguien con mucho rodaje, podés ser más directo
+      y exigente, siempre dentro de la técnica del sándwich.
     - Usá EXACTAMENTE esta estructura y estos títulos (podés ajustar el contenido,
       no el formato ni los emojis).
     - MUY IMPORTANTE, formato Markdown real (esto es lo que hace que se lea bien,

@@ -9,8 +9,32 @@ import { createClient } from '@/lib/supabase/client';
 import { registrarEventoFunnel } from '@/lib/analytics';
 import { Spinner } from '@/components/Spinner';
 import { FeedbackInforme } from '@/components/FeedbackInforme';
+import { PasosApiKey } from '@/components/PasosApiKey';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// Calibra qué tan exigente es la entrevista según cuántas entrevistas tuvo
+// la persona en su vida (no tiene que ver con el seniority del puesto). El
+// mismo texto "nivel" se manda al backend para ajustar tanto la dificultad
+// de las preguntas como el tono del feedback final (ver Backend/main.py).
+const EXPERIENCIA_INFO: Record<string, { emoji: string; cartel: string }> = {
+  Ninguna: {
+    emoji: '👋',
+    cartel: 'El reclutador va a ser amable y contenedor: como es tu primera vez, el foco va a estar en que te sueltes y pierdas el miedo.',
+  },
+  '1 a 5': {
+    emoji: '🙂',
+    cartel: 'El reclutador va a tener un tono ameno, pero ya te va a dar feedback concreto para que sigas mejorando.',
+  },
+  '6 a 15': {
+    emoji: '🧐',
+    cartel: 'El reclutador va a ser moderadamente crítico: como ya tenés rodaje, te va a exigir más precisión en las respuestas.',
+  },
+  'Más de 15': {
+    emoji: '🔥',
+    cartel: 'El reclutador va a ser exigente y directo a la hora de evaluar técnicamente, como en una entrevista real de nivel alto.',
+  },
+};
 
 type FeedbackOratoria = {
   transcripcion: string;
@@ -142,6 +166,10 @@ export default function Home() {
   // deja claro. Si queda vacío, el backend no lo incluye en el título ni en
   // el prompt — ver Backend/main.py.
   const [seniority, setSeniority] = useState('');
+  // Cuánta experiencia tiene la persona entrevistándose (no el rol): calibra
+  // la dificultad de las preguntas y qué tan duro/ameno es el feedback del
+  // informe final. Ver EXPERIENCIA_INFO abajo y Backend/main.py.
+  const [experiencia, setExperiencia] = useState('1 a 5');
   const [enfoque, setEnfoque] = useState('Mixta (Técnica + Conductual)');
   const [idioma, setIdioma] = useState('Español');
   const [cantidad, setCantidad] = useState(3);
@@ -283,6 +311,7 @@ export default function Home() {
     const formData = new FormData();
     formData.append('rol', rol);
     formData.append('seniority', seniority);
+    formData.append('experiencia_entrevistas', experiencia);
     formData.append('enfoque', enfoque);
     formData.append('cantidad_preguntas', cantidad.toString());
     formData.append('idioma', idioma);
@@ -436,6 +465,7 @@ export default function Home() {
     const formData = new FormData();
     formData.append('rol', rol);
     formData.append('seniority', seniority);
+    formData.append('experiencia_entrevistas', experiencia);
     formData.append('idioma', idioma);
     formData.append('jd', jd);
     formData.append(
@@ -679,20 +709,7 @@ export default function Home() {
                     <span className="text-slate-600">· Es 100% gratis y te lleva menos de 1 minuto.</span>
                   </div>
 
-                  <ol className="mt-2.5 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {[
-                      'Entrá con tu cuenta de Google.',
-                      'Arriba de la página, hacé clic en "Crear clave de API".',
-                      'Esperá unos segundos: se abre tu clave, lista para copiar.',
-                    ].map((paso, i) => (
-                      <li key={i} className="flex items-start gap-1.5 text-slate-500">
-                        <span className="shrink-0 w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-[10px] font-bold flex items-center justify-center mt-0.5">
-                          {i + 1}
-                        </span>
-                        {paso}
-                      </li>
-                    ))}
-                  </ol>
+                  <PasosApiKey />
                 </div>
               </div>
             </div>
@@ -735,6 +752,34 @@ export default function Home() {
                     <option value="Senior">Senior</option>
                   </select>
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-800 mb-1">
+                  ¿Cuántas entrevistas tuviste a lo largo de tu vida?
+                </label>
+                <p className="text-xs text-slate-500 mb-2">
+                  Con esto calibramos qué tan exigente va a ser el reclutador con vos 👇
+                </p>
+                <div className="flex flex-wrap gap-1.5 bg-slate-100 border border-slate-300 rounded-2xl p-1.5">
+                  {Object.keys(EXPERIENCIA_INFO).map((opt) => (
+                    <button
+                      type="button"
+                      key={opt}
+                      onClick={() => setExperiencia(opt)}
+                      className={`px-3 py-1.5 text-xs sm:text-sm rounded-full whitespace-nowrap transition-all ${
+                        experiencia === opt
+                          ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold shadow'
+                          : 'text-slate-600 hover:bg-white'
+                      }`}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 animate-fade-in">
+                  {EXPERIENCIA_INFO[experiencia].emoji} {EXPERIENCIA_INFO[experiencia].cartel}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4">

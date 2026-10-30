@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { registrarEventoFunnel } from '@/lib/analytics';
 import { Spinner } from '@/components/Spinner';
 import { FeedbackInforme } from '@/components/FeedbackInforme';
+import { PasosApiKey } from '@/components/PasosApiKey';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -374,6 +375,8 @@ export default function CvPage() {
                     </a>
                     <span className="text-slate-600">· Es 100% gratis y te lleva menos de 1 minuto.</span>
                   </div>
+
+                  <PasosApiKey />
                 </div>
               </div>
             </div>
