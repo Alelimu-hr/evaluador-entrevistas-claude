@@ -413,4 +413,196 @@ export const AREAS_CARRERA: AreaCarrera[] = [
       },
     ],
   },
+  {
+    slug: 'construccion',
+    nombre: 'Construcción / Arquitectura / Ingeniería',
+    emoji: '🏗️',
+    roles: [
+      {
+        nombre: 'Arquitecto/a',
+        descripcion:
+          'Diseña espacios y edificios, desde el anteproyecto hasta los planos ejecutivos, balanceando estética, funcionalidad y normativa de construcción vigente. Puede trabajar en estudios de arquitectura, desarrolladoras inmobiliarias o de forma independiente.\n\nRequiere matrícula profesional habilitante (colegio de arquitectos de la jurisdicción) para firmar planos y ejercer formalmente, así que no es un camino 100% autodidacta. El primer empleo suele ser en un estudio de arquitectura como dibujante/proyectista, sumando experiencia real antes de liderar proyectos propios.',
+        herramientas: 'AutoCAD, Revit (BIM), SketchUp, Illustrator/Photoshop para presentaciones.',
+      },
+      {
+        nombre: 'Ingeniero/a Civil',
+        descripcion:
+          'Diseña y supervisa la parte estructural y técnica de una obra (cimientos, estructura, cálculo de cargas), asegurando que lo que diseña el arquitecto sea seguro y viable de construir.\n\nComo Arquitectura, exige matrícula profesional para ejercer formalmente y firmar cálculos estructurales. Suele trabajar codo a codo con Arquitectura desde las primeras etapas del proyecto, así que entender bien ambas disciplinas ayuda a progresar más rápido en la carrera.',
+        herramientas: 'AutoCAD, software de cálculo estructural (SAP2000, ETABS), Revit.',
+      },
+      {
+        nombre: 'Jefe/a de Obra / Project Manager de Obra',
+        descripcion:
+          'Coordina la ejecución de la obra en el día a día: equipos de trabajo, proveedores, cronograma y presupuesto, asegurando que lo que está en los planos se construya en tiempo y forma.\n\nCasi nunca es un primer trabajo: se llega acá después de haber pasado por roles técnicos en obra (como Arquitecto/a, Ingeniero/a Civil o Maestro Mayor de Obras) y haber demostrado capacidad de gestión y liderazgo de equipos en terreno.',
+        herramientas: 'MS Project o software de gestión de obra, Excel, herramientas de seguimiento de certificaciones de avance.',
+      },
+      {
+        nombre: 'Computista / Presupuestista',
+        descripcion:
+          'Calcula con precisión los costos de un proyecto de construcción: materiales, mano de obra, tiempos, antes y durante la obra, para que el presupuesto se cumpla y no haya sorpresas.\n\nEs un rol con alta demanda y relativamente pocos perfiles especializados, porque combina conocimiento técnico de construcción con manejo detallado de números. Buen punto de entrada para quien viene de Arquitectura, Ingeniería o Administración de Empresas con interés en el rubro.',
+        herramientas: 'Excel avanzado, software de cómputo y presupuesto (Presto, Devexa u otros según el mercado), AutoCAD para medir planos.',
+      },
+      {
+        nombre: 'Comprador/a de Materiales (Procurement de Obra)',
+        descripcion:
+          'Gestiona la compra de materiales e insumos para la obra: cotiza proveedores, negocia precios y plazos de entrega, y se asegura de que el material llegue a tiempo para no frenar el avance de la construcción.\n\nEs un rol accesible para quien viene de Compras/Procurement en cualquier industria y quiere sumarse a Construcción, no hace falta formación técnica específica, aunque ayuda mucho conocer los materiales del rubro.',
+        herramientas: 'ERP o sistemas de gestión de compras, Excel, relación directa con proveedores/corralones.',
+      },
+    ],
+  },
+  {
+    slug: 'medios',
+    nombre: 'Medios / Comunicación / Producción Audiovisual',
+    emoji: '🎬',
+    roles: [
+      {
+        nombre: 'Periodista / Redactor/a',
+        descripcion:
+          'Investiga, escribe y edita notas, artículos o guiones informativos para medios tradicionales o digitales, verificando datos y fuentes antes de publicar.\n\nSe entra tanto desde la carrera de Periodismo o Comunicación como de forma autodidacta, construyendo un portfolio de notas publicadas (incluso en blog propio o medios chicos) que demuestre capacidad de investigar y escribir con claridad. Desde acá se suele crecer hacia edición, coordinación de contenidos o especializarse en un tema puntual (economía, tecnología, deportes).',
+        herramientas: 'CMS de publicación (WordPress u otros), herramientas de verificación de fuentes, Google Docs/Sheets.',
+      },
+      {
+        nombre: 'Editor/a de Video',
+        descripcion:
+          'Arma el producto audiovisual final a partir del material filmado: corte, ritmo, color, sonido y efectos, adaptando el video al formato y plataforma donde se va a publicar.\n\nEs una de las puertas de entrada más accesibles a producción audiovisual: se puede aprender de forma autodidacta y armar un portfolio propio sin necesidad de un título formal, aunque la competencia es alta por lo mismo. Un buen reel con 3 o 4 trabajos sólidos suele pesar más que cualquier curso a la hora de conseguir el primer cliente o trabajo.',
+        herramientas: 'Adobe Premiere Pro, After Effects, DaVinci Resolve, CapCut para formatos cortos.',
+      },
+      {
+        nombre: 'Productor/a Audiovisual',
+        descripcion:
+          'Organiza todo lo necesario para que una producción (un video, una serie, un evento filmado) suceda: presupuesto, locaciones, equipo técnico, cronograma de rodaje y logística general.\n\nPide experiencia previa real en sets de filmación, así que el camino típico es empezar en roles de asistencia de producción y escalar a cargo de la producción completa con el tiempo. La capacidad de resolver problemas bajo presión (algo siempre se complica en un rodaje) es tan importante como el conocimiento técnico.',
+        herramientas: 'Planillas de producción/presupuesto, software de gestión de proyectos, contactos de proveedores del rubro (equipos, locaciones).',
+      },
+      {
+        nombre: 'Conductor/a / Locutor/a',
+        descripcion:
+          'Presenta y conduce contenido en vivo o grabado (radio, streaming, eventos, videos institucionales), con buena dicción y capacidad de improvisar y sostener la atención de la audiencia.\n\nEs un rol donde el talento y la presencia en cámara/micrófono pesan más que el título, aunque formarse en locución ayuda con la técnica de voz. Muchas veces se arranca en formatos chicos (streaming propio, radio local) antes de llegar a proyectos con más alcance.',
+        herramientas: 'Software de streaming (OBS Studio), consola de audio básica, teleprompter en formatos más profesionales.',
+      },
+    ],
+  },
+  {
+    slug: 'inmobiliario',
+    nombre: 'Real Estate / Inmobiliario',
+    emoji: '🏠',
+    roles: [
+      {
+        nombre: 'Corredor/a Inmobiliario / Agente de Ventas',
+        descripcion:
+          'Intermedia entre quien vende/alquila una propiedad y quien busca comprarla/alquilarla: capta propiedades, las muestra, negocia condiciones y acompaña hasta el cierre de la operación.\n\nEn Argentina requiere matrícula de Corredor Inmobiliario (según la jurisdicción) para ejercer de forma independiente y cobrar comisión, aunque muchas inmobiliarias contratan agentes junior sin matrícula propia para que vayan sumando experiencia bajo la matrícula de la empresa. La cartera de contactos y la capacidad comercial pesan mucho más que el título a la hora de generar ingresos.',
+        herramientas: 'Portales inmobiliarios (Zonaprop, Argenprop), CRM inmobiliario, redes sociales para mostrar propiedades.',
+      },
+      {
+        nombre: 'Tasador/a',
+        descripcion:
+          'Determina el valor de mercado de una propiedad, analizando ubicación, estado, comparables de la zona y condiciones del mercado, para operaciones de compraventa, créditos hipotecarios o sucesiones.\n\nSuele requerir formación específica en tasaciones (a veces con matrícula propia según la jurisdicción) y conocimiento profundo del mercado de la zona donde se trabaja. Es un buen camino de especialización para alguien que ya viene del mundo inmobiliario o de la construcción y quiere un rol más técnico y menos comercial.',
+        herramientas: 'Bases de datos de comparables de mercado, planillas de cálculo, informes catastrales.',
+      },
+      {
+        nombre: 'Property Manager / Administrador de Propiedades',
+        descripcion:
+          'Gestiona el día a día de una o varias propiedades en alquiler por cuenta de su dueño: cobra alquileres, coordina mantenimiento y reparaciones, y resuelve problemas con inquilinos.\n\nEs un rol accesible para quien viene de Atención al Cliente u Operaciones, no hace falta matrícula ni formación específica en la mayoría de los casos, aunque ayuda mucho ser organizado y resolutivo. Con la gestión de propiedades para alquiler temporario (tipo Airbnb) en alza, es un área con demanda creciente.',
+        herramientas: 'Software de gestión de alquileres, Excel, plataformas de alquiler temporario si aplica.',
+      },
+      {
+        nombre: 'Desarrollador/a Inmobiliario (Gestión de Proyectos)',
+        descripcion:
+          'Lidera un proyecto inmobiliario de punta a punta, desde la compra del terreno hasta la venta de las unidades: coordina arquitectos, constructoras, financiamiento y comercialización.\n\nEs un rol de alta responsabilidad al que casi nunca se llega como primer trabajo: se necesita experiencia previa real en Construcción, Finanzas o Comercial inmobiliario antes de liderar un proyecto propio. No conviene apuntar a esto como punto de partida, sí como un objetivo de carrera de mediano a largo plazo dentro del rubro.',
+        herramientas: 'Excel avanzado (modelos financieros de proyecto), software de gestión de proyectos, relación con bancos/financiamiento.',
+      },
+    ],
+  },
+  {
+    slug: 'industria',
+    nombre: 'Industria / Manufactura',
+    emoji: '🏭',
+    roles: [
+      {
+        nombre: 'Ingeniero/a de Procesos',
+        descripcion:
+          'Diseña y optimiza los procesos de producción de una planta industrial, buscando mejorar eficiencia, calidad y costos, y resolviendo problemas técnicos que surgen en la línea de producción.\n\nRequiere formación en Ingeniería (industrial, química, mecánica u otra según el rubro de la planta), y suele ser un buen primer trabajo técnico para quien recién se recibe, trabajando primero bajo la supervisión de ingenieros más senior.',
+        herramientas: 'Software de simulación de procesos, Excel, metodologías de mejora continua (Lean, Six Sigma).',
+      },
+      {
+        nombre: 'Jefe/a de Planta',
+        descripcion:
+          'Responsable integral de la operación de una planta productiva: gestiona al equipo, los objetivos de producción, el cumplimiento de normas de calidad y seguridad, y el presupuesto operativo.\n\nEs un rol de liderazgo al que se llega después de varios años de experiencia en producción industrial, generalmente habiendo pasado antes por roles como Ingeniero/a de Procesos o supervisión de línea. No es un primer trabajo; sí un objetivo de mediano plazo dentro de la industria.',
+        herramientas: 'ERP de producción (SAP u otros), indicadores de productividad (OEE), Excel avanzado.',
+      },
+      {
+        nombre: 'Mantenimiento Industrial',
+        descripcion:
+          'Se encarga de que la maquinaria y los equipos de la planta funcionen correctamente: mantenimiento preventivo programado y reparaciones cuando algo falla, para minimizar tiempos de parada de producción.\n\nEs una puerta de entrada técnica accesible para quien tiene formación en electromecánica, electricidad industrial o similar, incluso de nivel terciario (no siempre se exige título universitario). La experiencia práctica con maquinaria pesa mucho más que la formación teórica sola.',
+        herramientas: 'Software de gestión de mantenimiento (CMMS), herramientas específicas según el tipo de maquinaria, planes de mantenimiento preventivo.',
+      },
+      {
+        nombre: 'Seguridad e Higiene (Seguridad Laboral)',
+        descripcion:
+          'Diseña e implementa las políticas de seguridad de la planta para prevenir accidentes laborales, capacita al personal, y asegura el cumplimiento de la normativa vigente en la materia.\n\nRequiere formación específica (Técnico/a o Licenciado/a en Higiene y Seguridad) y en muchos casos matrícula profesional para firmar informes técnicos. Es un área con demanda estable porque la normativa laboral exige tener a alguien a cargo de esto en cualquier planta industrial.',
+        herramientas: 'Normativa de seguridad e higiene laboral vigente, planillas de relevamiento de riesgos, software de gestión de capacitaciones.',
+      },
+    ],
+  },
+  {
+    slug: 'ong',
+    nombre: 'Sector Social / ONG',
+    emoji: '🤲',
+    roles: [
+      {
+        nombre: 'Coordinador/a de Proyectos Sociales',
+        descripcion:
+          'Planifica y ejecuta proyectos con impacto social (educativos, de salud, ambientales, entre otros): define objetivos, coordina al equipo y a los beneficiarios, y se asegura de que el proyecto se cumpla en tiempo y con los recursos disponibles.\n\nSe valora mucho la experiencia previa de campo (haber trabajado directamente con la comunidad o población objetivo) además de capacidad de gestión de proyectos. Es un camino accesible tanto desde carreras sociales (Trabajo Social, Ciencias Sociales) como desde perfiles de gestión que quieren aportar en el sector.',
+        herramientas: 'Herramientas de gestión de proyectos, Excel/Google Sheets, a veces marcos de trabajo específicos (marco lógico).',
+      },
+      {
+        nombre: 'Fundraising / Desarrollo de Fondos',
+        descripcion:
+          'Consigue los recursos económicos que la organización necesita para funcionar: arma propuestas para donantes y financiadores (individuos, empresas, organismos internacionales) y gestiona esas relaciones en el tiempo.\n\nCombina habilidades comerciales/de relación con conocimiento del sector social, así que es un buen camino para quien viene de Ventas o Marketing y quiere orientar esas habilidades hacia un propósito social. La capacidad de escribir propuestas claras y convincentes es clave para crecer en este rol.',
+        herramientas: 'CRM de donantes, herramientas de redacción de propuestas, plataformas de crowdfunding si aplica.',
+      },
+      {
+        nombre: 'Voluntariado y Comunidad',
+        descripcion:
+          'Recluta, capacita y coordina a los voluntarios de la organización, asegurando que tengan una buena experiencia y que su trabajo esté bien organizado y alineado con los objetivos del proyecto.\n\nEs una puerta de entrada frecuente al sector social, muchas veces para quien empezó como voluntario/a en la misma organización y fue asumiendo responsabilidades de coordinación. Las habilidades de comunicación y organización de personas pesan más que un título específico.',
+        herramientas: 'Planillas de seguimiento de voluntarios, herramientas de comunicación grupal (WhatsApp, Slack), redes sociales.',
+      },
+      {
+        nombre: 'Monitoreo y Evaluación de Impacto',
+        descripcion:
+          'Mide si los proyectos de la organización realmente están logrando el impacto que buscan: diseña indicadores, recolecta datos y arma informes para la organización y para los financiadores.\n\nEs un rol más técnico y analítico dentro del sector social, donde ayuda mucho tener formación o experiencia en investigación social, estadística o Data Analyst. Si te gusta el lado social pero también los números, es un buen punto de encuentro entre ambos intereses.',
+        herramientas: 'Excel/Google Sheets, herramientas de encuestas (Google Forms, KoboToolbox), a veces SQL o Power BI en organizaciones más grandes.',
+      },
+    ],
+  },
+  {
+    slug: 'salud',
+    nombre: 'Salud (Gestión)',
+    emoji: '🏥',
+    roles: [
+      {
+        nombre: 'Administración de Clínicas / Centros de Salud',
+        descripcion:
+          'Gestiona la operación administrativa de una institución de salud: turnos, facturación a obras sociales/prepagas, recursos humanos del centro y cumplimiento de normativa sanitaria.\n\nEs un rol de gestión accesible desde carreras de Administración, sin necesidad de formación médica, aunque conocer el funcionamiento del sistema de salud y las obras sociales/prepagas es clave para desempeñarse bien. Se valora mucho la experiencia previa en administración de salud específicamente, por la cantidad de normativa particular del sector.',
+        herramientas: 'Sistemas de gestión hospitalaria/de turnos, Excel, conocimiento de facturación a obras sociales y prepagas.',
+      },
+      {
+        nombre: 'Asuntos Regulatorios (Industria Farmacéutica)',
+        descripcion:
+          'Se asegura de que los medicamentos y productos de la empresa cumplan con toda la normativa sanitaria para poder fabricarse, importarse y venderse legalmente (ANMAT en Argentina, y organismos equivalentes en otros países).\n\nRequiere formación específica (generalmente Farmacia, Bioquímica o carreras afines) y conocimiento profundo de la normativa del sector, que es compleja y cambia con frecuencia. Es un rol con alta demanda dentro de laboratorios farmacéuticos y relativamente pocos perfiles formados.',
+        herramientas: 'Normativa de ANMAT (o el organismo regulador correspondiente), software de gestión documental regulatoria, Excel.',
+      },
+      {
+        nombre: 'Farmacovigilancia',
+        descripcion:
+          'Monitorea la seguridad de los medicamentos una vez que ya están en el mercado: recibe y analiza reportes de efectos adversos, y se asegura de que se informen correctamente a las autoridades sanitarias.\n\nTambién requiere formación en ciencias de la salud (Farmacia, Medicina, Enfermería) y suele ser un área donde se valora mucho la precisión y el detalle, porque los reportes tienen implicancias regulatorias y de seguridad real. Convive de cerca con Asuntos Regulatorios dentro de un laboratorio farmacéutico.',
+        herramientas: 'Bases de datos de farmacovigilancia, normativa sanitaria vigente, herramientas de gestión documental.',
+      },
+      {
+        nombre: 'Coordinador/a de Ensayos Clínicos',
+        descripcion:
+          'Organiza y supervisa el desarrollo de un ensayo clínico en un centro de salud: coordina a los pacientes voluntarios, al equipo médico y asegura que el estudio cumpla con el protocolo y la normativa ética y sanitaria.\n\nRequiere formación en ciencias de la salud (Enfermería, Medicina, Bioquímica u otra carrera afín) y suele exigir capacitación específica en Buenas Prácticas Clínicas (BPC/GCP). Es un rol con buena demanda dentro de la industria farmacéutica y centros de investigación médica.',
+        herramientas: 'Software de gestión de ensayos clínicos, normativa de Buenas Prácticas Clínicas (GCP), planillas de seguimiento de pacientes.',
+      },
+    ],
+  },
 ];
