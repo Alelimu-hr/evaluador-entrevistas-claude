@@ -18,11 +18,13 @@ type Puntajes = {
   formato_ats: number;
   logros: number;
   palabras_clave: number;
+  proyectado?: number;
 };
 
+// Puntajes en %  (0 a 100), no notas sobre 10.
 function colorDeNota(nota: number) {
-  if (nota >= 7) return { texto: 'text-emerald-600', anillo: 'ring-emerald-300', borde: 'border-emerald-200' };
-  if (nota >= 4) return { texto: 'text-amber-600', anillo: 'ring-amber-300', borde: 'border-amber-200' };
+  if (nota >= 70) return { texto: 'text-emerald-600', anillo: 'ring-emerald-300', borde: 'border-emerald-200' };
+  if (nota >= 40) return { texto: 'text-amber-600', anillo: 'ring-amber-300', borde: 'border-amber-200' };
   return { texto: 'text-red-600', anillo: 'ring-red-300', borde: 'border-red-200' };
 }
 
@@ -464,17 +466,30 @@ export default function CvPage() {
                   } p-6 rounded-2xl flex items-center justify-between shadow-xl shadow-purple-950/30 animate-scale-in`}
                 >
                   <div>
-                    <span className="text-slate-800 font-semibold block">Puntaje Global</span>
-                    <span className="text-slate-500 text-xs">Qué tan listo está tu CV</span>
+                    <span className="text-slate-800 font-semibold block">Compatibilidad con el puesto</span>
+                    <span className="text-slate-500 text-xs">Qué tan listo está tu CV para esta búsqueda</span>
                   </div>
                   <span
-                    className={`text-4xl font-extrabold ${colorDeNota(puntajes.global).texto} ring-4 ${
+                    className={`text-3xl font-extrabold ${colorDeNota(puntajes.global).texto} ring-4 ${
                       colorDeNota(puntajes.global).anillo
                     } bg-white rounded-full w-24 h-24 flex items-center justify-center`}
                   >
-                    {puntajes.global}
+                    {puntajes.global}%
                   </span>
                 </div>
+
+                {typeof puntajes.proyectado === 'number' && puntajes.proyectado > puntajes.global && (
+                  <div className="bg-gradient-to-r from-indigo-50 to-emerald-50 border border-indigo-200 rounded-2xl px-5 py-3 flex items-center justify-center gap-3">
+                    <span className={`text-lg font-bold ${colorDeNota(puntajes.global).texto}`}>
+                      {puntajes.global}%
+                    </span>
+                    <span className="text-slate-400 text-sm">→</span>
+                    <span className={`text-lg font-bold ${colorDeNota(puntajes.proyectado).texto}`}>
+                      {puntajes.proyectado}% estimado
+                    </span>
+                    <span className="text-slate-500 text-xs">aplicando las 3 acciones de abajo</span>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-3 gap-2.5">
                   {[
@@ -488,7 +503,7 @@ export default function CvPage() {
                         colorDeNota(item.valor).borde
                       } rounded-xl p-3 text-center shadow-md shadow-purple-950/10`}
                     >
-                      <p className={`text-xl font-bold ${colorDeNota(item.valor).texto}`}>{item.valor}</p>
+                      <p className={`text-xl font-bold ${colorDeNota(item.valor).texto}`}>{item.valor}%</p>
                       <p className="text-[11px] text-slate-500 mt-0.5">{item.label}</p>
                     </div>
                   ))}

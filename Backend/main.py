@@ -1355,10 +1355,10 @@ async def analizar_cv(
 
     ## 1. 🎯 PUNTAJE Y DIAGNÓSTICO
 
-    - **PUNTAJE GLOBAL:** x/10 — {instruccion_puntaje_match}, con una breve justificación.
-    - **PUNTAJE FORMATO ATS:** x/10 — basado específicamente en el diagnóstico del texto extraído explicado arriba.
-    - **PUNTAJE LOGROS CUANTIFICABLES:** x/10 — qué proporción de las responsabilidades descriptas tienen un resultado medible (número, %, cifra) vs. cuántas son tareas genéricas sin impacto demostrado.
-    - **PUNTAJE PALABRAS CLAVE:** x/10 — {instruccion_puntaje_palabras_clave}.
+    - **COMPATIBILIDAD GLOBAL:** x% — {instruccion_puntaje_match}, con una breve justificación. Expresalo SIEMPRE como porcentaje (0 a 100), nunca como nota sobre 10.
+    - **FORMATO ATS:** x% — basado específicamente en el diagnóstico del texto extraído explicado arriba.
+    - **LOGROS CUANTIFICABLES:** x% — qué proporción de las responsabilidades descriptas tienen un resultado medible (número, %, cifra) vs. cuántas son tareas genéricas sin impacto demostrado.
+    - **PALABRAS CLAVE:** x% — {instruccion_puntaje_palabras_clave}.
 
     CAMPO "formato_markdown" — contiene:
 
@@ -1425,8 +1425,21 @@ async def analizar_cv(
 
     ## 5. 🚀 3 ACCIONES PRIORITARIAS PARA ESTA SEMANA
 
-    (3 acciones concretas y priorizadas, en orden de impacto, basadas en todo
-    lo de arriba.)
+    (ANTES de listar las acciones, una línea en negrita, sola, tipo:
+    "**📈 Si aplicás estas 3 acciones, tu compatibilidad podría subir de
+    X% a Y% aprox.**" — donde X% es EXACTAMENTE el mismo número que pusiste
+    en "COMPATIBILIDAD GLOBAL" arriba, e Y% es tu estimación realista y
+    CONSERVADORA de a dónde llegaría si la persona aplica las 3 acciones de
+    abajo. Importante: esas acciones ya están ancladas en la experiencia
+    real de la persona (son las mismas palabras clave de la sección 4 que
+    SÍ tienen respaldo en su CV, más los logros reescritos de la sección 3),
+    así que la proyección tiene que sonar alcanzable y honesta, nunca una
+    promesa vacía — nunca proyectes más de 90-95%, y si el CV ya está muy
+    bien armado (compatibilidad global ya alta), el salto proyectado tiene
+    que ser chico y decirlo así.
+
+    Después de esa línea, las 3 acciones concretas y priorizadas, en orden
+    de impacto, basadas en todo lo de arriba.)
 
     CAMPO "cv_reescrito_markdown" — contiene EL CV COMPLETO reescrito, listo
     para exportar y adjuntar directo en una postulación real (no son ejemplos
@@ -1453,15 +1466,21 @@ async def analizar_cv(
     - Nunca le asignes a la persona un cargo o título de seniority que el CV
       original no respalda (misma regla que en el resto del informe).
 
+    IMPORTANTE sobre "puntajes.proyectado": tiene que ser EXACTAMENTE el
+    mismo número Y% que usaste en la línea "📈 Si aplicás estas 3 acciones..."
+    dentro de "cierre_markdown" — nunca pueden quedar dos números distintos
+    para la misma proyección.
+
     Devolvé ÚNICAMENTE un JSON válido con esta forma exacta (sin texto antes
     ni después, sin bloques de código):
 
     {{
       "puntajes": {{
-        "global": numero_del_1_al_10,
-        "formato_ats": numero_del_1_al_10,
-        "logros": numero_del_1_al_10,
-        "palabras_clave": numero_del_1_al_10
+        "global": numero_del_0_al_100,
+        "formato_ats": numero_del_0_al_100,
+        "logros": numero_del_0_al_100,
+        "palabras_clave": numero_del_0_al_100,
+        "proyectado": numero_del_0_al_100
       }},
       "intro_markdown": "## 📄 Informe de tu CV\\n\\n...",
       "formato_markdown": "## 2. 🛠️ FORMATO Y COMPATIBILIDAD ATS\\n\\n...",
