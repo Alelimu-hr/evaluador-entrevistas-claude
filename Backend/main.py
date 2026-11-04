@@ -526,6 +526,7 @@ async def generar_pregunta(
     rol: str = Form(...),
     seniority: str = Form(""),
     experiencia_entrevistas: str = Form(""),
+    historial_entrevistas: str = Form(""),
     enfoque: str = Form("Liderazgo y Estrategia"),
     cantidad_preguntas: str = Form("3"),
     idioma: str = Form("Español"),
@@ -565,6 +566,25 @@ async def generar_pregunta(
     linea_seniority = f"Seniority: {seniority.strip()}\n    " if seniority and seniority.strip() else ""
     nivel_experiencia = NIVELES_EXPERIENCIA.get(experiencia_entrevistas, NIVEL_EXPERIENCIA_DEFAULT)
 
+    # Memoria entre sesiones: el frontend manda un resumen de las sesiones
+    # anteriores de esta persona EN ESTE simulador (sacado de la tabla
+    # "simulaciones" en Supabase), cuando existen. Es un dato real, más
+    # confiable que el autoreporte de "experiencia_entrevistas" de arriba —
+    # por eso, si hay contradicción entre los dos, le decimos a Gemini que
+    # priorice este.
+    bloque_historial = ""
+    if historial_entrevistas and historial_entrevistas.strip():
+        bloque_historial = f"""
+    Historial REAL de esta persona en este mismo simulador (más confiable
+    que la auto-declaración de arriba si hay contradicción entre los dos):
+    tiene sesiones anteriores registradas acá. Usalo para calibrar la
+    dificultad y, cuando tenga sentido, generar alguna pregunta que retome
+    o profundice un punto débil mencionado ahí, en vez de ignorar que ya
+    practicó antes en esta plataforma:
+
+    {historial_entrevistas.strip()[:3000]}
+    """
+
     prompt = f"""
     Actúa como un reclutador exigente.
     Genera exactamente {total_a_generar} preguntas de entrevista en idioma {idioma}.
@@ -575,6 +595,7 @@ async def generar_pregunta(
 
     Experiencia previa de la persona entrevistándose (ajustá la dificultad
     y el estilo de las preguntas en base a esto): {nivel_experiencia}
+    {bloque_historial}
 
     Las primeras {cantidad_int} preguntas son las que se van a usar en la
     entrevista. Las últimas {reserva_extra} son preguntas "de repuesto":
@@ -689,6 +710,7 @@ async def informe_final(
     rol: str = Form(...),
     seniority: str = Form(""),
     experiencia_entrevistas: str = Form(""),
+    historial_entrevistas: str = Form(""),
     idioma: str = Form("Español"),
     jd: str = Form(None),
     preguntas_meta: str = Form(...),
@@ -715,6 +737,20 @@ async def informe_final(
     clausula_seniority = f" con nivel '{seniority.strip()}'" if seniority and seniority.strip() else ""
     nivel_experiencia = NIVELES_EXPERIENCIA.get(experiencia_entrevistas, NIVEL_EXPERIENCIA_DEFAULT)
 
+    # Mismo mecanismo de memoria que en /api/generar-pregunta: si el
+    # frontend manda historial real de sesiones anteriores, se lo pasamos a
+    # Gemini para que el informe compare explícitamente contra la vez
+    # pasada, en vez de evaluar esta sesión en el vacío.
+    bloque_historial = ""
+    if historial_entrevistas and historial_entrevistas.strip():
+        bloque_historial = f"""
+    Historial REAL de sesiones anteriores de esta persona en este mismo
+    simulador (más confiable que la auto-declaración de arriba si hay
+    contradicción entre los dos):
+
+    {historial_entrevistas.strip()[:3000]}
+    """
+
     contents = [f"""
     Sos un Reclutador Executive / Headhunter con mucha calle, evaluando una
     simulación de entrevista para el puesto '{rol}'{clausula_seniority}.
@@ -722,6 +758,7 @@ async def informe_final(
 
     Experiencia previa de la persona entrevistándose (usala para calibrar tu
     nivel de exigencia en el informe, ver más abajo): {nivel_experiencia}
+    {bloque_historial}
 
     A continuación vas a escuchar, pregunta por pregunta, los audios reales con las
     respuestas del candidato (te indico también la duración y el ritmo de habla medidos
@@ -743,6 +780,12 @@ async def informe_final(
       con alguien que nunca se entrevistó, priorizá la contención por sobre
       la dureza técnica; con alguien con mucho rodaje, podés ser más directo
       y exigente, siempre dentro de la técnica del sándwich.
+    - Si hay un historial REAL de sesiones anteriores (indicado arriba),
+      mencioná explícitamente en el párrafo de apertura cómo se compara
+      ESTA sesión con la anterior: qué mejoró de forma concreta y qué
+      punto débil sigue costando igual, en vez de evaluar esta sesión en
+      el vacío como si fuera la primera vez. Si no hay historial (primera
+      sesión de la persona en la plataforma), no inventes una comparación.
     - Usá EXACTAMENTE esta estructura y estos títulos (podés ajustar el contenido,
       no el formato ni los emojis).
     - MUY IMPORTANTE, formato Markdown real (esto es lo que hace que se lea bien,

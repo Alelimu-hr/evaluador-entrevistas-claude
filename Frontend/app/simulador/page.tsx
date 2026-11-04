@@ -205,12 +205,68 @@ export default function Home() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  // --- Memoria entre sesiones ---
+  // Resumen en texto de las últimas sesiones reales de este usuario en este
+  // simulador (sacado de la tabla "simulaciones"), para mandárselo al backend
+  // y que la IA genuinamente "recuerde" entrevistas anteriores: ajuste la
+  // dificultad y compare el feedback contra la vez pasada, en vez de evaluar
+  // cada sesión en el vacío. Si el usuario es nuevo, queda vacío y no cambia
+  // nada del comportamiento actual.
+  const [historialResumen, setHistorialResumen] = useState('');
+  const [sesionesPrevias, setSesionesPrevias] = useState(0);
+
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
     supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? null));
+  }, []);
+
+  useEffect(() => {
+    const cargarHistorial = async () => {
+      try {
+        const supabase = createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { count } = await supabase
+          .from('simulaciones')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id);
+        setSesionesPrevias(count ?? 0);
+
+        const { data: previas } = await supabase
+          .from('simulaciones')
+          .select('rol, seniority, nota_global, informe_markdown, creado_en')
+          .eq('user_id', user.id)
+          .order('creado_en', { ascending: false })
+          .limit(2);
+
+        if (previas && previas.length > 0) {
+          const resumen = previas
+            .map((s, i) => {
+              const fecha = s.creado_en
+                ? new Date(s.creado_en).toLocaleDateString('es-AR')
+                : 'fecha desconocida';
+              const notaTxt = s.nota_global != null ? `, nota global ${s.nota_global}/10` : '';
+              const informeRecortado = (s.informe_markdown || '').slice(0, 1200);
+              return `--- Sesión ${i === 0 ? 'más reciente' : 'anterior a esa'} (${fecha}) — rol: ${
+                s.rol
+              }${s.seniority ? `, seniority: ${s.seniority}` : ''}${notaTxt} ---\n${informeRecortado}`;
+            })
+            .join('\n\n');
+          setHistorialResumen(resumen);
+        }
+      } catch (err) {
+        // Si falla (sin conexión, tabla recién migrada, etc.) seguimos sin
+        // historial: el simulador funciona igual que antes, solo sin memoria.
+        console.error('No se pudo cargar el historial de simulaciones:', err);
+      }
+    };
+    cargarHistorial();
   }, []);
 
   // Primer escalón del embudo: entró logueado a la pantalla. Una vez por
@@ -312,6 +368,7 @@ export default function Home() {
     formData.append('rol', rol);
     formData.append('seniority', seniority);
     formData.append('experiencia_entrevistas', experiencia);
+    formData.append('historial_entrevistas', historialResumen);
     formData.append('enfoque', enfoque);
     formData.append('cantidad_preguntas', cantidad.toString());
     formData.append('idioma', idioma);
@@ -466,6 +523,7 @@ export default function Home() {
     formData.append('rol', rol);
     formData.append('seniority', seniority);
     formData.append('experiencia_entrevistas', experiencia);
+    formData.append('historial_entrevistas', historialResumen);
     formData.append('idioma', idioma);
     formData.append('jd', jd);
     formData.append(
@@ -657,6 +715,12 @@ export default function Home() {
             <p className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-4">
               🌎 Gratis y para cualquier rol o industria — no hace falta que sea un puesto técnico.
             </p>
+            {sesionesPrevias > 0 && (
+              <p className="inline-flex items-center gap-1.5 text-xs text-emerald-200 bg-emerald-400/10 border border-emerald-300/30 px-3 py-1 rounded-full mt-2 ml-2">
+                🧠 Ya hiciste {sesionesPrevias} {sesionesPrevias === 1 ? 'entrevista' : 'entrevistas'} acá antes —
+                vamos a tener en cuenta tu historial para calibrar esta sesión.
+              </p>
+            )}
           </div>
         )}
 
