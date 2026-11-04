@@ -219,6 +219,13 @@ JSON_CONFIG_NEGOCIACION = types.GenerateContentConfig(
     temperature=0.1,
 )
 
+# Temperatura un poco más alta que las de diagnóstico/puntaje de arriba: esto
+# genera IDEAS de contenido, no un puntaje, así que un poco más de variedad
+# entre corridas está bien (y hasta es deseable) en vez de ser un problema.
+JSON_CONFIG_CONTENIDO_LINKEDIN = types.GenerateContentConfig(
+    temperature=0.4,
+)
+
 
 def get_client(api_key: str, timeout_ms: int = 45000) -> genai.Client:
     if not api_key or not api_key.strip():
@@ -1249,6 +1256,126 @@ async def analizar_perfil_linkedin(
         )
         if parte
     ).strip()
+    return data
+
+
+@app.post("/api/linkedin-estrategia-contenido")
+async def linkedin_estrategia_contenido(
+    x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
+    rol_objetivo: str = Form(None),
+    idioma: str = Form("Español"),
+    objetivo_libre: str = Form(None),
+    perfil: UploadFile = File(...),
+):
+    """Genera una estrategia de contenido para LinkedIn (pilares + banco de
+    ideas de posteos) pensada específicamente para alguien en BÚSQUEDA
+    LABORAL — no para un creador de contenido o marketer que vende una
+    audiencia, que es el público al que apuntan herramientas como Taplio o
+    Supergrow. Reutiliza el mismo PDF de perfil que ya se sube en
+    /api/analizar-perfil-linkedin (mismo patrón de extracción), para no
+    pedírselo de nuevo a la persona."""
+    client = get_client(x_gemini_api_key)
+
+    perfil_bytes = await perfil.read()
+    if not perfil_bytes:
+        raise HTTPException(status_code=400, detail="El archivo llegó vacío.")
+
+    future = _pdf_executor.submit(extraer_texto_cv, perfil, perfil_bytes)
+    try:
+        perfil_texto = future.result(timeout=PDF_TIMEOUT_SEGUNDOS)
+    except FutureTimeoutError:
+        raise HTTPException(
+            status_code=400,
+            detail="El PDF tardó demasiado en procesarse. Probá con otro archivo.",
+        )
+
+    if not perfil_texto or len(perfil_texto.strip()) < 50:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "No pudimos leer texto de ese PDF. Asegurate de subir el PDF que "
+                "exporta LinkedIn desde tu propio perfil (botón 'Más' > 'Guardar en "
+                "PDF'), no una captura de pantalla ni otro tipo de archivo."
+            ),
+        )
+
+    # Mismo patrón "dirigido" vs. "objetivo" que en /api/analizar-perfil-linkedin.
+    tiene_rol = bool(rol_objetivo and rol_objetivo.strip())
+    if tiene_rol:
+        bloque_objetivo = f"""
+    Rol/puesto al que apunta esta persona: {rol_objetivo}
+
+    Contexto adicional que la persona escribió con sus propias palabras:
+    {objetivo_libre if objetivo_libre and objetivo_libre.strip() else 'No provisto'}
+    """
+    else:
+        bloque_objetivo = """
+    Esta persona NO indicó ningún rol objetivo puntual: inferí vos mismo su
+    área/campo profesional a partir de su propia experiencia real en el
+    perfil, y pensá los pilares para esa área, sin asignarle una aspiración
+    que no expresó.
+    """
+
+    prompt = f"""
+    Actuá como un consultor de marca personal en LinkedIn especializado en
+    BUSCADORES DE EMPLEO — no en creadores de contenido ni en marketers que
+    venden una audiencia (ese es el público de herramientas como Taplio o
+    Supergrow, pero NO es el objetivo acá). Tu tarea es proponerle a esta
+    persona una estrategia de contenido realista para generar visibilidad
+    frente a reclutadores mientras busca trabajo, no para "hacerse conocido"
+    en abstracto.
+    {bloque_objetivo}
+
+    Perfil de LinkedIn real de esta persona (extraído de su propio PDF —
+    usalo como la fuente de verdad de su trayectoria real, NUNCA inventes
+    experiencia, logros o proyectos que no estén acá):
+    \"\"\"
+    {perfil_texto[:10000]}
+    \"\"\"
+
+    Dirigite a la persona en segunda persona ("vos"), en {idioma}, con un
+    tono cercano y práctico, nunca genérico de curso de marketing.
+
+    Generá entre 3 y 5 PILARES DE CONTENIDO personalizados a su trayectoria
+    real y a su objetivo (si lo indicó). Un pilar es un tema recurrente
+    sobre el que puede postear repetidamente sin quedarse sin ideas — NO
+    son temas genéricos de marketing ("liderazgo", "productividad") sino
+    anclados en SU experiencia concreta y su situación de búsqueda actual:
+    pensalos entre cosas como compartir el proceso de búsqueda con
+    honestidad, aprendizajes concretos de su área, opiniones informadas
+    sobre su industria, logros propios sin sonar autobombo, o comentar
+    contenido de empresas/personas objetivo de forma genuina — pero
+    SIEMPRE adaptado a SU caso real, nunca repitiendo esta lista tal cual.
+
+    Para cada pilar, generá entre 3 y 4 IDEAS DE POSTEOS concretas (el
+    título/tema y el ángulo, NO el posteo escrito entero), ancladas en algo
+    real de su perfil cuando sea posible (un logro, un proyecto, una
+    situación de su propia experiencia) — nunca ideas genéricas tipo "5
+    tips para..." que podrían aplicarle a cualquiera.
+
+    Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más
+    (sin bloques de código, sin texto fuera del JSON):
+    {{
+      "intro_markdown": "## 📣 Tu estrategia de contenido en LinkedIn\\n\\n(2-3 párrafos: por qué esto importa para alguien buscando trabajo —no es \\"hacerse influencer\\", es que te vean antes de aplicar— y un resumen de por qué elegiste estos pilares puntuales para esta persona, anclado en su perfil real)",
+      "pilares": [
+        {{
+          "nombre": "Nombre corto del pilar",
+          "descripcion": "1-2 oraciones de qué trata este pilar y por qué le sirve a esta persona puntual",
+          "ideas": [
+            {{"titulo": "Título/tema del posteo", "angulo": "1 oración: el ángulo concreto, anclado en su experiencia real"}}
+          ]
+        }}
+      ],
+      "cierre_markdown": "## 🗓️ Cómo arrancar\\n\\n(con guion \\"- \\", 3-4 acciones concretas: cadencia sugerida —2-3 veces por semana—, mezclar formatos, reservar tiempo fijo para comentar en posteos de empresas/personas objetivo — siempre aplicado a ESTA persona, no genérico)"
+    }}
+    """
+
+    texto, modelo_usado = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG_CONTENIDO_LINKEDIN)
+    data = extraer_json_seguro(texto)
+    data.setdefault("intro_markdown", "")
+    data.setdefault("cierre_markdown", "")
+    data.setdefault("pilares", [])
+    data["modelo_usado"] = modelo_usado
     return data
 
 
