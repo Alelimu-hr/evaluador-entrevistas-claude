@@ -28,8 +28,8 @@ const HERRAMIENTAS = [
   {
     href: '/linkedin',
     emoji: '💼',
-    titulo: 'Mejorá tu perfil de LinkedIn',
-    texto: 'Optimizá tu perfil para que los reclutadores te encuentren primero.',
+    titulo: 'LinkedIn y marca personal',
+    texto: 'Mejorá tu perfil de LinkedIn y aprendé a desarrollar tu marca personal.',
   },
 ];
 

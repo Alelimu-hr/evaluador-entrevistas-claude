@@ -676,9 +676,9 @@ export default function Home() {
               className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
             >
               <p className="text-2xl">💼</p>
-              <p className="font-semibold text-slate-800 text-sm mt-1.5">Mejorá tu perfil de LinkedIn</p>
+              <p className="font-semibold text-slate-800 text-sm mt-1.5">LinkedIn y marca personal</p>
               <p className="text-xs text-slate-500 mt-0.5">
-                Optimizá tu perfil para que los reclutadores te encuentren primero.
+                Mejorá tu perfil de LinkedIn y aprendé a desarrollar tu marca personal.
               </p>
             </Link>
             <div className="relative overflow-hidden text-left p-4 rounded-2xl border border-transparent bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-lg shadow-purple-500/30">
