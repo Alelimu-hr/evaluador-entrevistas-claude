@@ -120,6 +120,36 @@ const OBJETIVOS_LINKEDIN: {
 const AVISO_IA_LINKEDIN =
   '⚠️ Estos ejemplos son para inspirarte, no para pegarlos tal cual: LinkedIn detecta texto que suena 100% generado por IA y le baja el alcance. Usalos como punto de partida y reescribilos con tu propia voz antes de publicar.';
 
+// Extraído como componente propio (en vez de repetir el JSX adentro de cada
+// bloque "vista === 'perfil'" / "vista === 'contenido'") porque TypeScript
+// angosta el tipo de "vista" al literal de ese bloque — comparándolo ahí
+// mismo contra el otro valor tira error de compilación ("no overlap"). Acá
+// adentro "vista" vuelve a ser el tipo completo "Vista", sin ese problema.
+function PestanasLinkedin({ vista, setVista }: { vista: Vista; setVista: (v: Vista) => void }) {
+  return (
+    <div className="flex gap-1 bg-white/5 border border-white/10 rounded-full p-1 w-fit mx-auto animate-fade-in-up">
+      <button
+        type="button"
+        onClick={() => setVista('perfil')}
+        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+          vista === 'perfil' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
+        }`}
+      >
+        🔍 Optimizar mi perfil
+      </button>
+      <button
+        type="button"
+        onClick={() => setVista('contenido')}
+        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+          vista === 'contenido' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
+        }`}
+      >
+        📣 Estrategia de contenido
+      </button>
+    </div>
+  );
+}
+
 export default function LinkedinPage() {
   const [vista, setVista] = useState<Vista>('perfil');
 
@@ -473,26 +503,7 @@ export default function LinkedinPage() {
             )}
 
             {/* Pestañas — debajo de la intro, arriba del formulario */}
-            <div className="flex gap-1 bg-white/5 border border-white/10 rounded-full p-1 w-fit mx-auto animate-fade-in-up">
-              <button
-                type="button"
-                onClick={() => setVista('perfil')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  vista === 'perfil' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                🔍 Optimizar mi perfil
-              </button>
-              <button
-                type="button"
-                onClick={() => setVista('contenido')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  vista === 'contenido' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                📣 Estrategia de contenido
-              </button>
-            </div>
+            <PestanasLinkedin vista={vista} setVista={setVista} />
 
             {!hayResultadoPerfil && (
               <form onSubmit={handleAnalizar} className="space-y-4 animate-fade-in-up">
@@ -621,26 +632,7 @@ export default function LinkedinPage() {
             )}
 
             {/* Pestañas — debajo de la intro, arriba del contenido */}
-            <div className="flex gap-1 bg-white/5 border border-white/10 rounded-full p-1 w-fit mx-auto animate-fade-in-up">
-              <button
-                type="button"
-                onClick={() => setVista('perfil')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  vista === 'perfil' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                🔍 Optimizar mi perfil
-              </button>
-              <button
-                type="button"
-                onClick={() => setVista('contenido')}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-                  vista === 'contenido' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                📣 Estrategia de contenido
-              </button>
-            </div>
+            <PestanasLinkedin vista={vista} setVista={setVista} />
 
             <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5 animate-fade-in-up">
               <h3 className="text-sm font-semibold text-slate-800 mb-3">📚 Cómo funciona LinkedIn (resumen rápido)</h3>
