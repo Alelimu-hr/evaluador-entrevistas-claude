@@ -452,28 +452,6 @@ export default function LinkedinPage() {
           </div>
         )}
 
-        {/* Pestañas */}
-        <div className="flex gap-1 bg-white/5 border border-white/10 rounded-full p-1 w-fit animate-fade-in-up">
-          <button
-            type="button"
-            onClick={() => setVista('perfil')}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              vista === 'perfil' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            🔍 Optimizar mi perfil
-          </button>
-          <button
-            type="button"
-            onClick={() => setVista('contenido')}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
-              vista === 'contenido' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            📣 Estrategia de contenido
-          </button>
-        </div>
-
         {vista === 'perfil' && (
           <>
             {!hayResultadoPerfil && (
@@ -493,6 +471,28 @@ export default function LinkedinPage() {
                 </p>
               </div>
             )}
+
+            {/* Pestañas — debajo de la intro, arriba del formulario */}
+            <div className="flex gap-1 bg-white/5 border border-white/10 rounded-full p-1 w-fit mx-auto animate-fade-in-up">
+              <button
+                type="button"
+                onClick={() => setVista('perfil')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  vista === 'perfil' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                🔍 Optimizar mi perfil
+              </button>
+              <button
+                type="button"
+                onClick={() => setVista('contenido')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  vista === 'contenido' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                📣 Estrategia de contenido
+              </button>
+            </div>
 
             {!hayResultadoPerfil && (
               <form onSubmit={handleAnalizar} className="space-y-4 animate-fade-in-up">
@@ -619,6 +619,28 @@ export default function LinkedinPage() {
                 </p>
               </div>
             )}
+
+            {/* Pestañas — debajo de la intro, arriba del contenido */}
+            <div className="flex gap-1 bg-white/5 border border-white/10 rounded-full p-1 w-fit mx-auto animate-fade-in-up">
+              <button
+                type="button"
+                onClick={() => setVista('perfil')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  vista === 'perfil' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                🔍 Optimizar mi perfil
+              </button>
+              <button
+                type="button"
+                onClick={() => setVista('contenido')}
+                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                  vista === 'contenido' ? 'bg-white text-slate-800 shadow' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                📣 Estrategia de contenido
+              </button>
+            </div>
 
             <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 rounded-2xl shadow-xl shadow-purple-950/30 p-5 animate-fade-in-up">
               <h3 className="text-sm font-semibold text-slate-800 mb-3">📚 Cómo funciona LinkedIn (resumen rápido)</h3>
