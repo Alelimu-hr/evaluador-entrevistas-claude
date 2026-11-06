@@ -40,7 +40,17 @@ FFMPEG_PATH = imageio_ffmpeg.get_ffmpeg_exe()
 # Para leer PDFs de CV en un hilo aparte: si el PDF viene raro/pesado y
 # pypdf se cuelga leyéndolo, no queremos que se frene TODO el servidor
 # (y todas las demás peticiones de otros participantes) con él.
-_pdf_executor = ThreadPoolExecutor(max_workers=4)
+#
+# OJO memoria: bajado de 4 a 2 después de que la instancia de Render se
+# quedó sin RAM y se reinició sola (ver aviso de "exceeded its memory
+# limit"). Con 4 hilos, hasta 4 PDFs pesados se podían estar parseando en
+# simultáneo, cada uno con su propia copia del texto extraído en memoria,
+# justo al mismo tiempo que la instancia también procesa audio (que ya de
+# por sí usa bastante RAM — ver convertir_audio_a_wav). Esto NO es la causa
+# raíz (no hay un leak: nada queda creciendo entre pedidos), es solo bajar
+# el techo de cuánto puede picar en simultáneo. El fix de fondo es más
+# memoria en el plan de Render — ver la conversación sobre capacidad.
+_pdf_executor = ThreadPoolExecutor(max_workers=2)
 PDF_TIMEOUT_SEGUNDOS = 15
 
 # Cuántas entrevistas tuvo la persona en su vida (NO el seniority del
@@ -1262,6 +1272,7 @@ async def analizar_perfil_linkedin(
 @app.post("/api/linkedin-estrategia-contenido")
 async def linkedin_estrategia_contenido(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
+    objetivo_linkedin: str = Form(""),
     rol_objetivo: str = Form(None),
     idioma: str = Form("Español"),
     objetivo_libre: str = Form(None),
@@ -1316,14 +1327,28 @@ async def linkedin_estrategia_contenido(
     que no expresó.
     """
 
+    # Objetivo elegido en la pestaña (vender / generar interacciones / que la
+    # encuentren reclutadores) — a diferencia del rol objetivo, este campo
+    # SÍ es obligatorio desde el frontend, pero igual se cubre el caso de
+    # que llegue vacío (ej. llamadas directas a la API sin pasar por la UI).
+    objetivo_linkedin_texto = (
+        objetivo_linkedin.strip()
+        if objetivo_linkedin and objetivo_linkedin.strip()
+        else "No especificado — priorizá aumentar su empleabilidad general."
+    )
+
     prompt = f"""
     Actuá como un consultor de marca personal en LinkedIn especializado en
     BUSCADORES DE EMPLEO — no en creadores de contenido ni en marketers que
     venden una audiencia (ese es el público de herramientas como Taplio o
     Supergrow, pero NO es el objetivo acá). Tu tarea es proponerle a esta
     persona una estrategia de contenido realista para generar visibilidad
-    frente a reclutadores mientras busca trabajo, no para "hacerse conocido"
-    en abstracto.
+    mientras busca trabajo, no para "hacerse conocido" en abstracto.
+
+    Objetivo principal que esta persona busca con su estrategia de contenido
+    (priorizá los pilares, las ideas y el cierre para ESTO por sobre
+    cualquier otra cosa — es la variable más importante de todo el prompt):
+    {objetivo_linkedin_texto}
     {bloque_objetivo}
 
     Perfil de LinkedIn real de esta persona (extraído de su propio PDF —
@@ -1337,36 +1362,50 @@ async def linkedin_estrategia_contenido(
     tono cercano y práctico, nunca genérico de curso de marketing.
 
     Generá entre 3 y 5 PILARES DE CONTENIDO personalizados a su trayectoria
-    real y a su objetivo (si lo indicó). Un pilar es un tema recurrente
-    sobre el que puede postear repetidamente sin quedarse sin ideas — NO
-    son temas genéricos de marketing ("liderazgo", "productividad") sino
-    anclados en SU experiencia concreta y su situación de búsqueda actual:
-    pensalos entre cosas como compartir el proceso de búsqueda con
-    honestidad, aprendizajes concretos de su área, opiniones informadas
-    sobre su industria, logros propios sin sonar autobombo, o comentar
-    contenido de empresas/personas objetivo de forma genuina — pero
-    SIEMPRE adaptado a SU caso real, nunca repitiendo esta lista tal cual.
+    real y a su objetivo. Un pilar es un tema recurrente sobre el que puede
+    postear repetidamente sin quedarse sin ideas — NO son temas genéricos de
+    marketing ("liderazgo", "productividad") sino anclados en SU experiencia
+    concreta y su situación actual: pensalos entre cosas como compartir el
+    proceso de búsqueda con honestidad, aprendizajes concretos de su área,
+    opiniones informadas sobre su industria, logros propios sin sonar
+    autobombo, o comentar contenido de empresas/personas objetivo de forma
+    genuina — pero SIEMPRE adaptado a SU caso real y a su objetivo elegido
+    arriba, nunca repitiendo esta lista tal cual.
 
     Para cada pilar, generá entre 3 y 4 IDEAS DE POSTEOS concretas (el
-    título/tema y el ángulo, NO el posteo escrito entero), ancladas en algo
-    real de su perfil cuando sea posible (un logro, un proyecto, una
-    situación de su propia experiencia) — nunca ideas genéricas tipo "5
-    tips para..." que podrían aplicarle a cualquiera.
+    título/tema y el ángulo), ancladas en algo real de su perfil cuando sea
+    posible (un logro, un proyecto, una situación de su propia experiencia)
+    — nunca ideas genéricas tipo "5 tips para..." que podrían aplicarle a
+    cualquiera. Para UNA de esas ideas por pilar (la más fuerte), además
+    escribí el POSTEO COMPLETO de ejemplo (3-6 líneas, tono humano y
+    conversacional, nunca corporativo ni con hashtags en exceso) — es para
+    mostrar el formato, no para que lo copien tal cual.
+
+    MUY IMPORTANTE — es CLAVE que menciones esto explícitamente en el cierre
+    (campo "cierre_markdown"): postear no alcanza solo, hay que hacer crecer
+    la red de forma deliberada conectando activamente con reclutadores,
+    gente de Talent Acquisition y selectores/as de personal de su industria
+    — son quienes más impactan sus chances reales de conseguir entrevistas,
+    y sin una red que los incluya, hasta el mejor posteo tiene alcance
+    limitado. Dale una acción concreta para esto (ej. "mandale una solicitud
+    con una nota corta y genuina a X reclutadores de tu industria por
+    semana", nunca un pedido de conexión vacío tipo "hola, te agrego").
 
     Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más
     (sin bloques de código, sin texto fuera del JSON):
     {{
-      "intro_markdown": "## 📣 Tu estrategia de contenido en LinkedIn\\n\\n(2-3 párrafos: por qué esto importa para alguien buscando trabajo —no es \\"hacerse influencer\\", es que te vean antes de aplicar— y un resumen de por qué elegiste estos pilares puntuales para esta persona, anclado en su perfil real)",
+      "intro_markdown": "## 📣 Tu estrategia de contenido en LinkedIn\\n\\n(2-3 párrafos: por qué esto importa para alguien buscando trabajo —no es \\"hacerse influencer\\", es que te vean antes de aplicar— y un resumen de por qué elegiste estos pilares puntuales para esta persona y su objetivo, anclado en su perfil real)",
       "pilares": [
         {{
           "nombre": "Nombre corto del pilar",
           "descripcion": "1-2 oraciones de qué trata este pilar y por qué le sirve a esta persona puntual",
           "ideas": [
             {{"titulo": "Título/tema del posteo", "angulo": "1 oración: el ángulo concreto, anclado en su experiencia real"}}
-          ]
+          ],
+          "ejemplo_post": "el posteo completo de ejemplo para la idea más fuerte de este pilar, 3-6 líneas, tono humano"
         }}
       ],
-      "cierre_markdown": "## 🗓️ Cómo arrancar\\n\\n(con guion \\"- \\", 3-4 acciones concretas: cadencia sugerida —2-3 veces por semana—, mezclar formatos, reservar tiempo fijo para comentar en posteos de empresas/personas objetivo — siempre aplicado a ESTA persona, no genérico)"
+      "cierre_markdown": "## 🗓️ Cómo arrancar\\n\\n(con guion \\"- \\", 4-5 acciones concretas: cadencia sugerida —2-3 veces por semana—, mezclar formatos, Y OBLIGATORIO la acción de conectar activamente con reclutadores/Talent Acquisition/selectores de su industria explicada arriba — siempre aplicado a ESTA persona y su objetivo, no genérico)"
     }}
     """
 

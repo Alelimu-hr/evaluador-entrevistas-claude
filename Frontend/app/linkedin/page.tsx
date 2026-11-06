@@ -32,7 +32,10 @@ type Pilar = {
   nombre: string;
   descripcion: string;
   ideas: IdeaPost[];
+  ejemplo_post?: string;
 };
+
+type ObjetivoLinkedin = '' | 'vender' | 'interacciones' | 'reclutadores';
 
 function colorDeNota(nota: number) {
   if (nota >= 7) return { texto: 'text-emerald-600', anillo: 'ring-emerald-300', borde: 'border-emerald-200' };
@@ -73,6 +76,50 @@ const TIPS_LINKEDIN: { emoji: string; texto: string }[] = [
   },
 ];
 
+// Reemplaza al toggle "dirigido/objetivo" del análisis de perfil en esta
+// pestaña — ahí no tenía sentido ("¿qué tipo de análisis querés?" no es una
+// pregunta real para una estrategia de contenido). Esto sí lo es: define
+// para qué quiere usar LinkedIn esta persona, y el prompt del backend ajusta
+// los pilares e ideas en función de la respuesta. "textoBackend" es la frase
+// completa que se le manda a Gemini (más clara para el prompt que mandar
+// solo la key).
+const OBJETIVOS_LINKEDIN: {
+  value: ObjetivoLinkedin;
+  emoji: string;
+  label: string;
+  descripcion: string;
+  textoBackend: string;
+}[] = [
+  {
+    value: 'vender',
+    emoji: '💰',
+    label: 'Vender tu expertise',
+    descripcion: 'Posicionarte como especialista para conseguir clientes, proyectos o consultoría.',
+    textoBackend: 'Vender su expertise: posicionarse como especialista para conseguir clientes, proyectos o consultoría.',
+  },
+  {
+    value: 'interacciones',
+    emoji: '🔥',
+    label: 'Generar más interacciones',
+    descripcion: 'Crecer tu visibilidad y tu red en general — que te vea más gente.',
+    textoBackend: 'Generar más interacciones y visibilidad en general: hacer crecer su red y su alcance.',
+  },
+  {
+    value: 'reclutadores',
+    emoji: '🎯',
+    label: 'Que te encuentren reclutadores',
+    descripcion: 'Que te tengan en el radar para procesos de selección concretos.',
+    textoBackend:
+      'Que la encuentren reclutadores, gente de Talent Acquisition y selectores/as de personal, para procesos de selección concretos.',
+  },
+];
+
+// Aviso fijo (sin IA) que se muestra junto a los ejemplos de posteo — no
+// hace falta que Gemini lo redacte cada vez, y así queda siempre igual y
+// bien visible.
+const AVISO_IA_LINKEDIN =
+  '⚠️ Estos ejemplos son para inspirarte, no para pegarlos tal cual: LinkedIn detecta texto que suena 100% generado por IA y le baja el alcance. Usalos como punto de partida y reescribilos con tu propia voz antes de publicar.';
+
 export default function LinkedinPage() {
   const [vista, setVista] = useState<Vista>('perfil');
 
@@ -106,6 +153,10 @@ export default function LinkedinPage() {
   // Reutiliza el mismo PDF de perfil / rol objetivo / idioma de arriba (no
   // tiene sentido pedírselo de nuevo): solo cambia el endpoint y cómo se
   // muestra el resultado (pilares + ideas, no un informe de puntajes).
+  // "objetivoLinkedin" es propio de esta pestaña (no existe en la de
+  // análisis de perfil) — reemplaza al toggle "modo" que no tenía sentido
+  // acá, ver OBJETIVOS_LINKEDIN arriba.
+  const [objetivoLinkedin, setObjetivoLinkedin] = useState<ObjetivoLinkedin>('');
   const [cargandoContenido, setCargandoContenido] = useState(false);
   const [errorContenido, setErrorContenido] = useState('');
   const [introContenidoMarkdown, setIntroContenidoMarkdown] = useState('');
@@ -167,6 +218,9 @@ export default function LinkedinPage() {
     setCierreContenidoMarkdown('');
     setPilares([]);
     setErrorContenido('');
+    // OJO: "objetivoLinkedin" NO se resetea a propósito — si vuelve a
+    // generar otra estrategia es más probable que sea con el mismo
+    // objetivo que recién eligió, no tiene sentido hacerla elegir de nuevo.
   };
 
   // Registra el análisis para poder ver uso/adopción de esta herramienta,
@@ -247,20 +301,23 @@ export default function LinkedinPage() {
     e.preventDefault();
     if (!apiKey) return alert('Pegá tu clave de Google AI Studio para probar.');
     if (!perfilFile) return alert('Subí el PDF de tu perfil de LinkedIn.');
-    if (modo === 'dirigido' && !rolObjetivo.trim()) {
-      return alert(
-        'Poné el puesto al que apuntás, o elegí "Tu LinkedIn tal cual está" si preferís que infiramos tu área a partir de tu experiencia.'
-      );
+    if (!objetivoLinkedin) {
+      return alert('Contanos qué estás buscando lograr con tu LinkedIn — elegí una opción arriba.');
     }
 
     setCargandoContenido(true);
     setErrorContenido('');
 
+    const objetivoElegido = OBJETIVOS_LINKEDIN.find((o) => o.value === objetivoLinkedin);
+
     const formData = new FormData();
-    if (modo === 'dirigido') {
-      formData.append('rol_objetivo', rolObjetivo);
-      formData.append('objetivo_libre', objetivoLibre);
-    }
+    formData.append('objetivo_linkedin', objetivoElegido?.textoBackend || '');
+    // A diferencia de la pestaña de análisis de perfil, acá el rol objetivo
+    // es siempre opcional (no depende de ningún toggle de "modo") — es
+    // contexto extra que suma si está, pero el objetivo elegido arriba ya
+    // alcanza para armar la estrategia.
+    if (rolObjetivo.trim()) formData.append('rol_objetivo', rolObjetivo);
+    if (objetivoLibre.trim()) formData.append('objetivo_libre', objetivoLibre);
     formData.append('idioma', idioma);
     formData.append('perfil', perfilFile);
 
@@ -574,6 +631,31 @@ export default function LinkedinPage() {
 
             {!hayResultadoContenido && (
               <form onSubmit={handleGenerarEstrategia} className="space-y-4 animate-fade-in-up">
+                <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl shadow-xl shadow-purple-950/30">
+                  <label className="block text-sm font-semibold text-slate-800 mb-2">
+                    ¿Qué estás buscando lograr con tu LinkedIn?
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {OBJETIVOS_LINKEDIN.map((o) => (
+                      <button
+                        key={o.value}
+                        type="button"
+                        onClick={() => setObjetivoLinkedin(o.value)}
+                        className={`text-left p-3 rounded-xl border transition-all ${
+                          objetivoLinkedin === o.value
+                            ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                            : 'border-slate-200 bg-white hover:border-purple-300'
+                        }`}
+                      >
+                        <p className="text-sm font-semibold text-slate-800">
+                          {o.emoji} {o.label}
+                        </p>
+                        <p className="text-xs text-slate-500 mt-0.5">{o.descripcion}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <CamposComunes
                   apiKey={apiKey}
                   setApiKey={setApiKey}
@@ -588,6 +670,7 @@ export default function LinkedinPage() {
                   setIdioma={setIdioma}
                   perfilFile={perfilFile}
                   setPerfilFile={setPerfilFile}
+                  mostrarSelectorModo={false}
                 />
 
                 {errorContenido && <p className="text-xs text-red-400 px-1 animate-fade-in">{errorContenido}</p>}
@@ -611,6 +694,10 @@ export default function LinkedinPage() {
                   </div>
                 </div>
 
+                <p className="text-xs text-amber-200 bg-amber-500/10 border border-amber-400/30 rounded-xl px-3 py-2 animate-fade-in">
+                  {AVISO_IA_LINKEDIN}
+                </p>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {pilares.map((pilar, i) => (
                     <div
@@ -630,6 +717,14 @@ export default function LinkedinPage() {
                           </li>
                         ))}
                       </ul>
+                      {pilar.ejemplo_post && (
+                        <div className="mt-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                          <p className="text-[11px] font-semibold text-indigo-700 uppercase tracking-wide mb-1.5">
+                            📝 Ejemplo de posteo
+                          </p>
+                          <p className="text-xs text-slate-600 whitespace-pre-line">{pilar.ejemplo_post}</p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -675,6 +770,7 @@ function CamposComunes({
   setIdioma,
   perfilFile,
   setPerfilFile,
+  mostrarSelectorModo = true,
 }: {
   apiKey: string;
   setApiKey: (v: string) => void;
@@ -689,7 +785,18 @@ function CamposComunes({
   setIdioma: (v: string) => void;
   perfilFile: File | null;
   setPerfilFile: (f: File | null) => void;
+  // false en la pestaña de "Estrategia de contenido": ahí no tiene sentido
+  // preguntar "¿qué tipo de análisis querés?" (no es un análisis), así que
+  // esa pestaña trae su propio selector de objetivo (ver OBJETIVOS_LINKEDIN)
+  // y acá el puesto objetivo queda siempre como campo opcional, sin el
+  // toggle dirigido/objetivo.
+  mostrarSelectorModo?: boolean;
 }) {
+  // En la pestaña de perfil, el puesto objetivo solo se pide/exige en modo
+  // "dirigido". En la de contenido (mostrarSelectorModo=false) se muestra
+  // siempre, pero nunca es obligatorio — el objetivo de LinkedIn ya alcanza.
+  const mostrarRolObjetivo = mostrarSelectorModo ? modo === 'dirigido' : true;
+
   return (
     <>
       {/* API Key */}
@@ -754,51 +861,55 @@ function CamposComunes({
 
       {/* Modo de análisis + rol objetivo + idioma */}
       <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
-        <div>
-          <label className="block text-sm font-semibold text-slate-800 mb-2">¿Qué tipo de análisis querés?</label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <button
-              type="button"
-              onClick={() => setModo('dirigido')}
-              className={`text-left p-3 rounded-xl border transition-all ${
-                modo === 'dirigido'
-                  ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                  : 'border-slate-200 bg-white hover:border-purple-300'
-              }`}
-            >
-              <p className="text-sm font-semibold text-slate-800">🎯 En función de una posición</p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Pensado en el rol al que te gustaría adaptarlo.
-              </p>
-            </button>
-            <button
-              type="button"
-              onClick={() => setModo('objetivo')}
-              className={`text-left p-3 rounded-xl border transition-all ${
-                modo === 'objetivo'
-                  ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
-                  : 'border-slate-200 bg-white hover:border-purple-300'
-              }`}
-            >
-              <p className="text-sm font-semibold text-slate-800">📄 Tu LinkedIn tal cual está</p>
-              <p className="text-xs text-slate-500 mt-0.5">
-                A partir de tu experiencia actual, sin apuntar a una vacante puntual.
-              </p>
-            </button>
+        {mostrarSelectorModo && (
+          <div>
+            <label className="block text-sm font-semibold text-slate-800 mb-2">¿Qué tipo de análisis querés?</label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                onClick={() => setModo('dirigido')}
+                className={`text-left p-3 rounded-xl border transition-all ${
+                  modo === 'dirigido'
+                    ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                    : 'border-slate-200 bg-white hover:border-purple-300'
+                }`}
+              >
+                <p className="text-sm font-semibold text-slate-800">🎯 En función de una posición</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Pensado en el rol al que te gustaría adaptarlo.
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModo('objetivo')}
+                className={`text-left p-3 rounded-xl border transition-all ${
+                  modo === 'objetivo'
+                    ? 'border-indigo-500 bg-indigo-50 ring-2 ring-indigo-200'
+                    : 'border-slate-200 bg-white hover:border-purple-300'
+                }`}
+              >
+                <p className="text-sm font-semibold text-slate-800">📄 Tu LinkedIn tal cual está</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  A partir de tu experiencia actual, sin apuntar a una vacante puntual.
+                </p>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className={`grid grid-cols-1 ${modo === 'dirigido' ? 'md:grid-cols-2' : ''} gap-4`}>
-          {modo === 'dirigido' && (
+        <div className={`grid grid-cols-1 ${mostrarRolObjetivo ? 'md:grid-cols-2' : ''} gap-4`}>
+          {mostrarRolObjetivo && (
             <div>
-              <label className="block text-sm font-semibold text-slate-800 mb-1">Puesto al que apuntás</label>
+              <label className="block text-sm font-semibold text-slate-800 mb-1">
+                Puesto al que apuntás {!mostrarSelectorModo && <span className="text-slate-400 font-normal">(opcional)</span>}
+              </label>
               <input
                 type="text"
                 value={rolObjetivo}
                 onChange={(e) => setRolObjetivo(e.target.value)}
                 placeholder="Ej: Analista Contable, Líder de Ventas, Desarrollador Backend..."
                 className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
-                required
+                required={mostrarSelectorModo}
               />
               <p className="text-xs text-slate-500 mt-1">
                 Así te sugerimos palabras clave y pilares de contenido pensados para ESE rol puntual.
@@ -816,7 +927,7 @@ function CamposComunes({
               <option value="Inglés">Inglés</option>
             </select>
           </div>
-          {modo === 'dirigido' && (
+          {mostrarRolObjetivo && (
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-slate-800 mb-1">
                 Contanos más sobre lo que buscás (opcional)
