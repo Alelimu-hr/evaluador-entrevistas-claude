@@ -497,9 +497,9 @@ export default function CvPage() {
                 Estás acá
               </span>
               <p className="text-2xl">📄</p>
-              <p className="font-semibold text-white text-sm mt-1.5">Optimizá tu CV para cada búsqueda</p>
+              <p className="font-semibold text-white text-sm mt-1.5">Armado y optimización de CV</p>
               <p className="text-xs text-white/80 mt-0.5">
-                Comparación contra el puesto, o armalo de cero si todavía no tenés uno.
+                Armá tu currículum de cero o potenciá el que ya tenés, para que tus postulaciones sean mucho más efectivas.
               </p>
             </div>
             <Link

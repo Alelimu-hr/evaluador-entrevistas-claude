@@ -439,9 +439,9 @@ export default function LinkedinPage() {
                   className="text-left p-4 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
                 >
                   <p className="text-2xl">📄</p>
-                  <p className="font-semibold text-slate-800 text-sm mt-1.5">Optimizá tu CV para cada búsqueda</p>
+                  <p className="font-semibold text-slate-800 text-sm mt-1.5">Armado y optimización de CV</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Comparación contra el puesto: chequeo ATS y logros reescritos, listos para pegar.
+                    Armá tu currículum de cero o potenciá el que ya tenés, para que tus postulaciones sean mucho más efectivas.
                   </p>
                 </Link>
                 <div className="relative overflow-hidden text-left p-4 rounded-2xl border border-transparent bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-lg shadow-purple-500/30">

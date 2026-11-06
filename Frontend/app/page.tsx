@@ -22,8 +22,8 @@ const HERRAMIENTAS = [
   {
     href: '/cv',
     emoji: '📄',
-    titulo: 'Optimizá tu CV para cada búsqueda',
-    texto: 'Comparación contra el puesto: chequeo ATS y logros reescritos, listos para pegar.',
+    titulo: 'Armado y optimización de CV',
+    texto: 'Armá tu currículum de cero o potenciá el que ya tenés, para que tus postulaciones sean mucho más efectivas.',
   },
   {
     href: '/linkedin',
