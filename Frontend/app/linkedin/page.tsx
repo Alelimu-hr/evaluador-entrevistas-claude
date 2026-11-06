@@ -342,6 +342,12 @@ export default function LinkedinPage() {
 
     const formData = new FormData();
     formData.append('objetivo_linkedin', objetivoElegido?.textoBackend || '');
+    // Mandamos también la key corta (no solo el texto largo de arriba): el
+    // backend la usa para decidir si corresponde la instrucción obligatoria
+    // de conectar con reclutadores en el cierre — Ale pidió que esa parte
+    // del prompt quede solo para quien elige "Que te encuentren
+    // reclutadores", no para los otros dos objetivos.
+    formData.append('objetivo_linkedin_key', objetivoLinkedin);
     // A diferencia de la pestaña de análisis de perfil, acá el rol objetivo
     // es siempre opcional (no depende de ningún toggle de "modo") — es
     // contexto extra que suma si está, pero el objetivo elegido arriba ya

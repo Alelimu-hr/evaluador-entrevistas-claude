@@ -1273,6 +1273,7 @@ async def analizar_perfil_linkedin(
 async def linkedin_estrategia_contenido(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
     objetivo_linkedin: str = Form(""),
+    objetivo_linkedin_key: str = Form(""),
     rol_objetivo: str = Form(None),
     idioma: str = Form("Español"),
     objetivo_libre: str = Form(None),
@@ -1337,6 +1338,39 @@ async def linkedin_estrategia_contenido(
         else "No especificado — priorizá aumentar su empleabilidad general."
     )
 
+    # La instrucción obligatoria de conectar con reclutadores/Talent
+    # Acquisition/selectores queda SOLO para quien elige el objetivo "Que te
+    # encuentren reclutadores" (pedido explícito de Ale) — para los otros dos
+    # objetivos (vender expertise / generar interacciones) el cierre se arma
+    # en base a pasos genéricos de cadencia y formato, sin forzar ese tema.
+    if (objetivo_linkedin_key or "").strip() == "reclutadores":
+        bloque_reclutadores = """
+    MUY IMPORTANTE — es CLAVE que menciones esto explícitamente en el cierre
+    (campo "cierre_markdown"): postear no alcanza solo, hay que hacer crecer
+    la red de forma deliberada conectando activamente con reclutadores,
+    gente de Talent Acquisition y selectores/as de personal de su industria
+    — son quienes más impactan sus chances reales de conseguir entrevistas,
+    y sin una red que los incluya, hasta el mejor posteo tiene alcance
+    limitado. Dale una acción concreta para esto (ej. "mandale una solicitud
+    con una nota corta y genuina a X reclutadores de tu industria por
+    semana", nunca un pedido de conexión vacío tipo "hola, te agrego").
+    """
+        instruccion_cierre_json = (
+            'con guion "- ", 4-5 acciones concretas: cadencia sugerida '
+            "—2-3 veces por semana—, mezclar formatos, Y OBLIGATORIO la "
+            "acción de conectar activamente con reclutadores/Talent "
+            "Acquisition/selectores de su industria explicada arriba — "
+            "siempre aplicado a ESTA persona y su objetivo, no genérico"
+        )
+    else:
+        bloque_reclutadores = ""
+        instruccion_cierre_json = (
+            'con guion "- ", 4-5 acciones concretas para arrancar: cadencia '
+            "sugerida —2-3 veces por semana—, mezclar formatos, y los "
+            "próximos pasos más relevantes para SU objetivo elegido arriba "
+            "— siempre aplicado a ESTA persona, no genérico"
+        )
+
     prompt = f"""
     Actuá como un consultor de marca personal en LinkedIn especializado en
     BUSCADORES DE EMPLEO — no en creadores de contenido ni en marketers que
@@ -1381,15 +1415,7 @@ async def linkedin_estrategia_contenido(
     conversacional, nunca corporativo ni con hashtags en exceso) — es para
     mostrar el formato, no para que lo copien tal cual.
 
-    MUY IMPORTANTE — es CLAVE que menciones esto explícitamente en el cierre
-    (campo "cierre_markdown"): postear no alcanza solo, hay que hacer crecer
-    la red de forma deliberada conectando activamente con reclutadores,
-    gente de Talent Acquisition y selectores/as de personal de su industria
-    — son quienes más impactan sus chances reales de conseguir entrevistas,
-    y sin una red que los incluya, hasta el mejor posteo tiene alcance
-    limitado. Dale una acción concreta para esto (ej. "mandale una solicitud
-    con una nota corta y genuina a X reclutadores de tu industria por
-    semana", nunca un pedido de conexión vacío tipo "hola, te agrego").
+    {bloque_reclutadores}
 
     Respondé EXCLUSIVAMENTE con un JSON con este formato exacto y nada más
     (sin bloques de código, sin texto fuera del JSON):
@@ -1405,7 +1431,7 @@ async def linkedin_estrategia_contenido(
           "ejemplo_post": "el posteo completo de ejemplo para la idea más fuerte de este pilar, 3-6 líneas, tono humano"
         }}
       ],
-      "cierre_markdown": "## 🗓️ Cómo arrancar\\n\\n(con guion \\"- \\", 4-5 acciones concretas: cadencia sugerida —2-3 veces por semana—, mezclar formatos, Y OBLIGATORIO la acción de conectar activamente con reclutadores/Talent Acquisition/selectores de su industria explicada arriba — siempre aplicado a ESTA persona y su objetivo, no genérico)"
+      "cierre_markdown": "## 🗓️ Cómo arrancar\\n\\n({instruccion_cierre_json})"
     }}
     """
 
