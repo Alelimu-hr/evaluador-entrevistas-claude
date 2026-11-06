@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { BuscadorHerramienta } from '@/components/BuscadorHerramienta';
 
 // Selector de herramientas para gente YA logueada — antes vivía en "/", pero
 // esa ruta ahora es la landing pública de marketing (ver app/page.tsx), así
@@ -61,6 +62,12 @@ export default function InicioPage() {
             conecta con el modelo de IA.
           </p>
         </div>
+
+        {/* El "buscador": para quien no tiene idea de cuál de las 5 usar.
+            Colapsado por default (ver BuscadorHerramienta) — no le resta
+            lugar a la elección directa de abajo para quien ya sabe qué
+            quiere. */}
+        <BuscadorHerramienta />
 
         {/* Las 5 herramientas — ninguna pre-seleccionada, esta es la elección real.
             Layout "pirámide invertida": 3 arriba, 2 centradas abajo. */}

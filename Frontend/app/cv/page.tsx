@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
 import { createClient } from '@/lib/supabase/client';
 import { registrarEventoFunnel } from '@/lib/analytics';
@@ -129,7 +130,15 @@ function CampoApiKey({
   );
 }
 
-export default function CvPage() {
+function CvPageInterno() {
+  // El "buscador" de /inicio linkea acá con ?modo=desde_cero o
+  // ?modo=optimizar para arrancar directo en el modo que ya eligió la
+  // persona, sin que tenga que tocar el toggle de nuevo (ver
+  // components/BuscadorHerramienta.tsx). Si no viene el parámetro, o viene
+  // con otro valor, se arranca en "optimizar" como siempre.
+  const searchParams = useSearchParams();
+  const modoInicial: ModoCv = searchParams.get('modo') === 'desde_cero' ? 'desde_cero' : 'optimizar';
+
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
   const [idioma, setIdioma] = useState('Español');
@@ -137,7 +146,7 @@ export default function CvPage() {
   const [error, setError] = useState('');
   const [descargandoPdf, setDescargandoPdf] = useState(false);
 
-  const [modoCv, setModoCv] = useState<ModoCv>('optimizar');
+  const [modoCv, setModoCv] = useState<ModoCv>(modoInicial);
   // Con qué modo se generó el resultado que se está mostrando — puede
   // diferir de "modoCv" si la persona ya tiene un resultado en pantalla
   // (el toggle de arriba queda oculto mientras hayResultado, pero igual
@@ -1061,5 +1070,16 @@ export default function CvPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Envuelto en Suspense porque CvPageInterno usa useSearchParams() (para leer
+// el ?modo= que manda el buscador de /inicio) — Next.js lo exige así para
+// cualquier página que lea parámetros de la URL.
+export default function CvPage() {
+  return (
+    <Suspense fallback={null}>
+      <CvPageInterno />
+    </Suspense>
   );
 }
