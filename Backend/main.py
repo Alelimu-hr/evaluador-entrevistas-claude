@@ -1732,6 +1732,240 @@ async def analizar_cv(
     return data
 
 
+@app.post("/api/armar-cv-desde-cero")
+async def armar_cv_desde_cero(
+    x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),
+    idioma: str = Form("Español"),
+    rol_objetivo: str = Form(...),
+    puesto_descripcion: str = Form(""),
+    datos_personales: str = Form("{}"),
+    experiencia: str = Form("[]"),
+    educacion: str = Form("[]"),
+    habilidades: str = Form(""),
+    idiomas_hablados: str = Form(""),
+    certificaciones: str = Form(""),
+    resumen_libre: str = Form(""),
+):
+    """Segundo modo del Optimizador de CV — para alguien que todavía NO
+    tiene un CV armado (primer empleo, o quiere rehacerlo desde cero; pedido
+    explícito de Ale: "no está la opción de empezá de cero tu CV"). En vez
+    de subir un PDF para comparar contra un puesto, la persona responde un
+    formulario guiado (datos personales, experiencia, educación,
+    habilidades — mandados como JSON en los campos de abajo) y la IA le
+    arma el CV completo de cero. El target es gente que "no tiene idea de
+    cómo armar un CV" — por eso el prompt explica los porqués, no solo tira
+    el resultado. Mismas reglas anti-inventar que analizar_cv: nunca le
+    sumamos a la persona experiencia, logros, cifras o títulos que no puso
+    ella misma."""
+    client = get_client(x_gemini_api_key)
+
+    def _parsear_json(valor: str, default):
+        try:
+            parsed = json.loads(valor) if valor and valor.strip() else default
+        except (json.JSONDecodeError, TypeError):
+            return default
+        return parsed if isinstance(parsed, type(default)) else default
+
+    datos = _parsear_json(datos_personales, {})
+    lista_experiencia = _parsear_json(experiencia, [])
+    lista_educacion = _parsear_json(educacion, [])
+
+    if not lista_experiencia and not lista_educacion:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Contanos al menos una experiencia (puede ser informal, "
+                "pasantía, voluntariado o un proyecto propio) o un dato de "
+                "educación para poder armar el CV."
+            ),
+        )
+
+    nombre = (datos.get("nombre") or "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="Falta tu nombre completo.")
+
+    bloque_datos = f"""
+Nombre completo: {nombre}
+Email: {(datos.get('email') or '').strip() or '[sin especificar]'}
+Teléfono: {(datos.get('telefono') or '').strip() or '[sin especificar]'}
+Ubicación: {(datos.get('ubicacion') or '').strip() or '[sin especificar]'}
+LinkedIn: {(datos.get('linkedin') or '').strip() or '[sin especificar]'}
+"""
+
+    if lista_experiencia:
+        bloques_exp = []
+        for i, exp in enumerate(lista_experiencia, start=1):
+            empresa = (exp.get("empresa") or "").strip() or "[empresa sin especificar]"
+            puesto = (exp.get("puesto") or "").strip() or "[puesto sin especificar]"
+            periodo = (exp.get("periodo") or "").strip() or "[período sin especificar]"
+            tareas = (exp.get("tareas") or "").strip() or "(no describió tareas)"
+            bloques_exp.append(
+                f"{i}. {puesto} en {empresa} ({periodo})\n   Qué hacía, en sus palabras: {tareas}"
+            )
+        bloque_experiencia = "\n".join(bloques_exp)
+    else:
+        bloque_experiencia = (
+            "La persona no tiene experiencia laboral formal para listar "
+            "(puede ser su primer CV). NO inventes experiencia — armá el CV "
+            "apoyándote en su educación, habilidades y lo que haya contado "
+            "en el resumen libre (proyectos propios, voluntariado, "
+            "facultad, etc.)."
+        )
+
+    if lista_educacion:
+        bloques_edu = []
+        for edu in lista_educacion:
+            institucion = (edu.get("institucion") or "").strip() or "[institución sin especificar]"
+            titulo = (edu.get("titulo") or "").strip() or "[título/carrera sin especificar]"
+            estado = (edu.get("estado") or "").strip() or "[estado sin especificar]"
+            bloques_edu.append(f"- {titulo} — {institucion} ({estado})")
+        bloque_educacion = "\n".join(bloques_edu)
+    else:
+        bloque_educacion = "No especificó educación formal."
+
+    bloque_habilidades = habilidades.strip() or "No especificó."
+    bloque_idiomas = idiomas_hablados.strip() or "No especificó."
+    bloque_certificaciones = certificaciones.strip() or "No especificó."
+    bloque_resumen_libre = (
+        f"\nAlgo más que quiso contar sobre sí misma/o:\n{resumen_libre.strip()}\n"
+        if resumen_libre.strip()
+        else ""
+    )
+
+    tiene_puesto = bool(puesto_descripcion and puesto_descripcion.strip())
+    bloque_puesto = (
+        f"""
+Descripción del puesto al que quiere apuntar este CV (pegada por la
+persona, tratala como contexto para elegir qué palabras clave y qué
+logros destacar primero — pero NUNCA para inventarle experiencia que no
+tiene):
+
+{puesto_descripcion.strip()}
+"""
+        if tiene_puesto
+        else "No pegó ninguna descripción de puesto puntual — orientá el CV de forma general hacia el tipo de rol indicado arriba."
+    )
+
+    prompt = f"""
+    Actuá como un consultor experto en reclutamiento y en cómo armar un CV
+    efectivo para sistemas ATS, ayudando a alguien que está armando su CV DE
+    CERO — probablemente nunca armó uno, o no tiene ni idea de por dónde
+    empezar. Tu trabajo es tomar la información real que esta persona
+    completó en un formulario guiado y devolverle un CV completo,
+    profesional y listo para usar — sin que ella tenga que saber nada de
+    formato ni de ATS.
+
+    ROL AL QUE APUNTA ESTE CV: {rol_objetivo.strip()}
+    {bloque_puesto}
+
+    DATOS PERSONALES:
+    {bloque_datos}
+
+    EXPERIENCIA (en las propias palabras de la persona):
+    {bloque_experiencia}
+
+    EDUCACIÓN:
+    {bloque_educacion}
+
+    HABILIDADES / HERRAMIENTAS QUE MENCIONÓ:
+    {bloque_habilidades}
+
+    IDIOMAS:
+    {bloque_idiomas}
+
+    CERTIFICACIONES / CURSOS:
+    {bloque_certificaciones}
+    {bloque_resumen_libre}
+
+    REGLA ANTI-INVENTAR (la más importante de todas): usá ÚNICAMENTE la
+    información de arriba. Nunca le agregues a la persona una experiencia,
+    empresa, cargo, logro, cifra, certificación o años de experiencia que
+    no haya puesto ella misma. Si algo es necesario para un CV completo
+    pero la persona no lo dio (ej. un resultado numérico de una tarea), usá
+    un placeholder explícito entre corchetes (ej. "[completar con tu
+    cifra/% real]") en vez de inventarlo — igual que hacemos siempre en
+    esta herramienta.
+
+    - Dirigite a la persona en segunda persona ("vos") fuera del CV mismo
+      (en los campos de explicación), en {idioma}, con un tono cálido,
+      claro y sin tecnicismos — pensá que probablemente es la primera vez
+      que arma un CV y puede sentirse perdida/o con todo esto.
+    - MUY IMPORTANTE, formato Markdown real: "## " para títulos en su
+      propia línea, línea en blanco entre título y contenido, viñetas con
+      "- ".
+    - El resultado se parte en 3 campos de markdown independientes (ver el
+      JSON de abajo).
+
+    CAMPO "intro_markdown" — contiene:
+
+    ## ✨ Tu primer CV, armado
+
+    (dos o tres párrafos breves y simples:
+    1. Un mensaje alentador y concreto — nada de "veredicto" tipo
+       diagnóstico, esto es algo nuevo que estás creando con ella/él, no
+       una corrección.
+    2. Una explicación en términos MUY simples de qué es un sistema ATS y
+       por qué el formato de este CV (una sola columna, sin tablas ni
+       diseños raros) importa — para que entienda el por qué, no solo el
+       qué.
+    3. Qué criterio usamos para armar el CV con lo que ella/él contó.)
+
+    CAMPO "consejos_markdown" — contiene:
+
+    ## 💡 3 cosas para tener en cuenta antes de mandarlo
+
+    (3 consejos concretos y priorizados, pensados para alguien sin
+    experiencia previa armando CVs. Si hay datos marcados como "[sin
+    especificar]" o placeholders sin completar en el CV de abajo, al menos
+    uno de los 3 consejos tiene que señalar explícitamente cuáles son y
+    pedirle que los complete antes de mandarlo. Si corresponde (la persona
+    tiene poca o ninguna experiencia laboral formal), sumá un consejo sobre
+    cómo compensar eso — ej. destacar proyectos propios, voluntariado,
+    estudios o certificaciones — sin nunca sugerirle que mienta o exagere.)
+
+    CAMPO "cv_armado_markdown" — contiene EL CV COMPLETO, listo para
+    exportar y usar en una postulación real. Reglas:
+    - Orden: nombre y datos de contacto → resumen profesional (2-3 líneas,
+      nuevo, lo escribís vos en base a todo lo de arriba, mencionando el
+      rol objetivo) → experiencia laboral (si tiene) → educación →
+      certificaciones/idiomas si hay → habilidades.
+    - Para cada experiencia, reescribí lo que contó en sus propias
+      palabras como viñetas profesionales: verbo de acción fuerte + qué
+      hizo + impacto si lo mencionó, o un placeholder entre corchetes si
+      el impacto no está pero el tipo de tarea sugiere que debería tener
+      uno medible.
+    - Si la persona casi no tiene experiencia laboral, el CV igual tiene
+      que quedar sólido: apoyate en educación, habilidades, certificaciones
+      y lo que contó en el resumen libre (proyectos, voluntariado, etc.) —
+      nunca inventes experiencia laboral que no tiene para "rellenar".
+    - Nunca le asignes un cargo, título o años de seniority que no surgen
+      de lo que puso.
+    - Formato 100% seguro para ATS: sin columnas, sin tablas, una sola
+      columna lineal. "## " para cada sección, "- " para viñetas, línea en
+      blanco entre título y contenido.
+
+    Devolvé ÚNICAMENTE un JSON válido con esta forma exacta (sin texto
+    antes ni después, sin bloques de código):
+
+    {{
+      "intro_markdown": "## ✨ Tu primer CV, armado\\n\\n...",
+      "consejos_markdown": "## 💡 3 cosas para tener en cuenta antes de mandarlo\\n\\n...",
+      "cv_armado_markdown": "## {nombre}\\n\\n...(CV completo)..."
+    }}
+    """
+
+    texto, modelo_usado = llamar_gemini_con_fallback(client, prompt, config=JSON_CONFIG_CV)
+    data = extraer_json_seguro(texto)
+    for campo in ("intro_markdown", "consejos_markdown", "cv_armado_markdown"):
+        data.setdefault(campo, "")
+
+    data["modelo_usado"] = modelo_usado
+    data["informe_markdown"] = "\n\n".join(
+        parte for parte in (data["intro_markdown"], data["consejos_markdown"]) if parte
+    ).strip()
+    return data
+
+
 @app.post("/api/plan-transicion-carrera")
 async def plan_transicion_carrera(
     x_gemini_api_key: str = Header(None, alias="x-gemini-api-key"),

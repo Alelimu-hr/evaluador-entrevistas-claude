@@ -13,6 +13,14 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 type EstadoKey = 'vacio' | 'verificando' | 'valida' | 'invalida';
 
+// Dos modos dentro de la misma herramienta: "optimizar" (el flujo original,
+// comparar un CV ya armado contra un puesto) y "desde_cero" (pedido
+// explícito de Ale: gente que todavía no tiene CV armado, ej. alguien
+// buscando su primer empleo). Comparten API Key/idioma y la pantalla de
+// resultado; se diferencian en el formulario de entrada y en el prompt que
+// usa cada uno en el backend.
+type ModoCv = 'optimizar' | 'desde_cero';
+
 type Puntajes = {
   global: number;
   formato_ats: number;
@@ -21,6 +29,22 @@ type Puntajes = {
   proyectado?: number;
 };
 
+type ExperienciaForm = {
+  empresa: string;
+  puesto: string;
+  periodo: string;
+  tareas: string;
+};
+
+type EducacionForm = {
+  institucion: string;
+  titulo: string;
+  estado: string;
+};
+
+const EXPERIENCIA_VACIA: ExperienciaForm = { empresa: '', puesto: '', periodo: '', tareas: '' };
+const EDUCACION_VACIA: EducacionForm = { institucion: '', titulo: '', estado: '' };
+
 // Puntajes en %  (0 a 100), no notas sobre 10.
 function colorDeNota(nota: number) {
   if (nota >= 70) return { texto: 'text-emerald-600', anillo: 'ring-emerald-300', borde: 'border-emerald-200' };
@@ -28,30 +52,135 @@ function colorDeNota(nota: number) {
   return { texto: 'text-red-600', anillo: 'ring-red-300', borde: 'border-red-200' };
 }
 
+// Bloque de API Key, compartido entre los dos modos (antes vivía solo
+// dentro del form de "optimizar").
+function CampoApiKey({
+  apiKey,
+  setApiKey,
+  estadoKey,
+}: {
+  apiKey: string;
+  setApiKey: (v: string) => void;
+  estadoKey: EstadoKey;
+}) {
+  return (
+    <>
+      <div className="relative overflow-hidden bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl shadow-xl shadow-purple-950/30 transition-colors">
+        <div className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 bg-purple-200/40 rounded-full blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-10 w-48 h-48 bg-blue-200/40 rounded-full blur-3xl" />
+
+        <div className="relative">
+          <label className="block text-sm font-semibold text-slate-800 mb-2">
+            🔑 API Key de Gemini:{' '}
+            <span className="text-xs font-normal text-slate-400">— así conectás con la IA que hace el análisis</span>
+          </label>
+          <div className="relative">
+            <input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="AIzaSy..."
+              required
+              className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
+              {estadoKey === 'verificando' && <Spinner className="text-slate-400" />}
+              {estadoKey === 'valida' && (
+                <span className="text-emerald-500 animate-scale-in" title="API Key válida">
+                  🟢
+                </span>
+              )}
+              {estadoKey === 'invalida' && (
+                <span className="text-red-500 animate-scale-in" title="API Key inválida">
+                  🔴
+                </span>
+              )}
+            </span>
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-slate-200 text-xs">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <a
+                href="https://aistudio.google.com/apikey"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 underline hover:text-indigo-700 transition-colors font-medium"
+              >
+                👉 Conseguí tu API Key gratuita acá
+              </a>
+              <span className="text-slate-600">· Es 100% gratis y te lleva menos de 1 minuto.</span>
+            </div>
+
+            <PasosApiKey />
+          </div>
+        </div>
+      </div>
+      {estadoKey === 'invalida' && (
+        <p className="text-xs text-red-400 -mt-2 px-1 animate-fade-in">
+          No pudimos validar esa API Key. Revisá que esté completa y sin espacios de más.
+        </p>
+      )}
+      {estadoKey === 'valida' && (
+        <p className="text-xs text-emerald-400 -mt-2 px-1 animate-fade-in">
+          ✓ API Key reconocida correctamente.
+        </p>
+      )}
+    </>
+  );
+}
+
 export default function CvPage() {
   const [apiKey, setApiKey] = useState('');
   const [estadoKey, setEstadoKey] = useState<EstadoKey>('vacio');
-  const [puestoObjetivo, setPuestoObjetivo] = useState('');
   const [idioma, setIdioma] = useState('Español');
-  const [cvFile, setCvFile] = useState<File | null>(null);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState('');
   const [descargandoPdf, setDescargandoPdf] = useState(false);
 
+  const [modoCv, setModoCv] = useState<ModoCv>('optimizar');
+  // Con qué modo se generó el resultado que se está mostrando — puede
+  // diferir de "modoCv" si la persona ya tiene un resultado en pantalla
+  // (el toggle de arriba queda oculto mientras hayResultado, pero igual
+  // necesitamos saber qué labels/textos usar).
+  const [modoResultado, setModoResultado] = useState<ModoCv>('optimizar');
+
+  // --- Modo "optimizar" (flujo original: comparar un CV ya armado) ---
+  const [puestoObjetivo, setPuestoObjetivo] = useState('');
+  const [cvFile, setCvFile] = useState<File | null>(null);
+
+  // --- Modo "desde_cero" (formulario guiado para armar el CV) ---
+  const [nombreCompleto, setNombreCompleto] = useState('');
+  const [emailContacto, setEmailContacto] = useState('');
+  const [telefonoContacto, setTelefonoContacto] = useState('');
+  const [ubicacionContacto, setUbicacionContacto] = useState('');
+  const [linkedinContacto, setLinkedinContacto] = useState('');
+  const [rolObjetivoDesdeCero, setRolObjetivoDesdeCero] = useState('');
+  const [puestoDescripcionDesdeCero, setPuestoDescripcionDesdeCero] = useState('');
+  const [sinExperiencia, setSinExperiencia] = useState(false);
+  const [experiencias, setExperiencias] = useState<ExperienciaForm[]>([{ ...EXPERIENCIA_VACIA }]);
+  const [educaciones, setEducaciones] = useState<EducacionForm[]>([{ ...EDUCACION_VACIA }]);
+  const [habilidadesDesdeCero, setHabilidadesDesdeCero] = useState('');
+  const [idiomasHabladosDesdeCero, setIdiomasHabladosDesdeCero] = useState('');
+  const [certificacionesDesdeCero, setCertificacionesDesdeCero] = useState('');
+  const [resumenLibreDesdeCero, setResumenLibreDesdeCero] = useState('');
+
   const [puntajes, setPuntajes] = useState<Puntajes | null>(null);
   // Mismo patrón que la herramienta de LinkedIn: el backend devuelve el
-  // informe ya partido en estos 5 campos de markdown independientes, en vez
+  // informe ya partido en estos campos de markdown independientes, en vez
   // de un solo bloque gigante — así el frontend no tiene que adivinar dónde
-  // cortar el texto (ver Backend/main.py, analizar_cv).
+  // cortar el texto (ver Backend/main.py, analizar_cv y
+  // armar_cv_desde_cero). El modo "desde_cero" solo usa intro/cierre (ahí
+  // van sus 2 campos: intro_markdown y consejos_markdown) y deja
+  // formato/logros/palabras_clave vacíos.
   const [informeMarkdown, setInformeMarkdown] = useState(''); // versión completa, solo para el PDF
   const [introMarkdown, setIntroMarkdown] = useState('');
   const [formatoMarkdown, setFormatoMarkdown] = useState('');
   const [logrosMarkdown, setLogrosMarkdown] = useState('');
   const [palabrasClaveMarkdown, setPalabrasClaveMarkdown] = useState('');
   const [cierreMarkdown, setCierreMarkdown] = useState('');
-  // CV completo reescrito, listo para adjuntar — es un documento aparte del
-  // informe de diagnóstico, por eso tiene su propio estado y su propio botón
-  // de descarga (ver handleDescargarCvReescrito).
+  // CV completo (reescrito, o armado de cero) — es un documento aparte del
+  // informe, por eso tiene su propio estado y su propio botón de descarga
+  // (ver handleDescargarCvReescrito).
   const [cvReescritoMarkdown, setCvReescritoMarkdown] = useState('');
   const [descargandoCv, setDescargandoCv] = useState(false);
 
@@ -108,6 +237,9 @@ export default function CvPage() {
   // rompe la UI si falla (ej: la tabla todavía no existe en Supabase).
   // "modo" queda fijo en 'dirigido' porque la tabla analisis_cv tiene un
   // check constraint que todavía espera ese valor — ver sql_herramienta_cv.sql.
+  // Solo se llama para el modo "optimizar": el modo "desde_cero" no compara
+  // contra nada (no hay puntaje), así que no tiene sentido forzarlo en esta
+  // tabla todavía.
   const guardarAnalisisEnSupabase = async (puntajesResultado: Puntajes | null) => {
     try {
       const supabase = createClient();
@@ -136,6 +268,7 @@ export default function CvPage() {
 
     setCargando(true);
     setError('');
+    setModoResultado('optimizar');
     registrarEventoFunnel('cv', 'envio_formulario'); // 3er escalón
 
     const formData = new FormData();
@@ -170,16 +303,102 @@ export default function CvPage() {
     }
   };
 
+  // --- Helpers del formulario guiado (modo "desde_cero") ---
+  const actualizarExperiencia = (idx: number, campo: keyof ExperienciaForm, valor: string) => {
+    setExperiencias((prev) => prev.map((exp, i) => (i === idx ? { ...exp, [campo]: valor } : exp)));
+  };
+  const agregarExperiencia = () => setExperiencias((prev) => [...prev, { ...EXPERIENCIA_VACIA }]);
+  const quitarExperiencia = (idx: number) => setExperiencias((prev) => prev.filter((_, i) => i !== idx));
+
+  const actualizarEducacion = (idx: number, campo: keyof EducacionForm, valor: string) => {
+    setEducaciones((prev) => prev.map((edu, i) => (i === idx ? { ...edu, [campo]: valor } : edu)));
+  };
+  const agregarEducacion = () => setEducaciones((prev) => [...prev, { ...EDUCACION_VACIA }]);
+  const quitarEducacion = (idx: number) => setEducaciones((prev) => prev.filter((_, i) => i !== idx));
+
+  const handleArmarDesdeCero = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!apiKey) return alert('Pegá tu clave de Google AI Studio para probar.');
+    if (!nombreCompleto.trim()) return alert('Contanos tu nombre completo.');
+    if (!rolObjetivoDesdeCero.trim()) {
+      return alert('Contanos a qué tipo de puesto te gustaría postularte.');
+    }
+
+    const experienciasValidas = sinExperiencia
+      ? []
+      : experiencias.filter((exp) => exp.empresa.trim() || exp.puesto.trim() || exp.tareas.trim());
+    const educacionesValidas = educaciones.filter((edu) => edu.institucion.trim() || edu.titulo.trim());
+
+    if (experienciasValidas.length === 0 && educacionesValidas.length === 0) {
+      return alert(
+        'Contanos al menos una experiencia (formal, informal, pasantía o voluntariado) o un dato de educación.'
+      );
+    }
+
+    setCargando(true);
+    setError('');
+    setModoResultado('desde_cero');
+    registrarEventoFunnel('cv', 'envio_formulario');
+
+    const formData = new FormData();
+    formData.append('idioma', idioma);
+    formData.append('rol_objetivo', rolObjetivoDesdeCero);
+    formData.append('puesto_descripcion', puestoDescripcionDesdeCero);
+    formData.append(
+      'datos_personales',
+      JSON.stringify({
+        nombre: nombreCompleto,
+        email: emailContacto,
+        telefono: telefonoContacto,
+        ubicacion: ubicacionContacto,
+        linkedin: linkedinContacto,
+      })
+    );
+    formData.append('experiencia', JSON.stringify(experienciasValidas));
+    formData.append('educacion', JSON.stringify(educacionesValidas));
+    formData.append('habilidades', habilidadesDesdeCero);
+    formData.append('idiomas_hablados', idiomasHabladosDesdeCero);
+    formData.append('certificaciones', certificacionesDesdeCero);
+    formData.append('resumen_libre', resumenLibreDesdeCero);
+
+    try {
+      const res = await fetch(`${API_URL}/api/armar-cv-desde-cero`, {
+        method: 'POST',
+        headers: { 'x-gemini-api-key': apiKey },
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'No se pudo armar el CV.');
+      }
+      setPuntajes(null);
+      setInformeMarkdown(data.informe_markdown || '');
+      setIntroMarkdown(data.intro_markdown || '');
+      setFormatoMarkdown('');
+      setLogrosMarkdown('');
+      setPalabrasClaveMarkdown('');
+      setCierreMarkdown(data.consejos_markdown || '');
+      setCvReescritoMarkdown(data.cv_armado_markdown || '');
+      registrarEventoFunnel('cv', 'completado_exito');
+    } catch (err: any) {
+      setError(err.message || 'Ocurrió un error inesperado.');
+    } finally {
+      setCargando(false);
+    }
+  };
+
   const handleDescargarPdf = async () => {
     setDescargandoPdf(true);
     // A diferencia de LinkedIn, acá no armamos un título/nombre de archivo
-    // con el puesto objetivo: en modo "dirigido" ese campo puede ser una
+    // con el puesto objetivo: en modo "optimizar" ese campo puede ser una
     // descripción de puesto entera pegada por la persona, no un rol cortito
     // — meterla en el título/nombre de archivo sería ilegible. Título fijo.
+    const titulo = modoResultado === 'desde_cero' ? 'Consejos para tu CV' : 'Informe de tu CV';
+    const nombreArchivo = modoResultado === 'desde_cero' ? 'Consejos_CV' : 'Informe_CV';
     const formData = new FormData();
     formData.append('informe_markdown', informeMarkdown);
-    formData.append('titulo', 'Informe de tu CV');
-    formData.append('nombre_archivo', 'Informe_CV');
+    formData.append('titulo', titulo);
+    formData.append('nombre_archivo', nombreArchivo);
 
     try {
       const res = await fetch(`${API_URL}/api/descargar-pdf`, {
@@ -194,7 +413,7 @@ export default function CvPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'Informe_CV.pdf';
+      a.download = `${nombreArchivo}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -208,10 +427,12 @@ export default function CvPage() {
 
   const handleDescargarCvReescrito = async () => {
     setDescargandoCv(true);
+    const titulo = modoResultado === 'desde_cero' ? 'Mi CV' : 'Tu CV Optimizado';
+    const nombreArchivo = modoResultado === 'desde_cero' ? 'Mi_CV' : 'CV_Optimizado';
     const formData = new FormData();
     formData.append('informe_markdown', cvReescritoMarkdown);
-    formData.append('titulo', 'Tu CV Optimizado');
-    formData.append('nombre_archivo', 'CV_Optimizado');
+    formData.append('titulo', titulo);
+    formData.append('nombre_archivo', nombreArchivo);
 
     try {
       const res = await fetch(`${API_URL}/api/descargar-pdf`, {
@@ -226,7 +447,7 @@ export default function CvPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'CV_Optimizado.pdf';
+      a.download = `${nombreArchivo}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -278,7 +499,7 @@ export default function CvPage() {
               <p className="text-2xl">📄</p>
               <p className="font-semibold text-white text-sm mt-1.5">Optimizá tu CV para cada búsqueda</p>
               <p className="text-xs text-white/80 mt-0.5">
-                Comparación contra el puesto: chequeo ATS y logros reescritos, listos para pegar.
+                Comparación contra el puesto, o armalo de cero si todavía no tenés uno.
               </p>
             </div>
             <Link
@@ -311,6 +532,31 @@ export default function CvPage() {
         )}
 
         {!hayResultado && (
+          <div className="flex justify-center animate-fade-in-up">
+            <div className="inline-flex gap-1 bg-white/5 border border-white/10 rounded-full p-1">
+              <button
+                type="button"
+                onClick={() => setModoCv('optimizar')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  modoCv === 'optimizar' ? 'bg-white text-slate-800 shadow-md' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                📄 Ya tengo un CV
+              </button>
+              <button
+                type="button"
+                onClick={() => setModoCv('desde_cero')}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  modoCv === 'desde_cero' ? 'bg-white text-slate-800 shadow-md' : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                ✨ No tengo CV, armalo de cero
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!hayResultado && modoCv === 'optimizar' && (
           <div className="text-center pt-2 pb-2 animate-fade-in-up">
             <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
               Chequeo ATS con IA
@@ -329,69 +575,28 @@ export default function CvPage() {
           </div>
         )}
 
-        {!hayResultado && (
+        {!hayResultado && modoCv === 'desde_cero' && (
+          <div className="text-center pt-2 pb-2 animate-fade-in-up">
+            <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
+              Armalo con IA, paso a paso
+            </p>
+            <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
+              ¿Todavía no tenés un CV armado?
+            </h2>
+            <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
+              No hace falta que sepas de formato ni de ATS. Contestá estas preguntas simples sobre vos —
+              estudios, experiencia (aunque sea informal o un primer trabajo) y habilidades — y te armamos
+              un CV completo, prolijo y listo para mandar.
+            </p>
+            <p className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-4">
+              🌱 Ideal si es tu primer CV o nunca tuviste uno armado.
+            </p>
+          </div>
+        )}
+
+        {!hayResultado && modoCv === 'optimizar' && (
           <form onSubmit={handleAnalizar} className="space-y-4 animate-fade-in-up">
-            {/* API Key */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl shadow-xl shadow-purple-950/30 transition-colors">
-              <div className="pointer-events-none absolute -top-20 -right-16 w-56 h-56 bg-purple-200/40 rounded-full blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-24 -left-10 w-48 h-48 bg-blue-200/40 rounded-full blur-3xl" />
-
-              <div className="relative">
-                <label className="block text-sm font-semibold text-slate-800 mb-2">
-                  🔑 API Key de Gemini:{' '}
-                  <span className="text-xs font-normal text-slate-400">— así conectás con la IA que hace el análisis</span>
-                </label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="AIzaSy..."
-                    required
-                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 pl-3 pr-9 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-                    {estadoKey === 'verificando' && <Spinner className="text-slate-400" />}
-                    {estadoKey === 'valida' && (
-                      <span className="text-emerald-500 animate-scale-in" title="API Key válida">
-                        🟢
-                      </span>
-                    )}
-                    {estadoKey === 'invalida' && (
-                      <span className="text-red-500 animate-scale-in" title="API Key inválida">
-                        🔴
-                      </span>
-                    )}
-                  </span>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-slate-200 text-xs">
-                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    <a
-                      href="https://aistudio.google.com/apikey"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-indigo-600 underline hover:text-indigo-700 transition-colors font-medium"
-                    >
-                      👉 Conseguí tu API Key gratuita acá
-                    </a>
-                    <span className="text-slate-600">· Es 100% gratis y te lleva menos de 1 minuto.</span>
-                  </div>
-
-                  <PasosApiKey />
-                </div>
-              </div>
-            </div>
-            {estadoKey === 'invalida' && (
-              <p className="text-xs text-red-400 -mt-2 px-1 animate-fade-in">
-                No pudimos validar esa API Key. Revisá que esté completa y sin espacios de más.
-              </p>
-            )}
-            {estadoKey === 'valida' && (
-              <p className="text-xs text-emerald-400 -mt-2 px-1 animate-fade-in">
-                ✓ API Key reconocida correctamente.
-              </p>
-            )}
+            <CampoApiKey apiKey={apiKey} setApiKey={setApiKey} estadoKey={estadoKey} />
 
             {/* Puesto objetivo + idioma */}
             <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
@@ -451,6 +656,283 @@ export default function CvPage() {
             >
               {cargando && <Spinner />}
               {cargando ? 'Analizando tu CV...' : '🔍 Analizar mi CV'}
+            </button>
+          </form>
+        )}
+
+        {!hayResultado && modoCv === 'desde_cero' && (
+          <form onSubmit={handleArmarDesdeCero} className="space-y-4 animate-fade-in-up">
+            <CampoApiKey apiKey={apiKey} setApiKey={setApiKey} estadoKey={estadoKey} />
+
+            {/* Datos personales */}
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
+              <p className="text-sm font-semibold text-slate-800">👤 Tus datos</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input
+                  type="text"
+                  value={nombreCompleto}
+                  onChange={(e) => setNombreCompleto(e.target.value)}
+                  placeholder="Nombre y apellido"
+                  required
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                />
+                <input
+                  type="email"
+                  value={emailContacto}
+                  onChange={(e) => setEmailContacto(e.target.value)}
+                  placeholder="Email de contacto"
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                />
+                <input
+                  type="text"
+                  value={telefonoContacto}
+                  onChange={(e) => setTelefonoContacto(e.target.value)}
+                  placeholder="Teléfono (opcional)"
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                />
+                <input
+                  type="text"
+                  value={ubicacionContacto}
+                  onChange={(e) => setUbicacionContacto(e.target.value)}
+                  placeholder="Ciudad, país"
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                />
+                <input
+                  type="text"
+                  value={linkedinContacto}
+                  onChange={(e) => setLinkedinContacto(e.target.value)}
+                  placeholder="Link de tu LinkedIn (opcional)"
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 md:col-span-2"
+                />
+              </div>
+            </div>
+
+            {/* Rol objetivo + idioma */}
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">
+                    ¿A qué tipo de puesto te gustaría postularte?
+                  </label>
+                  <input
+                    type="text"
+                    value={rolObjetivoDesdeCero}
+                    onChange={(e) => setRolObjetivoDesdeCero(e.target.value)}
+                    placeholder="Ej: Vendedor/a, Analista de datos jr., Recepcionista..."
+                    required
+                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">Idioma del CV</label>
+                  <select
+                    value={idioma}
+                    onChange={(e) => setIdioma(e.target.value)}
+                    className="w-full bg-white border border-purple-200 text-slate-800 px-3 py-2 rounded-lg transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                  >
+                    <option value="Español">Español</option>
+                    <option value="Inglés">Inglés</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-800 mb-1">
+                  ¿Tenés un aviso puntual en mente? (opcional)
+                </label>
+                <textarea
+                  rows={3}
+                  value={puestoDescripcionDesdeCero}
+                  onChange={(e) => setPuestoDescripcionDesdeCero(e.target.value)}
+                  placeholder="Si ya viste un aviso que te interesa, pegalo acá para orientar mejor el CV. Si no, dejalo en blanco."
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-3 rounded-lg text-sm transition-all focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                />
+              </div>
+            </div>
+
+            {/* Experiencia */}
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-800">💼 Experiencia</p>
+                <label className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <input
+                    type="checkbox"
+                    checked={sinExperiencia}
+                    onChange={(e) => setSinExperiencia(e.target.checked)}
+                  />
+                  Todavía no tengo experiencia laboral
+                </label>
+              </div>
+
+              {!sinExperiencia && (
+                <div className="space-y-3">
+                  {experiencias.map((exp, idx) => (
+                    <div key={idx} className="bg-white/60 border border-purple-100 rounded-xl p-3 space-y-2">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={exp.puesto}
+                          onChange={(e) => actualizarExperiencia(idx, 'puesto', e.target.value)}
+                          placeholder="Puesto o tarea (ej: Cajero, Niñera, Ayudante de obra...)"
+                          className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                        />
+                        <input
+                          type="text"
+                          value={exp.empresa}
+                          onChange={(e) => actualizarExperiencia(idx, 'empresa', e.target.value)}
+                          placeholder="Empresa, negocio o para quién trabajaste"
+                          className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        value={exp.periodo}
+                        onChange={(e) => actualizarExperiencia(idx, 'periodo', e.target.value)}
+                        placeholder="Período (ej: Enero 2023 - Actualidad)"
+                        className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                      />
+                      <textarea
+                        rows={2}
+                        value={exp.tareas}
+                        onChange={(e) => actualizarExperiencia(idx, 'tareas', e.target.value)}
+                        placeholder="Contanos qué hacías ahí, como si le explicaras a un amigo"
+                        className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                      />
+                      {experiencias.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => quitarExperiencia(idx)}
+                          className="text-xs text-red-500 hover:text-red-600"
+                        >
+                          🗑️ Quitar esta experiencia
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={agregarExperiencia}
+                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                  >
+                    + Agregar otra experiencia
+                  </button>
+                  <p className="text-xs text-slate-500">
+                    Vale cualquier tipo de experiencia: trabajos informales, pasantías, voluntariado o changas.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Educación */}
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
+              <p className="text-sm font-semibold text-slate-800">🎓 Educación</p>
+              <div className="space-y-3">
+                {educaciones.map((edu, idx) => (
+                  <div key={idx} className="bg-white/60 border border-purple-100 rounded-xl p-3 space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={edu.titulo}
+                        onChange={(e) => actualizarEducacion(idx, 'titulo', e.target.value)}
+                        placeholder="Título o carrera (ej: Secundario, Lic. en Marketing...)"
+                        className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                      />
+                      <input
+                        type="text"
+                        value={edu.institucion}
+                        onChange={(e) => actualizarEducacion(idx, 'institucion', e.target.value)}
+                        placeholder="Institución"
+                        className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                      />
+                    </div>
+                    <input
+                      type="text"
+                      value={edu.estado}
+                      onChange={(e) => actualizarEducacion(idx, 'estado', e.target.value)}
+                      placeholder="Estado (ej: Completo, En curso - 3er año, 2022)"
+                      className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                    />
+                    {educaciones.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => quitarEducacion(idx)}
+                        className="text-xs text-red-500 hover:text-red-600"
+                      >
+                        🗑️ Quitar esta educación
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={agregarEducacion}
+                  className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                >
+                  + Agregar otro dato de educación
+                </button>
+              </div>
+            </div>
+
+            {/* Habilidades, idiomas, certificaciones y resumen libre */}
+            <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] border border-white/60 p-5 rounded-2xl space-y-4 shadow-xl shadow-purple-950/30 transition-colors">
+              <div>
+                <label className="block text-sm font-semibold text-slate-800 mb-1">
+                  Habilidades y herramientas que manejás
+                </label>
+                <textarea
+                  rows={2}
+                  value={habilidadesDesdeCero}
+                  onChange={(e) => setHabilidadesDesdeCero(e.target.value)}
+                  placeholder="Ej: Excel, atención al cliente, manejo de caja, Photoshop..."
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">Idiomas (opcional)</label>
+                  <input
+                    type="text"
+                    value={idiomasHabladosDesdeCero}
+                    onChange={(e) => setIdiomasHabladosDesdeCero(e.target.value)}
+                    placeholder="Ej: Inglés intermedio, Portugués básico"
+                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-800 mb-1">
+                    Certificaciones o cursos (opcional)
+                  </label>
+                  <input
+                    type="text"
+                    value={certificacionesDesdeCero}
+                    onChange={(e) => setCertificacionesDesdeCero(e.target.value)}
+                    placeholder="Ej: Curso de Excel (2023)"
+                    className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-800 mb-1">
+                  ¿Algo más que quieras contar? (opcional)
+                </label>
+                <textarea
+                  rows={2}
+                  value={resumenLibreDesdeCero}
+                  onChange={(e) => setResumenLibreDesdeCero(e.target.value)}
+                  placeholder="Ej: proyectos propios, voluntariado, por qué te interesa este tipo de puesto..."
+                  className="w-full bg-white border border-purple-200 text-slate-800 placeholder:text-slate-400 p-2.5 rounded-lg text-sm focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-300/40 resize-none"
+                />
+              </div>
+            </div>
+
+            {error && <p className="text-xs text-red-400 px-1 animate-fade-in">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={cargando}
+              className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-500 hover:via-purple-500 hover:to-blue-500 text-white py-3 rounded-full font-medium text-sm transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.99] flex items-center justify-center gap-2"
+            >
+              {cargando && <Spinner />}
+              {cargando ? 'Armando tu CV...' : '✨ Armar mi CV'}
             </button>
           </form>
         )}
@@ -524,10 +1006,15 @@ export default function CvPage() {
             {cvReescritoMarkdown && (
               <div className="bg-gradient-to-br from-emerald-50 via-white to-[#f1f0ff] border border-emerald-200 rounded-2xl shadow-xl shadow-emerald-950/10 p-5 space-y-3">
                 <div>
-                  <p className="font-semibold text-slate-800 text-sm">🧾 Tu CV optimizado, listo para adjuntar</p>
+                  <p className="font-semibold text-slate-800 text-sm">
+                    {modoResultado === 'desde_cero'
+                      ? '🧾 Tu primer CV, listo para adjuntar'
+                      : '🧾 Tu CV optimizado, listo para adjuntar'}
+                  </p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    Es tu CV completo, reescrito con todo lo de arriba ya aplicado — podés revisarlo acá abajo y
-                    descargarlo para mandarlo directo.
+                    {modoResultado === 'desde_cero'
+                      ? 'Es tu CV completo, armado con todo lo que nos contaste — revisalo acá abajo, completá los placeholders si quedó alguno, y descargalo.'
+                      : 'Es tu CV completo, reescrito con todo lo de arriba ya aplicado — podés revisarlo acá abajo y descargarlo para mandarlo directo.'}
                   </p>
                 </div>
                 <div className="text-slate-700 text-sm leading-relaxed informe-contenido max-w-none max-h-96 overflow-y-auto bg-white/60 rounded-xl p-4 border border-emerald-100">
@@ -539,7 +1026,11 @@ export default function CvPage() {
                   className="w-full bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:via-teal-500 hover:to-emerald-500 text-white py-2.5 rounded-full font-medium text-sm transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 active:scale-[0.99] flex items-center justify-center gap-2"
                 >
                   {descargandoCv && <Spinner />}
-                  {descargandoCv ? 'Generando PDF...' : '📥 Descargar tu CV optimizado (PDF)'}
+                  {descargandoCv
+                    ? 'Generando PDF...'
+                    : modoResultado === 'desde_cero'
+                      ? '📥 Descargar mi CV (PDF)'
+                      : '📥 Descargar tu CV optimizado (PDF)'}
                 </button>
               </div>
             )}
@@ -553,13 +1044,17 @@ export default function CvPage() {
                 className="flex-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-blue-600 hover:from-indigo-500 hover:via-purple-500 hover:to-blue-500 text-white py-2.5 rounded-full font-medium text-sm transition-all disabled:opacity-50 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 active:scale-[0.99] flex items-center justify-center gap-2"
               >
                 {descargandoPdf && <Spinner />}
-                {descargandoPdf ? 'Generando PDF...' : '📥 Descargar Informe en PDF'}
+                {descargandoPdf
+                  ? 'Generando PDF...'
+                  : modoResultado === 'desde_cero'
+                    ? '📥 Descargar consejos en PDF'
+                    : '📥 Descargar Informe en PDF'}
               </button>
               <button
                 onClick={reiniciarTodo}
                 className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-2.5 rounded-full font-medium text-sm transition-all active:scale-[0.99]"
               >
-                🔄 Analizar otro CV
+                {modoResultado === 'desde_cero' ? '🔄 Armar otro CV' : '🔄 Analizar otro CV'}
               </button>
             </div>
           </div>
