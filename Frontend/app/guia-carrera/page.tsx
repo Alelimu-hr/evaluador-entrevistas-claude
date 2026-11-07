@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { Poppins } from 'next/font/google';
 import ReactMarkdown from 'react-markdown';
 import { AREAS_CARRERA, LENGUAJES_PROGRAMACION, type RolCarrera } from '@/lib/contenidoCarrera';
 import { createClient } from '@/lib/supabase/client';
@@ -17,6 +18,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 // trackea funnel. La sección de abajo ("¿Cómo entro a este rol?") es la
 // capa de IA personalizada que sí usa Gemini — esa parte sí trackea funnel
 // con la herramienta 'plan_carrera' (ver Frontend/lib/analytics.ts).
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
 
 const ROL_DEV = 'Desarrollo (Dev)';
 
@@ -216,27 +223,30 @@ export default function GuiaCarreraPage() {
   };
 
   return (
-    <div className="min-h-screen bg-app text-white p-6 font-sans">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className={`${poppins.className} cl-landing p-6`}>
+      <div className="cl-bg" />
+      <div className="cl-blob cl-blob-1" />
+      <div className="cl-blob cl-blob-2" />
+      <div className="relative z-[2] max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+        <header className="flex justify-between items-center pb-4 animate-fade-in" style={{ borderBottom: '1px solid rgba(11,32,95,0.08)' }}>
+          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-[#08B9ED] to-[#A52BFF] bg-clip-text text-transparent">
             🧭 Guía de Salida Laboral
           </h1>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/inicio" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/inicio" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🏠 Inicio
             </Link>
-            <Link href="/simulador" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/simulador" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🎙 Simulador de Entrevistas
             </Link>
-            <Link href="/linkedin" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/linkedin" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               💼 LinkedIn
             </Link>
-            <Link href="/cv" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/cv" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               📄 CV
             </Link>
-            <Link href="/negociacion" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/negociacion" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               💬 Negociación
             </Link>
           </nav>
@@ -294,13 +304,13 @@ export default function GuiaCarreraPage() {
 
         {!area && (
           <div className="text-center pt-2 pb-2 animate-fade-in-up">
-            <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#7417E8] font-semibold mb-3">
               Orientación de carrera
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
+            <h2 className="font-display text-4xl md:text-5xl font-semibold text-[#0B205F] leading-tight max-w-2xl mx-auto">
               ¿No sabés para dónde apuntar?
             </h2>
-            <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
+            <p className="text-[#475569] text-base mt-3 max-w-xl mx-auto">
               Elegí un área para ver qué roles existen adentro, en qué consiste cada uno, y después pedile a la
               IA un plan concreto de cómo llegar ahí desde tu situación actual.
             </p>
@@ -331,12 +341,12 @@ export default function GuiaCarreraPage() {
           <div className="space-y-4 animate-fade-in-up">
             <button
               onClick={volverAAreas}
-              className="text-sm text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
+              className="text-sm text-[#64748b] hover:text-[#0B205F] transition-colors flex items-center gap-1.5"
             >
               ← Volver a áreas
             </button>
             <div className="text-center pt-1 pb-1">
-              <h2 className="font-display text-3xl md:text-4xl font-semibold text-white leading-tight flex items-center justify-center gap-2">
+              <h2 className="font-display text-3xl md:text-4xl font-semibold text-[#0B205F] leading-tight flex items-center justify-center gap-2">
                 <span>{area.emoji}</span> {area.nombre}
               </h2>
             </div>
@@ -360,7 +370,7 @@ export default function GuiaCarreraPage() {
           <div className="space-y-5 animate-fade-in-up">
             <button
               onClick={volverARoles}
-              className="text-sm text-slate-300 hover:text-white transition-colors flex items-center gap-1.5"
+              className="text-sm text-[#64748b] hover:text-[#0B205F] transition-colors flex items-center gap-1.5"
             >
               ← Volver a {area.nombre}
             </button>

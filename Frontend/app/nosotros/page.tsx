@@ -1,37 +1,56 @@
 import Link from 'next/link';
+import { Poppins } from 'next/font/google';
 
 // Página pública ("Nosotros") — habilitada en lib/supabase/middleware.ts junto
 // con "/" para que la pueda ver cualquiera, esté o no logueado. Da contexto y
 // confianza (quién está detrás de la herramienta) sin mezclar el pitch B2B de
 // Freelo HR (consultora, le habla a empresas) con este producto B2C gratuito.
+//
+// Mismo tratamiento visual que la landing pública (fondo claro, blobs de
+// marca, logo real de Chelaburo en el header).
 export const metadata = {
-  title: 'Nosotros — Asistente de Empleabilidad',
+  title: 'Nosotros — Chelaburo',
   description:
     'Quién está detrás de esta herramienta gratis con IA para buscar trabajo: Alexis Sarmiento, Founder de Freelo HR.',
 };
 
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
+
 export default function NosotrosPage() {
   return (
-    <div className="min-h-screen bg-app text-white p-6 font-sans">
-      <div className="max-w-2xl mx-auto space-y-8">
-        <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <Link
-            href="/"
-            className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent"
-          >
-            🚀 Asistente de Empleabilidad
+    <div className={`${poppins.className} cl-landing`}>
+      <div className="cl-bg" />
+      <div className="cl-blob cl-blob-1" />
+      <div className="cl-blob cl-blob-2" />
+
+      <div className="cl-wrap" style={{ maxWidth: 720, paddingBottom: 60 }}>
+        <header className="cl-header">
+          <Link href="/" className="cl-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/chelaburo-logo.png" alt="Chelaburo" />
           </Link>
           <nav className="text-sm">
-            <Link
-              href="/login"
-              className="px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 transition-colors"
-            >
+            <Link href="/login" className="cl-btn-ghost">
               Iniciar sesión
             </Link>
           </nav>
         </header>
 
-        <div className="bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] text-slate-800 rounded-2xl p-8 shadow-xl shadow-purple-950/30 animate-fade-in-up space-y-6">
+        <div
+          className="animate-fade-in-up"
+          style={{
+            marginTop: 40,
+            background: '#fff',
+            borderRadius: 28,
+            padding: 40,
+            boxShadow: '0 14px 34px rgba(11,32,95,0.08)',
+            border: '1.5px solid rgba(11,32,95,0.1)',
+          }}
+        >
           <div className="flex flex-col items-center text-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -40,12 +59,12 @@ export default function NosotrosPage() {
               className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"
             />
             <div>
-              <p className="font-semibold text-lg">Alexis Sarmiento</p>
-              <p className="text-sm text-slate-500">Lic. en Relaciones del Trabajo · Founder de Freelo HR</p>
+              <p className="font-semibold text-lg text-[#0B205F]">Alexis Sarmiento</p>
+              <p className="text-sm text-[#64748b]">Lic. en Relaciones del Trabajo · Founder de Freelo HR</p>
             </div>
           </div>
 
-          <div className="space-y-4 text-sm leading-relaxed text-slate-700">
+          <div className="space-y-4 text-sm leading-relaxed text-[#475569] mt-6">
             <p>
               Armé esta herramienta como mi granito de arena para la comunidad. Quise hacer algo distinto:
               útil de verdad, gratis, sin letra chica.
@@ -78,20 +97,20 @@ export default function NosotrosPage() {
             </p>
           </div>
 
-          <div className="pt-4 border-t border-slate-200">
-            <p className="font-semibold text-slate-800 mb-2">Contacto</p>
-            <p className="text-sm text-slate-600">
+          <div className="pt-4 mt-6" style={{ borderTop: '1px solid rgba(11,32,95,0.1)' }}>
+            <p className="font-semibold text-[#0B205F] mb-2">Contacto</p>
+            <p className="text-sm text-[#475569]">
               ¿Preguntas, sugerencias, o algo que no te funcionó bien? Escribime:
             </p>
             <div className="flex flex-col gap-1 mt-2 text-sm">
-              <a href="mailto:alexis.sarmiento94@gmail.com" className="text-purple-600 hover:underline">
+              <a href="mailto:alexis.sarmiento94@gmail.com" className="text-[#0757E8] hover:underline">
                 📧 alexis.sarmiento94@gmail.com
               </a>
               <a
                 href="https://www.linkedin.com/in/alexis-sarmiento-0b69379b/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-purple-600 hover:underline"
+                className="text-[#0757E8] hover:underline"
               >
                 💼 LinkedIn
               </a>

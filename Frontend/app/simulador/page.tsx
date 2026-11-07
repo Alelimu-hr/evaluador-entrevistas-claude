@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Poppins } from 'next/font/google';
 import ReactMarkdown from 'react-markdown';
 import confetti from 'canvas-confetti';
 import { createClient } from '@/lib/supabase/client';
@@ -12,6 +13,14 @@ import { FeedbackInforme } from '@/components/FeedbackInforme';
 import { PasosApiKey } from '@/components/PasosApiKey';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// Mismo tratamiento visual que el resto de la app (fondo claro, blobs de
+// marca, Poppins) — ver .cl-landing en globals.css.
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
 
 // Calibra qué tan exigente es la entrevista según cuántas entrevistas tuvo
 // la persona en su vida (no tiene que ver con el seniority del puesto). El
@@ -627,24 +636,27 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-app text-white p-6 font-sans">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className={`${poppins.className} cl-landing p-6`}>
+      <div className="cl-bg" />
+      <div className="cl-blob cl-blob-1" />
+      <div className="cl-blob cl-blob-2" />
+      <div className="relative z-[2] max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+        <header className="flex justify-between items-center pb-4 animate-fade-in" style={{ borderBottom: '1px solid rgba(11,32,95,0.08)' }}>
+          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-[#08B9ED] to-[#A52BFF] bg-clip-text text-transparent">
             🎙 Simulador de Entrevistas
           </h1>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/inicio" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/inicio" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🏠 Inicio
             </Link>
-            <Link href="/progreso" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/progreso" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               📈 Mi Progreso
             </Link>
-            {userEmail && <span className="text-slate-600 hidden sm:inline">{userEmail}</span>}
+            {userEmail && <span className="text-[#64748b] text-xs hidden sm:inline">{userEmail}</span>}
             <button
               onClick={handleCerrarSesion}
-              className="text-slate-400 hover:text-red-400 transition-colors"
+              className="text-[#475569] hover:text-red-500 transition-colors"
             >
               Salir
             </button>
@@ -702,21 +714,21 @@ export default function Home() {
 
         {paso === 'form' && (
           <div className="text-center pt-2 pb-2 animate-fade-in-up">
-            <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#7417E8] font-semibold mb-3">
               Práctica de entrevistas con IA
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
+            <h2 className="font-display text-4xl md:text-5xl font-semibold text-[#0B205F] leading-tight max-w-2xl mx-auto">
               Preparate para tu próxima entrevista
             </h2>
-            <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
+            <p className="text-[#475569] text-base mt-3 max-w-xl mx-auto">
               Preguntas personalizadas a tu rol y tu CV, feedback de oratoria en cada respuesta, y un informe final
               con tu diagnóstico completo.
             </p>
-            <p className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-4">
+            <p className="inline-flex items-center gap-1.5 text-xs text-[#475569] bg-[#f1f4fd] border border-[rgba(11,32,95,0.1)] px-3 py-1 rounded-full mt-4">
               🌎 Gratis y para cualquier rol o industria — no hace falta que sea un puesto técnico.
             </p>
             {sesionesPrevias > 0 && (
-              <p className="inline-flex items-center gap-1.5 text-xs text-emerald-200 bg-emerald-400/10 border border-emerald-300/30 px-3 py-1 rounded-full mt-2 ml-2">
+              <p className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full mt-2 ml-2">
                 🧠 Ya hiciste {sesionesPrevias} {sesionesPrevias === 1 ? 'entrevista' : 'entrevistas'} acá antes —
                 vamos a tener en cuenta tu historial para calibrar esta sesión.
               </p>
@@ -1171,7 +1183,7 @@ export default function Home() {
               </button>
               <button
                 onClick={reiniciarTodo}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-2.5 rounded-full font-medium text-sm transition-all active:scale-[0.99]"
+                className="flex-1 bg-white hover:bg-[#f3f5ff] text-[#0B205F] border border-[rgba(11,32,95,0.2)] py-2.5 rounded-full font-medium text-sm transition-all active:scale-[0.99]"
               >
                 🔄 Hacer otra simulación
               </button>

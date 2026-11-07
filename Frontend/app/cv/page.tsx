@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Poppins } from 'next/font/google';
 import ReactMarkdown from 'react-markdown';
 import { createClient } from '@/lib/supabase/client';
 import { registrarEventoFunnel } from '@/lib/analytics';
@@ -11,6 +12,14 @@ import { FeedbackInforme } from '@/components/FeedbackInforme';
 import { PasosApiKey } from '@/components/PasosApiKey';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+// Mismo tratamiento visual que el resto de la app (fondo claro, blobs de
+// marca, Poppins) — ver .cl-landing en globals.css.
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
 
 type EstadoKey = 'vacio' | 'verificando' | 'valida' | 'invalida';
 
@@ -471,21 +480,24 @@ function CvPageInterno() {
   const hayResultado = !!informeMarkdown;
 
   return (
-    <div className="min-h-screen bg-app text-white p-6 font-sans">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className={`${poppins.className} cl-landing p-6`}>
+      <div className="cl-bg" />
+      <div className="cl-blob cl-blob-1" />
+      <div className="cl-blob cl-blob-2" />
+      <div className="relative z-[2] max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+        <header className="flex justify-between items-center pb-4 animate-fade-in" style={{ borderBottom: '1px solid rgba(11,32,95,0.08)' }}>
+          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-[#08B9ED] to-[#A52BFF] bg-clip-text text-transparent">
             📄 Optimizá tu CV para cada búsqueda
           </h1>
           <nav className="flex items-center gap-4 text-sm">
-            <Link href="/inicio" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/inicio" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🏠 Inicio
             </Link>
-            <Link href="/simulador" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/simulador" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🎙 Simulador de Entrevistas
             </Link>
-            <Link href="/linkedin" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/linkedin" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               💼 LinkedIn
             </Link>
           </nav>
@@ -542,12 +554,12 @@ function CvPageInterno() {
 
         {!hayResultado && (
           <div className="flex justify-center animate-fade-in-up">
-            <div className="inline-flex gap-1 bg-white/5 border border-white/10 rounded-full p-1">
+            <div className="inline-flex gap-1 bg-[#f1f4fd] border border-[rgba(11,32,95,0.1)] rounded-full p-1">
               <button
                 type="button"
                 onClick={() => setModoCv('optimizar')}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  modoCv === 'optimizar' ? 'bg-white text-slate-800 shadow-md' : 'text-slate-300 hover:text-white'
+                  modoCv === 'optimizar' ? 'bg-white text-slate-800 shadow-md' : 'text-[#64748b] hover:text-[#0B205F]'
                 }`}
               >
                 📄 Ya tengo un CV
@@ -556,7 +568,7 @@ function CvPageInterno() {
                 type="button"
                 onClick={() => setModoCv('desde_cero')}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  modoCv === 'desde_cero' ? 'bg-white text-slate-800 shadow-md' : 'text-slate-300 hover:text-white'
+                  modoCv === 'desde_cero' ? 'bg-white text-slate-800 shadow-md' : 'text-[#64748b] hover:text-[#0B205F]'
                 }`}
               >
                 ✨ No tengo CV, armalo de cero
@@ -567,18 +579,18 @@ function CvPageInterno() {
 
         {!hayResultado && modoCv === 'optimizar' && (
           <div className="text-center pt-2 pb-2 animate-fade-in-up">
-            <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#7417E8] font-semibold mb-3">
               Chequeo ATS con IA
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
+            <h2 className="font-display text-4xl md:text-5xl font-semibold text-[#0B205F] leading-tight max-w-2xl mx-auto">
               ¿Tu CV está armado para ESTE puesto?
             </h2>
-            <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
+            <p className="text-[#475569] text-base mt-3 max-w-xl mx-auto">
               Pegá el aviso del puesto al que querés aplicar y subí tu CV en PDF: te decimos qué vería un
               sistema ATS al leerlo, qué palabras clave te faltan frente a esa búsqueda puntual, y te
               reescribimos cada logro, listo para pegar.
             </p>
-            <p className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-4">
+            <p className="inline-flex items-center gap-1.5 text-xs text-[#475569] bg-[#f1f4fd] border border-[rgba(11,32,95,0.1)] px-3 py-1 rounded-full mt-4">
               🌎 Gratis y para cualquier rol o industria.
             </p>
           </div>
@@ -586,18 +598,18 @@ function CvPageInterno() {
 
         {!hayResultado && modoCv === 'desde_cero' && (
           <div className="text-center pt-2 pb-2 animate-fade-in-up">
-            <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
+            <p className="text-sm uppercase tracking-[0.2em] text-[#7417E8] font-semibold mb-3">
               Armalo con IA, paso a paso
             </p>
-            <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
+            <h2 className="font-display text-4xl md:text-5xl font-semibold text-[#0B205F] leading-tight max-w-2xl mx-auto">
               ¿Todavía no tenés un CV armado?
             </h2>
-            <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
+            <p className="text-[#475569] text-base mt-3 max-w-xl mx-auto">
               No hace falta que sepas de formato ni de ATS. Contestá estas preguntas simples sobre vos —
               estudios, experiencia (aunque sea informal o un primer trabajo) y habilidades — y te armamos
               un CV completo, prolijo y listo para mandar.
             </p>
-            <p className="inline-flex items-center gap-1.5 text-xs text-slate-300 bg-white/5 border border-white/10 px-3 py-1 rounded-full mt-4">
+            <p className="inline-flex items-center gap-1.5 text-xs text-[#475569] bg-[#f1f4fd] border border-[rgba(11,32,95,0.1)] px-3 py-1 rounded-full mt-4">
               🌱 Ideal si es tu primer CV o nunca tuviste uno armado.
             </p>
           </div>
@@ -1061,7 +1073,7 @@ function CvPageInterno() {
               </button>
               <button
                 onClick={reiniciarTodo}
-                className="flex-1 bg-white/10 hover:bg-white/20 text-white border border-white/20 py-2.5 rounded-full font-medium text-sm transition-all active:scale-[0.99]"
+                className="flex-1 bg-white hover:bg-[#f3f5ff] text-[#0B205F] border border-[rgba(11,32,95,0.2)] py-2.5 rounded-full font-medium text-sm transition-all active:scale-[0.99]"
               >
                 {modoResultado === 'desde_cero' ? '🔄 Armar otro CV' : '🔄 Analizar otro CV'}
               </button>

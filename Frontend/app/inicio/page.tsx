@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Poppins } from 'next/font/google';
 import { createClient } from '@/lib/supabase/client';
 import { BuscadorHerramienta } from '@/components/BuscadorHerramienta';
 
@@ -10,6 +11,87 @@ import { BuscadorHerramienta } from '@/components/BuscadorHerramienta';
 // esa ruta ahora es la landing pública de marketing (ver app/page.tsx), así
 // que esto se mudó acá. El middleware redirige automáticamente a esta ruta
 // a cualquiera que esté logueado y entre a "/" o a "/login".
+//
+// Mismo tratamiento visual que la landing pública y /login (fondo claro,
+// blobs de marca, Poppins, tarjetas ".cl-tool-*"), para que no se sienta un
+// salto al formato viejo apenas te logueás.
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
+
+const HERRAMIENTAS_FILA_1 = [
+  {
+    href: '/cv',
+    emoji: '📄',
+    titulo: 'Armado y optimización de CV',
+    texto: 'Armá tu currículum de cero o potenciá el que ya tenés.',
+    clase: 'cl-tool-cv',
+    ir: 'Probar ahora →',
+  },
+  {
+    href: '/linkedin',
+    emoji: '💼',
+    titulo: 'LinkedIn y marca personal',
+    texto: 'Mejorá tu perfil y desarrollá tu marca personal.',
+    clase: 'cl-tool-li',
+    ir: 'Optimizar →',
+  },
+  {
+    href: '/simulador',
+    emoji: '🎙️',
+    titulo: 'Practicá tu entrevista',
+    texto: 'Simulá una entrevista real y recibí feedback con IA.',
+    clase: 'cl-tool-ent',
+    ir: 'Practicar →',
+  },
+];
+
+const HERRAMIENTAS_FILA_2 = [
+  {
+    href: '/guia-carrera',
+    emoji: '🧭',
+    titulo: 'Guía de Salida Laboral',
+    texto: 'Explorá áreas y roles, y armá tu plan de carrera.',
+    clase: 'cl-tool-car',
+    ir: 'Explorar →',
+  },
+  {
+    href: '/negociacion',
+    emoji: '💬',
+    titulo: 'Negociá tu oferta',
+    texto: 'Plan concreto para negociar sueldo y condiciones.',
+    clase: 'cl-tool-neg',
+    ir: 'Preparar →',
+  },
+];
+
+function TarjetaHerramienta({
+  href,
+  emoji,
+  titulo,
+  texto,
+  clase,
+  ir,
+}: {
+  href: string;
+  emoji: string;
+  titulo: string;
+  texto: string;
+  clase: string;
+  ir: string;
+}) {
+  return (
+    <Link href={href} className={`cl-tool-card ${clase}`}>
+      <span className="cl-emoji">{emoji}</span>
+      <div className="cl-titulo">{titulo}</div>
+      <div className="cl-texto">{texto}</div>
+      <div className="cl-ir">{ir}</div>
+    </Link>
+  );
+}
+
 export default function InicioPage() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -26,100 +108,58 @@ export default function InicioPage() {
   };
 
   return (
-    <div className="min-h-screen bg-app text-white p-6 font-sans">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Header */}
-        <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <h1 className="text-xl font-bold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            🚀 Asistente de Empleabilidad
-          </h1>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/progreso" className="text-slate-400 hover:text-white transition-colors">
+    <div className={`${poppins.className} cl-landing`}>
+      <div className="cl-bg" />
+      <div className="cl-blob cl-blob-1" />
+      <div className="cl-blob cl-blob-2" />
+
+      <div className="cl-wrap" style={{ paddingBottom: 60 }}>
+        <header className="cl-header">
+          <div className="cl-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/chelaburo-logo.png" alt="Chelaburo" />
+          </div>
+          <nav className="flex items-center gap-5 text-sm">
+            <Link href="/progreso" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               📈 Mi Progreso
             </Link>
-            <Link href="/nosotros" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/nosotros" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🙋 Nosotros
             </Link>
-            {userEmail && <span className="text-slate-600 hidden sm:inline">{userEmail}</span>}
+            {userEmail && <span className="text-[#64748b] text-xs hidden sm:inline">{userEmail}</span>}
             <button
               onClick={handleCerrarSesion}
-              className="text-slate-400 hover:text-red-400 transition-colors"
+              className="cl-btn-ghost"
             >
               Salir
             </button>
           </nav>
         </header>
 
-        <div className="text-center pt-6 pb-2 animate-fade-in-up">
-          <p className="text-sm uppercase tracking-[0.2em] text-purple-300 font-semibold mb-3">
-            Herramientas gratis con IA
-          </p>
-          <h2 className="font-display text-4xl md:text-5xl font-semibold text-white leading-tight max-w-2xl mx-auto">
-            ¿Con qué querés avanzar hoy?
-          </h2>
-          <p className="text-slate-300 text-base mt-3 max-w-xl mx-auto">
-            Elegí una herramienta para empezar. Son gratis: usás tu propia API Key de Gemini, la que te
-            conecta con el modelo de IA.
-          </p>
+        <div className="cl-seccion-tit" style={{ marginTop: 50, maxWidth: 640 }}>
+          <span className="cl-pill-chica">Herramientas gratis con IA</span>
+          <h2>¿Con qué querés avanzar hoy?</h2>
+          <p>Elegí una herramienta para empezar. Son gratis: usás tu propia API Key de Gemini.</p>
         </div>
 
         {/* El "buscador": para quien no tiene idea de cuál de las 5 usar.
             Colapsado por default (ver BuscadorHerramienta) — no le resta
             lugar a la elección directa de abajo para quien ya sabe qué
             quiere. */}
-        <BuscadorHerramienta />
+        <div style={{ marginTop: 28, maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
+          <BuscadorHerramienta />
+        </div>
 
-        {/* Las 5 herramientas — ninguna pre-seleccionada, esta es la elección real.
-            Layout "pirámide invertida": 3 arriba, 2 centradas abajo. */}
-        <div className="space-y-4 animate-fade-in-up">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link
-              href="/guia-carrera"
-              className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
-            >
-              <p className="text-3xl">🧭</p>
-              <p className="font-semibold text-slate-800 mt-2">Guía de Salida Laboral</p>
-              <p className="text-xs text-slate-500 mt-1">Explorá áreas y roles, y armá tu plan de carrera con IA para entrar al que te interesa.</p>
-            </Link>
-            <Link
-              href="/cv"
-              className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
-            >
-              <p className="text-3xl">📄</p>
-              <p className="font-semibold text-slate-800 mt-2">Armado y optimización de CV</p>
-              <p className="text-xs text-slate-500 mt-1">
-                Armá tu currículum de cero o potenciá el que ya tenés, para que tus postulaciones sean mucho más efectivas.
-              </p>
-            </Link>
-            <Link
-              href="/linkedin"
-              className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
-            >
-              <p className="text-3xl">💼</p>
-              <p className="font-semibold text-slate-800 mt-2">LinkedIn y marca personal</p>
-              <p className="text-xs text-slate-500 mt-1">
-                Mejorá tu perfil de LinkedIn y aprendé a desarrollar tu marca personal.
-              </p>
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:max-w-[67%] sm:mx-auto">
-            <Link
-              href="/simulador"
-              className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
-            >
-              <p className="text-3xl">🎙️</p>
-              <p className="font-semibold text-slate-800 mt-2">Practicá tu entrevista</p>
-              <p className="text-xs text-slate-500 mt-1">Simulá una entrevista real y recibí feedback con IA.</p>
-            </Link>
-            <Link
-              href="/negociacion"
-              className="text-left p-6 rounded-2xl border border-white/60 bg-gradient-to-br from-white via-[#f7f5ff] to-[#f1f0ff] shadow-xl shadow-purple-950/30 hover:shadow-purple-500/20 hover:-translate-y-0.5 transition-all"
-            >
-              <p className="text-3xl">💬</p>
-              <p className="font-semibold text-slate-800 mt-2">Negociá tu oferta</p>
-              <p className="text-xs text-slate-500 mt-1">Plan concreto para negociar sueldo y condiciones.</p>
-            </Link>
-          </div>
+        {/* Las 5 herramientas — ninguna pre-seleccionada, esta es la elección real. */}
+        <div className="cl-grid-tools" style={{ marginTop: 36 }}>
+          {HERRAMIENTAS_FILA_1.map((h) => (
+            <TarjetaHerramienta key={h.href} {...h} />
+          ))}
+        </div>
+        <div className="cl-grid-tools cl-fila2">
+          {HERRAMIENTAS_FILA_2.map((h) => (
+            <TarjetaHerramienta key={h.href} {...h} />
+          ))}
         </div>
       </div>
     </div>

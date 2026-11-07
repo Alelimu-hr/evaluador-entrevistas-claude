@@ -1,9 +1,19 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Poppins } from 'next/font/google';
 import { createClient } from '@/lib/supabase/server';
 import { ProgresoContenido } from '@/components/ProgresoContenido';
 
-const FONDO = 'bg-app';
+// Mismo tratamiento visual que el resto de la app rediseñada (fondo claro,
+// blobs de marca, logo real de Chelaburo). ProgresoContenido ya usaba
+// tarjetas blancas/claras (pensadas para flotar sobre el fondo oscuro
+// anterior), así que siguen viéndose bien tal cual sobre el fondo nuevo —
+// no hizo falta tocar ese componente.
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+});
 
 export default async function ProgresoPage() {
   const supabase = await createClient();
@@ -19,22 +29,29 @@ export default async function ProgresoPage() {
     .order('creado_en', { ascending: true });
 
   return (
-    <div className={`min-h-screen ${FONDO} text-white p-6 font-sans`}>
-      <div className="max-w-4xl mx-auto space-y-6">
-        <header className="flex justify-between items-center pb-4 border-b border-slate-800 animate-fade-in">
-          <h1 className="font-display text-2xl font-semibold flex items-center gap-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            📈 Mi Progreso
-          </h1>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link href="/inicio" className="text-slate-400 hover:text-white transition-colors">
+    <div className={`${poppins.className} cl-landing`}>
+      <div className="cl-bg" />
+      <div className="cl-blob cl-blob-1" />
+      <div className="cl-blob cl-blob-2" />
+
+      <div className="cl-wrap" style={{ maxWidth: 1000, paddingBottom: 60 }}>
+        <header className="cl-header">
+          <div className="cl-brand">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/chelaburo-logo.png" alt="Chelaburo" />
+          </div>
+          <nav className="flex items-center gap-5 text-sm">
+            <Link href="/inicio" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🏠 Inicio
             </Link>
-            <Link href="/simulador" className="text-slate-400 hover:text-white transition-colors">
+            <Link href="/simulador" className="font-semibold text-[#0B205F] opacity-75 hover:opacity-100 transition-opacity">
               🎙 Simulador
             </Link>
-            <span className="text-slate-600 hidden sm:inline">{user.email}</span>
+            <span className="text-[#64748b] text-xs hidden sm:inline">{user.email}</span>
           </nav>
         </header>
+
+        <h1 className="text-2xl font-extrabold text-[#0B205F] mt-8 mb-6">📈 Mi Progreso</h1>
 
         <ProgresoContenido sesionesIniciales={sesiones || []} />
       </div>
