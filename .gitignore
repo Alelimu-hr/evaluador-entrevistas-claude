@@ -1,0 +1,3 @@
+# Carpeta donde la app de Claude guarda los archivos que se mandan por chat
+# (previews, borradores, etc.) - no es parte del codigo del sitio.
+Claude outputs/
